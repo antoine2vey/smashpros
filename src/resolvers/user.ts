@@ -44,6 +44,31 @@ export interface UserUpdateInput extends UserCreateInput {
   prefix: string
 }
 
+const users = () => {
+  return prisma.user.findMany({
+    include: {
+      characters: true
+    }
+  })
+}
+
+const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
+  return prisma.user.findMany({
+    include: {
+      characters: true
+    },
+    where: {
+      characters: {
+        some: {
+          id: {
+            equals: characterId
+          }
+        }
+      }
+    }
+  })
+}
+
 const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) => {
   const { user } = ctx
   const { id, email, tag, profilePicture, characters, prefix } = payload
@@ -127,87 +152,80 @@ const passwordReset = async (_, { code, password, confirm_password }: { code: st
   return true
 }
 
+const login = async (_, { email, password }) => {
+  const user = await prisma.user.findUnique({ where: { email } })
+  
+  if (user) {
+    const match = await bcrypt.compare(password, user.password)
+
+    if (!match) {
+      throw new AuthenticationError('Bad credentials')
+    }
+
+    const userId = user.id
+    const token = jwt.sign({ userId }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
+
+    return {
+      token
+    }
+  } else {
+    throw new AuthenticationError('Bad credentials')
+  }
+}
+
+const register = async (_, { payload }: {payload: UserCreateInput}) => {
+  const { password, email, tag, profilePicture, characters } = payload
+  const { createReadStream, filename, mimetype } = await profilePicture
+  const id = uuid()
+  const saltRounds = 10
+  const { error } = registerSchema.validate(payload)
+
+  if (error) {
+    throw new UserInputError(error.message)
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(saltRounds)
+    const hash = await bcrypt.hash(password, salt)
+    const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
+
+    return prisma.user.create({
+      include: {
+        characters: true
+      },
+      data: {
+        email,
+        tag,
+        password: hash,
+        profile_picture: awsUri,
+        characters: {
+          connect: mapIdsToPrisma(characters)
+        }
+      } 
+    })
+  } catch (error) {
+    throw new UserInputError('Something went wrong with register.')
+  }
+}
+
 export const userResolver = {
   Query: {
-    users: () => {
-      return prisma.user.findMany({
-        include: {
-          characters: true
-        }
-      })
-    },
-    usersByCharacter: (_, { characterId }: PlayerByCharacterParams) => {
-      return prisma.user.findMany({
-        include: {
-          characters: true
-        },
-        where: {
-          characters: {
-            some: {
-              id: {
-                equals: characterId
-              }
-            }
-          }
-        }
-      })
-    }
+    users: combineResolvers(
+      isAuthenticated,
+      users
+    ),
+    usersByCharacter: combineResolvers(
+      isAuthenticated,
+      usersByCharacter
+    )
   },
   Mutation: {
-    register: async (_, { payload }: {payload: UserCreateInput}) => {
-      const { password, email, tag, profilePicture, characters } = payload
-      const { createReadStream, filename, mimetype } = await profilePicture
-      const id = uuid()
-      const saltRounds = 10
-      const { error } = registerSchema.validate(payload)
-
-      if (error) {
-        throw new UserInputError(error.message)
-      }
-
-      try {
-        const salt = await bcrypt.genSalt(saltRounds)
-        const hash = await bcrypt.hash(password, salt)
-        const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
-
-        return prisma.user.create({
-          include: {
-            characters: true
-          },
-          data: {
-            email,
-            tag,
-            password: hash,
-            profile_picture: awsUri,
-            characters: {
-              connect: mapIdsToPrisma(characters)
-            }
-          } 
-        })
-      } catch (error) {
-        throw new UserInputError('Something went wrong with register.')
-      }
-    },
-    login: async (_, { email, password }) => {
-      const user = await prisma.user.findUnique({ where: { email } })
-      
-      if (user) {
-        const match = await bcrypt.compare(password, user.password)
-
-        if (!match) {
-          throw new AuthenticationError('Bad credentials')
-        }
-
-        const userId = user.id
-        const token = jwt.sign({ userId }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
-
-        return {
-          token
-        }
-      } else {
-        throw new AuthenticationError('Bad credentials')
-      }
-    },
+    register: combineResolvers(
+      register
+    ),
+    login: combineResolvers(
+      login
+    ),
     updateProfile: combineResolvers(
       isAuthenticated,
       updateProfile
