@@ -46,5 +46,7 @@ export const userType = gql`
     register(payload: UserRegisterPayload): User!
     login(email: String!, password: String!): AuthPayload!
     updateProfile(payload: UserUpdatePayload!): User!
+    askPasswordReset(email: String!): String!
+    passwordReset(code: String!, password: String!, confirm_password: String!): Boolean!
   }
 `

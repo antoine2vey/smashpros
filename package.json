@@ -4,6 +4,7 @@
     "apollo-server": "^2.19.0",
     "aws-sdk": "^2.817.0",
     "bcrypt": "^5.0.0",
+    "date-fns": "^2.16.1",
     "graphql": "^15.4.0",
     "graphql-resolvers": "^0.4.2",
     "joi": "^17.3.0",

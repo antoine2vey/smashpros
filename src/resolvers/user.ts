@@ -8,11 +8,18 @@ import { mapIdsToPrisma } from "../utils/prisma";
 import Joi from "joi"
 import { combineResolvers } from 'graphql-resolvers'
 import { isAuthenticated } from "../middlewares/isAuthenticated";
+import { addMinutes, isAfter } from "date-fns";
 
 const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),
   email: Joi.string().email().required(),
   tag: Joi.string().required()
+})
+
+const forgotPasswordSchema = Joi.object({
+  code: Joi.string().required(),
+  password: Joi.string().min(4).required(),
+  confirm_password: Joi.any().equal(Joi.ref('password')).required()
 })
 
 export interface PlayerByCharacterParams {
@@ -60,6 +67,64 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
       prefix
     }
   })
+}
+
+const askPasswordReset = async (_, { email }: { email: string }) => {
+  const { error } = Joi.string().email().validate(email)
+  const code = uuid()
+  const expiration = addMinutes(new Date(), 10)
+
+  if (error) {
+    throw new UserInputError('Email is not valid')
+  }
+
+  try {
+    await prisma.user.update({
+      where: {
+        email
+      },
+      data: {
+        reset_token: code,
+        reset_token_expiration: expiration
+      }
+    })
+  
+    return `We sent you an email (code: ${code})`
+  } catch (error) {
+    return `We sent you an email`
+  }
+}
+
+const passwordReset = async (_, { code, password, confirm_password }: { code: string, password: string, confirm_password: string }) => {
+  const { error } = forgotPasswordSchema.validate({ code, password, confirm_password })
+  const user = await prisma.user.findFirst({ where: { reset_token: code }})
+  const now = new Date()
+  const isExpired = user ? isAfter(now, user.reset_token_expiration) : false
+
+  if (error) {
+    throw new UserInputError(error.message)
+  }
+
+  if (!user || isExpired) {
+    throw new AuthenticationError('Not authorized')
+  }
+
+  const saltRounds = 10
+  const salt = await bcrypt.genSalt(saltRounds)
+  const hash = await bcrypt.hash(password, salt)
+
+  await prisma.user.update({
+    where: {
+      email: user.email
+    },
+    data: {
+      password: hash,
+      reset_token_expiration: null,
+      reset_token: null
+    }
+  })
+
+  return true
 }
 
 export const userResolver = {
@@ -146,6 +211,12 @@ export const userResolver = {
     updateProfile: combineResolvers(
       isAuthenticated,
       updateProfile
+    ),
+    askPasswordReset: combineResolvers(
+      askPasswordReset
+    ),
+    passwordReset: combineResolvers(
+      passwordReset
     )
   }
 }
