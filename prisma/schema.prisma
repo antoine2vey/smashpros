@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String       @id @default(uuid())
+  created_at            DateTime     @default(now())
+  updated_at            DateTime     @updatedAt
+  profile_picture       String?
+  lat                   Float?
+  lng                   Float?
+  in_tournament         Boolean      @default(false)
+  is_playing            Boolean      @default(false)
+  tournament_id         String?
+  prefix                String?
+  crew_id               String?
+  role                  Role         @default(USER)
+  password              String
+  email                 String       @unique
+  tag                   String
+  crew                  Crew?        @relation(fields: [crew_id], references: [id])
+  current_tournament    Tournament?  @relation(fields: [tournament_id], references: [id])
+  characters            Character[]
+  favorited_tournaments Tournament[] @relation("favorited_tournaments")
+}
+
+model Character {
+  id      String @id @default(uuid())
+  name    String @unique
+  picture String
+  users   User[]
+}
+
+model Tournament {
+  id           String @id @default(uuid())
+  name         String @unique
+  lat          Float?
+  lng          Float?
+  participants User[]
+  favorited_by User[] @relation("favorited_tournaments")
+}
+
+model Crew {
+  id      String  @id @default(uuid())
+  name    String
+  prefix  String?
+  members User[]
+}
+
+enum Role {
+  ADMIN
+  TOURNAMENT_ORGANIZER
+  USER
+}
