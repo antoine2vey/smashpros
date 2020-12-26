@@ -4,6 +4,7 @@ import { resolvers } from './resolvers'
 import { ensureBucketExists } from './utils/aws'
 import { decode } from 'jsonwebtoken'
 import { prisma } from './prisma';
+import { Date } from './scalars/date';
 
 const schema = mergeSchemas({
   schemas,
@@ -11,6 +12,9 @@ const schema = mergeSchemas({
 })
 
 const server = new ApolloServer({
+  resolvers: {
+    Date: Date
+  },
   schema,
   context: async ({ req }) => {
     const now = +new Date()

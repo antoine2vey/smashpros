@@ -1,7 +1,10 @@
 import { gql } from "apollo-server";
 
-export const tournamentTypes = gql`
+export const tournamentType = gql`
+  scalar Date
+
   type Tournament {
+    id: ID!
     tournament_id: ID!
     name: String!
     city: String!
@@ -20,6 +23,9 @@ export const tournamentTypes = gql`
     state: Int!,
     venueName: String,
     venueAddress: String
+
+    participants: [User!]
+    favorited_by: [User!]
   }
 
   type TournamentImage {
@@ -29,5 +35,11 @@ export const tournamentTypes = gql`
 
   extend type Query {
     tournaments: [Tournament!]
+    tournament(id: ID!): Tournament!
+  }
+
+  extend type Mutation {
+    favoriteTournament(id: ID!, unfav: Boolean = false): Boolean!
+    participateTournament(id: ID!, unparticipate: Boolean = false): Tournament!
   }
 `
