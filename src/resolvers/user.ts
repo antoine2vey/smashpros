@@ -7,8 +7,8 @@ import { v4 as uuid } from 'uuid';
 import { mapIdsToPrisma } from "../utils/prisma";
 import Joi from "joi"
 import { combineResolvers } from 'graphql-resolvers'
-import { isAuthenticated } from "../middlewares/isAuthenticated";
 import { addMinutes, isAfter } from "date-fns";
+import { isAuthenticated } from "../middlewares";
 
 const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),

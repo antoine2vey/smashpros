@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
-import { isAuthenticated } from "../middlewares/isAuthenticated";
 import { prisma } from "../prisma";
 import { combineResolvers } from 'graphql-resolvers'
+import { isAdmin, isAuthenticated } from "../middlewares";
 
 export interface AddCharacter {
   name: string
@@ -30,6 +30,7 @@ export const characterResolver = {
   Mutation: {
     addCharacter: combineResolvers(
       isAuthenticated,
+      isAdmin,
       addCharacter
     )
   }
