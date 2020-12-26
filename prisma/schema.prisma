@@ -39,12 +39,27 @@ model Character {
 }
 
 model Tournament {
-  id           String @id @default(uuid())
-  name         String @unique
-  lat          Float?
-  lng          Float?
-  participants User[]
-  favorited_by User[] @relation("favorited_tournaments")
+  id                        String    @id @default(uuid())
+  name                      String    @unique
+  lat                       Float?
+  lng                       Float?
+  tournament_id             Int    @unique
+  city                      String
+  countryCode               String
+  createdAt                 DateTime?
+  currency                  String
+  numAttendees              Int
+  endAt                     DateTime?
+  eventRegistrationClosesAt DateTime?
+  hasOfflineEvents          Boolean?
+  images                    Json[]
+  isRegistrationOpen        Boolean?
+  slug                      String
+  state                     Int
+  venueName                 String?
+  venueAddress              String?
+  participants              User[]
+  favorited_by              User[]    @relation("favorited_tournaments")
 }
 
 model Crew {
