@@ -1,26 +1,36 @@
 import { Prisma } from "@prisma/client";
-import { AuthenticationError } from "apollo-server";
+import { isAuthenticated } from "../middlewares/isAuthenticated";
 import { prisma } from "../prisma";
+import { combineResolvers } from 'graphql-resolvers'
 
 export interface AddCharacter {
   name: string
   picture: string
 }
 
+const characters = () => {
+  return prisma.character.findMany()
+}
+
+const addCharacter = (_, { name, picture }: Prisma.CharacterCreateInput) => {
+  return prisma.character.create({
+    data: {
+      name,
+      picture
+    }
+  })
+}
+
 export const characterResolver = {
   Query: {
-    characters: () => {
-      return prisma.character.findMany()
-    }
+    characters: combineResolvers(
+      characters
+    )
   },
   Mutation: {
-    addCharacter: (_, { name, picture }: Prisma.CharacterCreateInput) => {
-      return prisma.character.create({
-        data: {
-          name,
-          picture
-        }
-      })
-    }
+    addCharacter: combineResolvers(
+      isAuthenticated,
+      addCharacter
+    )
   }
 }

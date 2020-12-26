@@ -1,4 +1,4 @@
-import { ApolloServer, AuthenticationError, mergeSchemas } from 'apollo-server'
+import { ApolloServer, IResolversParameter, mergeSchemas } from 'apollo-server'
 import { typeDefs as schemas } from './typedefs';
 import { resolvers } from './resolvers'
 import { ensureBucketExists } from './utils/aws'
@@ -7,7 +7,7 @@ import { prisma } from './prisma';
 
 const schema = mergeSchemas({
   schemas,
-  resolvers
+  resolvers: resolvers as IResolversParameter
 })
 
 const server = new ApolloServer({
@@ -34,7 +34,9 @@ const server = new ApolloServer({
 });
 
 server.listen().then(async ({ url, subscriptionsUrl }) => {
-  // await ensureBucketExists(process.env.S3_USER_BUCKET)
+  if (process.env.NODE_ENV === 'production') {
+    await ensureBucketExists(process.env.S3_USER_BUCKET)
+  }
 
   console.log(`🚀 Server ready at ${url}`);
   console.log(`🚀 WebSockets ready at ${subscriptionsUrl}`);
