@@ -24,8 +24,8 @@ export const tournamentType = gql`
     venueName: String,
     venueAddress: String
 
-    participants: [User!]
-    favorited_by: [User!]
+    participants(query: TournamentQuery): [User]
+    favorited_by: [User]
   }
 
   type TournamentImage {
@@ -35,7 +35,12 @@ export const tournamentType = gql`
 
   extend type Query {
     tournaments: [Tournament!]
-    tournament(id: ID!): Tournament!
+    tournament(id: ID!): Tournament
+  }
+
+  input TournamentQuery {
+    character: ID
+    player: String
   }
 
   extend type Mutation {

@@ -1,4 +1,5 @@
 import { combineResolvers } from "graphql-resolvers"
+import { isEmpty } from "lodash"
 import { isAuthenticated } from "../middlewares"
 import { prisma } from "../prisma"
 
@@ -25,6 +26,9 @@ export interface Tournament {
   state: number
   venueName?: string
   venueAddress?: string
+
+  participants?: any[]
+  favorited_by?: any[]
 }
 
 const tournaments = async () => {
@@ -44,10 +48,10 @@ const tournaments = async () => {
   })
 }
 
-const tournament = async (_, { id }: { id: string }) => {
-  return prisma.tournament.findUnique({
+const tournament = async (_, args: { id: string }, ctx, info) => {
+  return prisma.tournament.findFirst({
     where: {
-      id
+      id: args.id
     },
     include: {
       participants: {
@@ -108,7 +112,30 @@ const participateTournament = async (_, { id, unparticipate }: { id: string, un
   })
 }
 
+const participants = (tournament: Tournament, { query }) => {
+  if (isEmpty(query)) {
+    // Return all participants if no filter
+    return tournament.participants
+  }
+
+  const { character, player }: { character: string; player: string } = query
+  return tournament.participants.filter(participant => {
+    if (character) {
+      return participant.characters.some(char => char.id === character)
+    }
+
+    if (player) {
+      return participant.tag.includes(player)
+    }
+
+    return true
+  })
+}
+
 export const tournamentResolver = {
+  Tournament: {
+    participants
+  },
   Query: {
     tournaments: combineResolvers(
       isAuthenticated,

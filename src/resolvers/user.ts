@@ -13,7 +13,9 @@ import { isAuthenticated } from "../middlewares";
 const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),
   email: Joi.string().email().required(),
-  tag: Joi.string().required()
+  tag: Joi.string().required(),
+  profilePicture: Joi.any().required(),
+  characters: Joi.array().required()
 })
 
 const forgotPasswordSchema = Joi.object({
@@ -76,8 +78,6 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
   if (user.id !== id) {
     throw new AuthenticationError('Not allowed')  
   }
-
-  console.log(email, tag, prefix)
 
   return prisma.user.update({
     include: {
