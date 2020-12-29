@@ -19,7 +19,6 @@ model User {
   tournament_id          String?
   prefix                 String?
   crew_id                String?
-  role                   Role         @default(USER)
   password               String
   email                  String       @unique
   tag                    String
@@ -28,6 +27,7 @@ model User {
   crew                   Crew?        @relation(fields: [crew_id], references: [id])
   current_tournament     Tournament?  @relation(fields: [tournament_id], references: [id])
   characters             Character[]
+  roles                  Role[]
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
 }
 
@@ -43,8 +43,7 @@ model Tournament {
   name                      String    @unique
   lat                       Float?
   lng                       Float?
-  tournament_id             Int    @unique
-  city                      String
+  city                      String?
   countryCode               String
   createdAt                 DateTime?
   currency                  String
@@ -58,19 +57,27 @@ model Tournament {
   state                     Int
   venueName                 String?
   venueAddress              String?
+  tournament_id             Int       @unique
   participants              User[]
   favorited_by              User[]    @relation("favorited_tournaments")
 }
 
 model Crew {
-  id      String  @id @default(uuid())
-  name    String
-  prefix  String?
+  id      String @id @default(uuid())
+  name    String @unique
+  prefix  String
   members User[]
 }
 
-enum Role {
+model Role {
+  id    String   @id @default(uuid())
+  name  RoleEnum
+  users User[]
+}
+
+enum RoleEnum {
   ADMIN
   TOURNAMENT_ORGANIZER
+  CREW_ADMIN
   USER
 }

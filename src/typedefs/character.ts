@@ -10,8 +10,4 @@ export const characterType = gql`
   extend type Query {
     characters: [Character!]
   }
-
-  extend type Mutation {
-    addCharacter(name: String!, picture: String!): Character!
-  }
 `

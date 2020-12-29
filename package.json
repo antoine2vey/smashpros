@@ -4,6 +4,7 @@
     "apollo-server": "^2.19.0",
     "aws-sdk": "^2.817.0",
     "bcrypt": "^5.0.0",
+    "chalk": "^4.1.0",
     "date-fns": "^2.16.1",
     "dotenv": "^8.2.0",
     "graphql": "^15.4.0",
@@ -28,9 +29,11 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "prisma:migrate": "prisma migrate dev --preview-feature",
-    "prisma:introspect": "prisma introspect",
-    "prisma:studio": "prisma studio",
-    "seed:tournaments": "ts-node src/tournamentSynchronizer.ts"
+    "migrate": "prisma migrate dev --preview-feature",
+    "introspect": "prisma introspect",
+    "studio": "prisma studio",
+    "seed:tournaments": "ts-node src/seeds/tournamentSynchronizer.ts",
+    "seed:characters": "ts-node src/seeds/characters.ts",
+    "seed:roles": "ts-node src/seeds/roles.ts"
   }
 }

@@ -7,7 +7,7 @@ export const tournamentType = gql`
     id: ID!
     tournament_id: ID!
     name: String!
-    city: String!
+    city: String
     countryCode: String!
     createdAt: Date
     currency: String!
