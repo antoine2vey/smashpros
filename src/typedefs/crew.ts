@@ -10,10 +10,13 @@ export const crewType = gql`
 
   extend type Query {
     crews: [Crew!]
-    crew(id: ID!): Crew
+    crew: Crew
   }
 
   extend type Mutation {
-    createCrew(name: String!, prefix: String!): Crew!
+    createCrew(name: String!, prefix: String!): Crew
+    joinCrew(id: ID!): Crew
+    updateWaitingMember(id: ID!, action: String!): Crew
+    kickMember(id: ID!): Crew
   }
 `

@@ -3,7 +3,7 @@ import { skip } from 'graphql-resolvers'
 
 export const isAuthenticated = (_, __, { user }) => {
   if (!user) {
-    new AuthenticationError('Not authenticated')
+    throw new AuthenticationError('Not authenticated')
   }
   
   return skip

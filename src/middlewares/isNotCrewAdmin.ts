@@ -10,3 +10,11 @@ export const isNotCrewAdmin = (_, __, { user }) => {
   
   return skip
 }
+
+export const isCrewAdmin = (_, __, { user }) => {
+  if (hasRole(user.roles, RoleEnum.CREW_ADMIN)) {
+    return skip
+  }
+  
+  throw new ForbiddenError("Not a crew admin")
+}

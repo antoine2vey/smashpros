@@ -9,6 +9,8 @@ import Joi from "joi"
 import { combineResolvers } from 'graphql-resolvers'
 import { addMinutes, isAfter } from "date-fns";
 import { isAuthenticated } from "../middlewares";
+import { getRole } from "../utils/roles";
+import { RoleEnum } from "@prisma/client";
 
 const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),
@@ -189,6 +191,7 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
     const salt = await bcrypt.genSalt(saltRounds)
     const hash = await bcrypt.hash(password, salt)
     const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
+    const role = await getRole(RoleEnum.USER)
 
     return prisma.user.create({
       include: {
@@ -199,6 +202,9 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
         tag,
         password: hash,
         profile_picture: awsUri,
+        roles: {
+          connect: [{ id: role.id }]
+        },
         characters: {
           connect: mapIdsToPrisma(characters)
         }
