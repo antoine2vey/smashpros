@@ -9,11 +9,12 @@ export interface Tournament {
   lat: number
   lng: number
   tournament_id: string    
-  city: string
+  city?: string
   countryCode: string
   createdAt: number
   currency: string
   numAttendees: number
+  startAt: number
   endAt: number
   eventRegistrationClosesAt: number
   hasOfflineEvents?: boolean

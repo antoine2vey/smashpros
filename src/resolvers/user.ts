@@ -9,6 +9,8 @@ import Joi from "joi"
 import { combineResolvers } from 'graphql-resolvers'
 import { addMinutes, isAfter } from "date-fns";
 import { isAuthenticated } from "../middlewares";
+import { getRole } from "../utils/roles";
+import { RoleEnum } from "@prisma/client";
 
 const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),
@@ -153,7 +155,7 @@ const passwordReset = async (_, { code, password, confirm_password }: { code: st
 }
 
 const login = async (_, { email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({ where: { email }, include: { roles: true }})
   
   if (user) {
     const match = await bcrypt.compare(password, user.password)
@@ -163,7 +165,8 @@ const login = async (_, { email, password }) => {
     }
 
     const userId = user.id
-    const token = jwt.sign({ userId }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
+    const userRoles = user.roles.map(role => role.name)
+    const token = jwt.sign({ userId, userRoles }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
 
     return {
       token
@@ -188,6 +191,7 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
     const salt = await bcrypt.genSalt(saltRounds)
     const hash = await bcrypt.hash(password, salt)
     const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
+    const role = await getRole(RoleEnum.USER)
 
     return prisma.user.create({
       include: {
@@ -198,6 +202,9 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
         tag,
         password: hash,
         profile_picture: awsUri,
+        roles: {
+          connect: [{ id: role.id }]
+        },
         characters: {
           connect: mapIdsToPrisma(characters)
         }

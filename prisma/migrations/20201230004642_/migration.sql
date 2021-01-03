@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "crewId" TEXT;
+
+-- AddForeignKey
+ALTER TABLE "User" ADD FOREIGN KEY("crewId")REFERENCES "Crew"("id") ON DELETE SET NULL ON UPDATE CASCADE;

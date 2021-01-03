@@ -16,19 +16,20 @@ model User {
   lng                    Float?
   in_tournament          Boolean      @default(false)
   is_playing             Boolean      @default(false)
-  tournament_id          String?
   prefix                 String?
   crew_id                String?
-  role                   Role         @default(USER)
   password               String
   email                  String       @unique
   tag                    String
   reset_token            String?
   reset_token_expiration DateTime?
-  crew                   Crew?        @relation(fields: [crew_id], references: [id])
-  current_tournament     Tournament?  @relation(fields: [tournament_id], references: [id])
+  waiting_crew_id        String?
+  crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
+  waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
   characters             Character[]
+  roles                  Role[]
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
+  tournaments            Tournament[] @relation("user_tournaments")
 }
 
 model Character {
@@ -43,8 +44,7 @@ model Tournament {
   name                      String    @unique
   lat                       Float?
   lng                       Float?
-  tournament_id             Int    @unique
-  city                      String
+  city                      String?
   countryCode               String
   createdAt                 DateTime?
   currency                  String
@@ -58,19 +58,30 @@ model Tournament {
   state                     Int
   venueName                 String?
   venueAddress              String?
-  participants              User[]
+  tournament_id             Int       @unique
+  startAt                   DateTime?
+  is_started                Boolean   @default(false)
   favorited_by              User[]    @relation("favorited_tournaments")
+  participants              User[]    @relation("user_tournaments")
 }
 
 model Crew {
-  id      String  @id @default(uuid())
-  name    String
-  prefix  String?
-  members User[]
+  id              String @id @default(uuid())
+  name            String @unique
+  prefix          String
+  members         User[] @relation("crew_members")
+  waiting_members User[] @relation("crew_waiting_members")
 }
 
-enum Role {
+model Role {
+  id    String   @id @default(uuid())
+  name  RoleEnum
+  users User[]
+}
+
+enum RoleEnum {
   ADMIN
   TOURNAMENT_ORGANIZER
+  CREW_ADMIN
   USER
 }

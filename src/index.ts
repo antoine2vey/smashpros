@@ -29,7 +29,7 @@ const server = new ApolloServer({
 
     // @ts-ignore
     const { exp, userId } = token
-    const user = now > exp ? await prisma.user.findUnique({ where: { id: userId }}) : null
+    const user = now > exp ? await prisma.user.findUnique({ where: { id: userId }, include: { roles: true }}) : null
 
     return {
       user
@@ -38,9 +38,9 @@ const server = new ApolloServer({
 });
 
 server.listen().then(async ({ url, subscriptionsUrl }) => {
-  if (process.env.NODE_ENV === 'production') {
-    await ensureBucketExists(process.env.S3_USER_BUCKET)
-  }
+  // if (process.env.NODE_ENV === 'production') {
+  //   await ensureBucketExists(process.env.S3_USER_BUCKET)
+  // }
 
   console.log(`🚀 Server ready at ${url}`);
   console.log(`🚀 WebSockets ready at ${subscriptionsUrl}`);
