@@ -16,7 +16,6 @@ model User {
   lng                    Float?
   in_tournament          Boolean      @default(false)
   is_playing             Boolean      @default(false)
-  tournament_id          String?
   prefix                 String?
   crew_id                String?
   password               String
@@ -26,11 +25,11 @@ model User {
   reset_token_expiration DateTime?
   waiting_crew_id        String?
   crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
-  current_tournament     Tournament?  @relation(fields: [tournament_id], references: [id])
   waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
   characters             Character[]
   roles                  Role[]
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
+  tournaments            Tournament[] @relation("user_tournaments")
 }
 
 model Character {
@@ -60,8 +59,10 @@ model Tournament {
   venueName                 String?
   venueAddress              String?
   tournament_id             Int       @unique
-  participants              User[]
+  startAt                   DateTime?
+  is_started                Boolean   @default(false)
   favorited_by              User[]    @relation("favorited_tournaments")
+  participants              User[]    @relation("user_tournaments")
 }
 
 model Crew {

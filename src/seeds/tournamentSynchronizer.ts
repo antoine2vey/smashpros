@@ -28,6 +28,7 @@ const query = `
         createdAt
         currency
         numAttendees
+        startAt
         endAt
         eventRegistrationClosesAt
         hasOfflineEvents
@@ -75,7 +76,7 @@ function tournamentSynchronizer() {
           createdAt: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
           currency: tournament.currency,
           numAttendees: tournament.numAttendees,
-          endAt: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
+          endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
           eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
           hasOfflineEvents: tournament.hasOfflineEvents,
           images: tournament.images,
@@ -83,7 +84,8 @@ function tournamentSynchronizer() {
           slug: tournament.slug,
           state: tournament.state,
           venueName: tournament.venueName,
-          venueAddress: tournament.venueAddress
+          venueAddress: tournament.venueAddress,
+          startAt: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
         }
     
         return prisma.tournament.upsert({

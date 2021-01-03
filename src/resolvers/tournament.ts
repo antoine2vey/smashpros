@@ -14,6 +14,7 @@ export interface Tournament {
   createdAt: number
   currency: string
   numAttendees: number
+  startAt: number
   endAt: number
   eventRegistrationClosesAt: number
   hasOfflineEvents?: boolean
