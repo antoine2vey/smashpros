@@ -1,11 +1,8 @@
 import { RoleEnum } from "@prisma/client";
-import chalk from "chalk";
 import { prisma } from "../prisma";
+import logger from "../utils/logger";
 
 const createRoles = []
-const log = (...args) => (colors) => {
-  console.log(colors('[SEED]', ...args))
-}
 
 const roles: RoleEnum[] = [
   RoleEnum.ADMIN,
@@ -20,13 +17,13 @@ for (let name of roles) {
 } 
 
 export async function loadRoles() {
-  log('Creating roles ...')(chalk.bold)
+  logger.info('Creating roles ...')
   await Promise.all(createRoles)
     .then(() => {
-      log('Roles created !')(chalk.bold.green)
+      logger.info('Roles created !')
     })
-    .catch(() => {
-      log('Error during role creation')(chalk.bold.red)
+    .catch((error) => {
+      logger.error('Error during role creation', error)
     })
 }
 

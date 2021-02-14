@@ -1,10 +1,11 @@
 import { ApolloServer, IResolversParameter, mergeSchemas } from 'apollo-server'
 import { typeDefs as schemas } from './typedefs';
 import { resolvers } from './resolvers'
-import { ensureBucketExists } from './utils/aws'
 import { decode } from 'jsonwebtoken'
 import { prisma } from './prisma';
 import { Date as DateScalar } from './scalars/date';
+import { runAtMidnight } from './utils/cron';
+import { executeTournamentsQueries } from './backgroundTasks/tournaments';
 
 const schema = mergeSchemas({
   schemas,
@@ -34,14 +35,18 @@ const server = new ApolloServer({
     return {
       user
     }
+  },
+  subscriptions: {
+    onConnect: (params, socket) => {
+      console.log(params)
+      console.log(socket)
+    }
   }
 });
 
 server.listen().then(async ({ url, subscriptionsUrl }) => {
-  // if (process.env.NODE_ENV === 'production') {
-  //   await ensureBucketExists(process.env.S3_USER_BUCKET)
-  // }
-
   console.log(`🚀 Server ready at ${url}`);
   console.log(`🚀 WebSockets ready at ${subscriptionsUrl}`);
+
+  // runAtMidnight(executeTournamentsQueries)
 });

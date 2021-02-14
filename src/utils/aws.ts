@@ -1,7 +1,4 @@
 import AWS from 'aws-sdk'
-import fs, { ReadStream } from 'fs'
-import path from 'path'
-import stream from 'stream';
 
 AWS.config.update({
   region: 'eu-west-1',

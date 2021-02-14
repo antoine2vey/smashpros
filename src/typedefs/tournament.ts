@@ -46,5 +46,6 @@ export const tournamentType = gql`
   extend type Mutation {
     favoriteTournament(id: ID!, unfav: Boolean = false): Boolean!
     participateTournament(id: ID!, unparticipate: Boolean = false): Tournament!
+    checkUserIn(participant: ID!, tournament: ID!): Boolean!
   }
 `

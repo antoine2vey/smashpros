@@ -1,9 +1,5 @@
-import chalk from "chalk"
 import { prisma } from "../prisma"
-
-const log = (...args) => (colors) => {
-  console.log(colors('[SEED]', ...args))
-}
+import logger from "../utils/logger"
 
 const character = (name: string, picture: string) => ({ name, picture })
 const characters = [
@@ -101,13 +97,13 @@ function loadCharacters() {
   return Promise.all(createCharacters)
 }
 
-log('Creating characters ...')(chalk.bold)
+logger.info('Creating characters ...')
 loadCharacters()
   .then(() => {
-    log('Created characters!')(chalk.green.bold)
+    logger.info('Created characters!')
   })
-  .catch(() => {
-    log('Error during character creation...')(chalk.red.bold)
+  .catch((error) => {
+    logger.error('Error during character creation...', error)
   })
   .finally(() => {
     process.exit(0)

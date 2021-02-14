@@ -1,6 +1,7 @@
 import { combineResolvers } from "graphql-resolvers"
 import { isEmpty } from "lodash"
 import { isAuthenticated } from "../middlewares"
+import { isTO } from "../middlewares/isTO"
 import { prisma } from "../prisma"
 
 export interface Tournament {
@@ -133,6 +134,37 @@ const participants = (tournament: Tournament, { query }) => {
   })
 }
 
+const checkUserIn = async (_, { participant, tournament }: { participant: string, tournament: string }, { user }) => {
+  // Geet tournament where user is an organizer, we alreeady checked his role
+  const tourney = await prisma.tournament.findFirst({
+    where: {
+      id: tournament,
+      participants: {
+        some: {
+          id: participant,
+          is_checked_in: false
+        }
+      },
+      organizers: {
+        some: {
+          id: user.id
+        }
+      }
+    }
+  })
+
+  if (tourney) {
+    await prisma.user.update({
+      where: { id: participant },
+      data: { is_checked_in: true }
+    })
+
+    return true
+  }
+
+  return false
+}
+
 export const tournamentResolver = {
   Tournament: {
     participants
@@ -155,6 +187,11 @@ export const tournamentResolver = {
     participateTournament: combineResolvers(
       isAuthenticated,
       participateTournament
+    ),
+    checkUserIn: combineResolvers(
+      isAuthenticated,
+      isTO,
+      checkUserIn
     )
   }
 }

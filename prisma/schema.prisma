@@ -15,7 +15,6 @@ model User {
   lat                    Float?
   lng                    Float?
   in_tournament          Boolean      @default(false)
-  is_playing             Boolean      @default(false)
   prefix                 String?
   crew_id                String?
   password               String
@@ -24,12 +23,14 @@ model User {
   reset_token            String?
   reset_token_expiration DateTime?
   waiting_crew_id        String?
+  is_checked_in          Boolean      @default(false)
   crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
   waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
   characters             Character[]
   roles                  Role[]
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
   tournaments            Tournament[] @relation("user_tournaments")
+  tournaments_organizer  Tournament[] @relation("user_tournaments_organizer")
 }
 
 model Character {
@@ -63,6 +64,7 @@ model Tournament {
   is_started                Boolean   @default(false)
   favorited_by              User[]    @relation("favorited_tournaments")
   participants              User[]    @relation("user_tournaments")
+  organizers                User[]    @relation("user_tournaments_organizer")
 }
 
 model Crew {

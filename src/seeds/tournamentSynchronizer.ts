@@ -1,14 +1,13 @@
-import chalk from 'chalk'
-import { fromUnixTime } from 'date-fns'
+import { fromUnixTime, isBefore } from 'date-fns'
 import dotenv from 'dotenv'
 import fetch from "node-fetch"
 import { prisma } from '../prisma'
 import { Tournament } from '../resolvers/tournament'
+import logger from '../utils/logger'
 
 // Load env
 dotenv.config()
 
-const log = (...args) => (colors) => console.log(colors('[SEED]', ...args))
 const BASE_URL = 'https://api.smash.gg/gql/alpha'
 const query = `
   query {
@@ -87,6 +86,12 @@ function tournamentSynchronizer() {
           venueAddress: tournament.venueAddress,
           startAt: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
         }
+
+        const now = new Date()
+        if (isBefore(tourney.endAt, now)) {
+          logger.warn(`Tourney ${tourney.name} is outdated, not upserting.`)
+          return null
+        }
     
         return prisma.tournament.upsert({
           where: {
@@ -107,14 +112,13 @@ function tournamentSynchronizer() {
   })
 }
 
-log('Creating tourneys ...')(chalk.bold)
+logger.info('Creating tourneys')
 tournamentSynchronizer()
   .then(() => {
-    log('Created all tournaments!')(chalk.green.bold)
+    logger.info('Created all tournaments!')
   })
   .catch((error) => {
-    log('Something bad happened while creating tourneys :(')(chalk.red.bold)
-    log('Reason: ', error)(chalk.red.bold)
+    logger.error('Something bad happened while creating tourneys', error)
   })
   .finally(() => {
     process.exit(0)

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@prisma/client": "^2.13.1",
+    "@prisma/client": "^2.14.0",
     "apollo-server": "^2.19.0",
     "aws-sdk": "^2.817.0",
     "bcrypt": "^5.0.0",
@@ -14,10 +14,11 @@
     "lodash": "^4.17.20",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.3.3"
   },
   "devDependencies": {
-    "@prisma/cli": "2.13.1",
+    "@prisma/cli": "^2.14.0",
     "@types/bcrypt": "^3.0.0",
     "@types/dotenv": "^8.2.0",
     "@types/graphql-resolvers": "^0.3.0",
