@@ -76,6 +76,8 @@ const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
 const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) => {
   const { user } = ctx
   const { id, email, tag, profilePicture, characters, prefix } = payload
+  const { createReadStream, filename, mimetype } = await profilePicture
+  const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
 
   if (user.id !== id) {
     throw new AuthenticationError('Not allowed')  
@@ -91,7 +93,11 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
     data: {
       email,
       tag,
-      prefix
+      prefix,
+      profile_picture: awsUri,
+      characters: {
+        connect: mapIdsToPrisma(characters)
+      }
     }
   })
 }
@@ -189,9 +195,11 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
 
   try {
     const salt = await bcrypt.genSalt(saltRounds)
-    const hash = await bcrypt.hash(password, salt)
-    const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
-    const role = await getRole(RoleEnum.USER)
+    const [hash, awsUri, role] = await Promise.all([
+      bcrypt.hash(password, salt),
+      uploadFile(createReadStream, `${id}-${filename}`, mimetype),
+      getRole(RoleEnum.USER)
+    ])
 
     return prisma.user.create({
       include: {

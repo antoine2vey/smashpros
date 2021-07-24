@@ -10,6 +10,7 @@ export const userType = gql`
     profile_picture: String!
     characters: [Character!]
     role: String
+    is_checked_in: Boolean
   }
 
   type RegisterPayload {

@@ -1,4 +1,5 @@
 import { ApolloServer, IResolversParameter, mergeSchemas } from 'apollo-server'
+import express from 'express'
 import { typeDefs as schemas } from './typedefs';
 import { resolvers } from './resolvers'
 import { decode } from 'jsonwebtoken'
@@ -7,6 +8,7 @@ import { Date as DateScalar } from './scalars/date';
 import { runAtMidnight } from './utils/cron';
 import { executeTournamentsQueries } from './backgroundTasks/tournaments';
 
+const app = express()
 const schema = mergeSchemas({
   schemas,
   resolvers: resolvers as IResolversParameter
@@ -37,9 +39,9 @@ const server = new ApolloServer({
     }
   },
   subscriptions: {
-    onConnect: (params, socket) => {
+    onConnect: (params, ws) => {
       console.log(params)
-      console.log(socket)
+      console.log(ws)
     }
   }
 });
@@ -49,4 +51,11 @@ server.listen().then(async ({ url, subscriptionsUrl }) => {
   console.log(`🚀 WebSockets ready at ${subscriptionsUrl}`);
 
   // runAtMidnight(executeTournamentsQueries)
-});
+})
+
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json())
+app.post('/radar/hook', )
+app.listen({ port: 5000 }, () => {
+  console.log('🚀 Webhook server started at port 5000')
+})
