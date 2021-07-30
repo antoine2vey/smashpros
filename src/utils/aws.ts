@@ -27,7 +27,7 @@ export function ensureBucketExists(bucketName: string): Promise<void> {
 }
 
 export function uploadFile(
-  createReadStream: any,
+  createReadStream: () => AWS.S3.Body,
   filename: string,
   mimetype: string
 ): Promise<string> {

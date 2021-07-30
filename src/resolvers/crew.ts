@@ -5,8 +5,10 @@ import { isAuthenticated, isNotCrewAdmin } from "../middlewares";
 import { getRole } from "../utils/roles";
 import { isCrewAdmin } from "../middlewares/isNotCrewAdmin";
 import { UserInputError } from "apollo-server";
+import { updateMemberSchema } from "../validations/crew";
+import { CrewUpdateAction } from "../typings/enums";
 
-const crew = (_, __, { user }) => {
+const crew = async (_, __, { user }) => {
   if (!user.crew_id) {
     return null
   }
@@ -16,8 +18,13 @@ const crew = (_, __, { user }) => {
       id: user.crew_id
     },
     include: {
-      members: true,
-      waiting_members: true
+      members: {
+        include: {
+          characters: true,
+          roles: true
+        }
+      },
+      waiting_members: true,
     }
   })
 }
@@ -75,9 +82,11 @@ const joinCrew = async (_, { id }: { id: string }, { user }) => {
   })
 }
 
-const updateWaitingMember = async (_, { id, action }: { id: string, action: 'ACCEPT' | 'DENY' }, { user }) => {
-  if (action !== 'ACCEPT' && action !== 'DENY') {
-    throw new UserInputError('Sent wrong action')
+const updateWaitingMember = async (_, { id, action }: { id: string, action: CrewUpdateAction }, { user }) => {
+  const { error } = updateMemberSchema.validate(action)
+
+  if (error) {
+    throw new UserInputError(error.message)
   }
 
   return prisma.crew.update({
@@ -88,7 +97,7 @@ const updateWaitingMember = async (_, { id, action }: { id: string, action: 'ACC
       },
       members: {
         // Switch user to members if he is accepted, else do not connect
-        connect: action === 'ACCEPT' ? [{ id }] : []
+        connect: action === CrewUpdateAction.ACCEPT ? [{ id }] : []
       }
     },
     include: {

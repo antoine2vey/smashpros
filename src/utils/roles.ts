@@ -9,6 +9,6 @@ export function hasNotRole(roles: Role[], role: RoleEnum) {
   return roles.some(userRole => userRole.name !== role)
 }
 
-export async function getRole(role: RoleEnum) {
-  return prisma.role.findFirst({ where: { name: role } })
+export function getRole(role: RoleEnum) {
+  return prisma.role.findUnique({ where: { name: role } })
 }

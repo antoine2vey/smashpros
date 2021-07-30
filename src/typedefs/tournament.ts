@@ -47,5 +47,6 @@ export const tournamentType = gql`
     favoriteTournament(id: ID!, unfav: Boolean = false): Boolean!
     participateTournament(id: ID!, unparticipate: Boolean = false): Tournament!
     checkUserIn(participant: ID!, tournament: ID!): Boolean!
+    userEnteredTournament(tournament: ID!): User!
   }
 `

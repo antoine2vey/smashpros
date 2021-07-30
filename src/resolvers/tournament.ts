@@ -1,37 +1,11 @@
 import { combineResolvers } from "graphql-resolvers"
 import { isEmpty } from "lodash"
+import { PubSubActions } from "../typings/enums"
 import { isAuthenticated } from "../middlewares"
 import { isTO } from "../middlewares/isTO"
 import { prisma } from "../prisma"
-
-export interface Tournament {
-  id: number    
-  name: string    
-  lat: number
-  lng: number
-  tournament_id: string    
-  city?: string
-  countryCode: string
-  createdAt: number
-  currency: string
-  numAttendees: number
-  startAt: number
-  endAt: number
-  eventRegistrationClosesAt: number
-  hasOfflineEvents?: boolean
-  images: {
-    id: string
-    url: string
-  }[]
-  isRegistrationOpen?: boolean
-  slug: string
-  state: number
-  venueName?: string
-  venueAddress?: string
-
-  participants?: any[]
-  favorited_by?: any[]
-}
+import { pubsub } from "../redis"
+import { Tournament } from "../typings/interfaces"
 
 const tournaments = async () => {
   return prisma.tournament.findMany({
@@ -51,7 +25,7 @@ const tournaments = async () => {
 }
 
 const tournament = async (_, args: { id: string }, ctx, info) => {
-  return prisma.tournament.findFirst({
+  return prisma.tournament.findUnique({
     where: {
       id: args.id
     },
@@ -165,6 +139,24 @@ const checkUserIn = async (_, { participant, tournament }: { participant: string
   return false
 }
 
+const userEnteredTournament = async (_, { tournament }: { tournament: string }, { user }) => {
+  const update = await prisma.user.update({
+    where: {
+      id: user.id
+    },
+    data: {
+      in_tournament: true,
+    },
+    include: {
+      characters: true,
+      roles: true
+    }
+  })
+
+  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { userEnteredTournament: update })
+  return update
+}
+
 export const tournamentResolver = {
   Tournament: {
     participants
@@ -192,6 +184,10 @@ export const tournamentResolver = {
       isAuthenticated,
       isTO,
       checkUserIn
+    ),
+    userEnteredTournament: combineResolvers(
+      isAuthenticated,
+      userEnteredTournament
     )
   }
 }

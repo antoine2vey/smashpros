@@ -1,4 +1,4 @@
-import { ApolloServer, IResolversParameter, mergeSchemas } from 'apollo-server'
+import { IResolversParameter, mergeSchemas } from 'apollo-server'
 import express from 'express'
 import { typeDefs as schemas } from './typedefs';
 import { resolvers } from './resolvers'
@@ -6,9 +6,13 @@ import { decode } from 'jsonwebtoken'
 import { prisma } from './prisma';
 import { Date as DateScalar } from './scalars/date';
 import { runAtMidnight } from './utils/cron';
-import { executeTournamentsQueries } from './backgroundTasks/tournaments';
+import { executeTournamentsQueries } from './backgroundTasks/tournaments'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { execute, subscribe } from 'graphql'
+import { createServer } from 'http'
+import { ApolloServer } from 'apollo-server-express'
+import { findUserByToken } from './utils/user';
 
-const app = express()
 const schema = mergeSchemas({
   schemas,
   resolvers: resolvers as IResolversParameter
@@ -20,42 +24,42 @@ const server = new ApolloServer({
   },
   schema,
   context: async ({ req }) => {
-    const now = +new Date()
-    const authorization = req.headers.authorization || ''
-    const token = decode(authorization)
-
-    if (!token) {
-      return {
-        user: null
-      }
-    }
-
     // @ts-ignore
-    const { exp, userId } = token
-    const user = now > exp ? await prisma.user.findUnique({ where: { id: userId }, include: { roles: true }}) : null
-
+    const user = await findUserByToken(req.headers.authorization)
     return {
       user
-    }
-  },
-  subscriptions: {
-    onConnect: (params, ws) => {
-      console.log(params)
-      console.log(ws)
     }
   }
 });
 
-server.listen().then(async ({ url, subscriptionsUrl }) => {
-  console.log(`🚀 Server ready at ${url}`);
-  console.log(`🚀 WebSockets ready at ${subscriptionsUrl}`);
+server.start().then(async () => {
+  const app = express()
+  const httpServer = createServer(app)
+  
+  SubscriptionServer.create({
+    schema,
+    execute,
+    subscribe,
+    onConnect: async (params) => {
+      if (params.authorization) {
+        const user = await findUserByToken(params.authorization)
+        return {
+          user
+        }
+      }
+    }
+  }, {
+    server: httpServer,
+    path: server.graphqlPath
+  })
 
-  // runAtMidnight(executeTournamentsQueries)
-})
+  server.applyMiddleware({
+    app,
+    path: '/'
+  })
 
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
-app.post('/radar/hook', )
-app.listen({ port: 5000 }, () => {
-  console.log('🚀 Webhook server started at port 5000')
+  httpServer.listen({ port: 4000 }, () => {
+    console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`);
+    // runAtMidnight(executeTournamentsQueries)
+  })
 })

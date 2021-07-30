@@ -5,48 +5,15 @@ import jwt from 'jsonwebtoken'
 import { uploadFile } from "../utils/aws";
 import { v4 as uuid } from 'uuid';
 import { mapIdsToPrisma } from "../utils/prisma";
-import Joi from "joi"
 import { combineResolvers } from 'graphql-resolvers'
 import { addMinutes, isAfter } from "date-fns";
 import { isAuthenticated } from "../middlewares";
 import { getRole } from "../utils/roles";
 import { RoleEnum } from "@prisma/client";
-
-const registerSchema = Joi.object({
-  password: Joi.string().min(4).required(),
-  email: Joi.string().email().required(),
-  tag: Joi.string().required(),
-  profilePicture: Joi.any().required(),
-  characters: Joi.array().required()
-})
-
-const forgotPasswordSchema = Joi.object({
-  code: Joi.string().required(),
-  password: Joi.string().min(4).required(),
-  confirm_password: Joi.any().equal(Joi.ref('password')).required()
-})
-
-export interface PlayerByCharacterParams {
-  characterId: string
-}
-
-export interface UserCreateInput {
-  id: string
-  password: string
-  email: string
-  tag: string
-  profilePicture: {
-    filename: string
-    mimetype: string
-    encoding: string
-    createReadStream: any //TODO: fix type
-  }
-  characters: string[]
-}
-
-export interface UserUpdateInput extends UserCreateInput {
-  prefix: string
-}
+import {pubsub} from "../redis";
+import { forgotPasswordSchema, emailSchema, registerSchema } from "../validations/user";
+import { PubSubActions } from "../typings/enums";
+import { PlayerByCharacterParams, UserCreateInput, UserUpdateInput } from "../typings/interfaces"
 
 const users = () => {
   return prisma.user.findMany({
@@ -103,9 +70,10 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
 }
 
 const askPasswordReset = async (_, { email }: { email: string }) => {
-  const { error } = Joi.string().email().validate(email)
+  const { error } = emailSchema.validate(email)
   const code = uuid()
-  const expiration = addMinutes(new Date(), 10)
+  const now = new Date()
+  const expiration = addMinutes(now, 10)
 
   if (error) {
     throw new UserInputError('Email is not valid')
@@ -223,6 +191,10 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
   }
 }
 
+const userEnteredTournament = {
+  subscribe: () => pubsub.asyncIterator([PubSubActions.USER_ENTERED_TOURNAMENT])
+}
+
 export const userResolver = {
   Query: {
     users: combineResolvers(
@@ -251,5 +223,8 @@ export const userResolver = {
     passwordReset: combineResolvers(
       passwordReset
     )
+  },
+  Subscription: {
+    userEnteredTournament
   }
 }

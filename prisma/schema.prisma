@@ -77,7 +77,7 @@ model Crew {
 
 model Role {
   id    String   @id @default(uuid())
-  name  RoleEnum
+  name  RoleEnum @unique
   users User[]
 }
 

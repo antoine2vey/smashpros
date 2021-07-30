@@ -3,13 +3,18 @@ import { gql } from "apollo-server";
 export const userType = gql`
   scalar Upload
 
+  type Role {
+    id: ID!
+    name: String!
+  }
+
   type User {
     id: ID!
     email: String!
     tag: String!
     profile_picture: String!
     characters: [Character!]
-    role: String
+    roles: [Role]
     is_checked_in: Boolean
   }
 
@@ -49,5 +54,9 @@ export const userType = gql`
     updateProfile(payload: UserUpdatePayload!): User!
     askPasswordReset(email: String!): String!
     passwordReset(code: String!, password: String!, confirm_password: String!): Boolean!
+  }
+
+  extend type Subscription {
+    userEnteredTournament: User!
   }
 `

@@ -2,7 +2,7 @@ import { fromUnixTime, isBefore } from 'date-fns'
 import dotenv from 'dotenv'
 import fetch from "node-fetch"
 import { prisma } from '../prisma'
-import { Tournament } from '../resolvers/tournament'
+import { Tournament } from '../typings/interfaces'
 import logger from '../utils/logger'
 
 // Load env
@@ -77,7 +77,6 @@ function tournamentSynchronizer() {
           numAttendees: tournament.numAttendees,
           endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
           eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
-          hasOfflineEvents: tournament.hasOfflineEvents,
           images: tournament.images,
           isRegistrationOpen: tournament.isRegistrationOpen,
           slug: tournament.slug,
@@ -89,7 +88,13 @@ function tournamentSynchronizer() {
 
         const now = new Date()
         if (isBefore(tourney.endAt, now)) {
-          logger.warn(`Tourney ${tourney.name} is outdated, not upserting.`)
+          logger.warn(`Tourney ${tourney.name} is outdated, not upserting. (${tourney.endAt})`)
+          return null
+        }
+
+        // It's an online tournament, dont put it
+        if (!tournament.hasOfflineEvents) {
+          logger.warn(`Tourney ${tourney.name} is online, not upserting.`)
           return null
         }
     

@@ -12,6 +12,9 @@ const root = gql`
   type Mutation {
     _: Boolean
   }
+  type Subscription {
+    _: Boolean
+  }
 `
 const typeDefs: DocumentNode[] = [root, characterType, userType, tournamentType, crewType]
 
