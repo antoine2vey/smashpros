@@ -45,12 +45,14 @@ export interface UserCreateInput {
   password: string
   email: string
   tag: string
-  profilePicture: Promise<{
-    filename: string
-    mimetype: string
-    encoding: string
-    createReadStream: () => AWS.S3.Body
-  }>
+  profilePicture: {
+    file: Promise<{
+      filename: string
+      mimetype: string
+      encoding: string
+      createReadStream: () => AWS.S3.Body
+    }>
+  }
   characters: string[]
 }
 

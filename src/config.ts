@@ -3,6 +3,7 @@ import { typeDefs as schemas } from './typedefs';
 import { resolvers } from './resolvers'
 import { IResolversParameter, mergeSchemas } from 'apollo-server';
 import { findUserByToken } from './utils/user';
+import { GraphQLUpload } from 'graphql-upload';
 
 export const schema = mergeSchemas({
   schemas,
@@ -11,7 +12,8 @@ export const schema = mergeSchemas({
 
 export const config = {
   resolvers: {
-    Date: DateScalar
+    Date: DateScalar,
+    Upload: GraphQLUpload
   },
   schema,
   context: async ({ req }) => {

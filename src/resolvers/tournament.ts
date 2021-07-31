@@ -25,6 +25,23 @@ const tournaments = async () => {
 }
 
 const tournament = async (_, args: { id: string }, ctx, info) => {
+  console.log(await prisma.tournament.findUnique({
+    where: {
+      id: args.id
+    },
+    include: {
+      participants: {
+        include: {
+          characters: true
+        }
+      },
+      favorited_by: {
+        include: {
+          characters: true
+        }
+      }
+    }
+  }))
   return prisma.tournament.findUnique({
     where: {
       id: args.id

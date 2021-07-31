@@ -43,7 +43,7 @@ const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
 const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) => {
   const { user } = ctx
   const { id, email, tag, profilePicture, characters, prefix } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture
+  const { createReadStream, filename, mimetype } = await profilePicture.file
   const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
 
   if (user.id !== id) {
@@ -152,7 +152,7 @@ const login = async (_, { email, password }) => {
 
 const register = async (_, { payload }: {payload: UserCreateInput}) => {
   const { password, email, tag, profilePicture, characters } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture
+  const { createReadStream, filename, mimetype } = await profilePicture.file
   const id = uuid()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
@@ -187,6 +187,7 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
       } 
     })
   } catch (error) {
+    console.log(error)
     throw new UserInputError('Something went wrong with register.')
   }
 }
