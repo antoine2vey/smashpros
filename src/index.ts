@@ -1,10 +1,4 @@
-import { IResolversParameter, mergeSchemas } from 'apollo-server'
 import express from 'express'
-import { typeDefs as schemas } from './typedefs';
-import { resolvers } from './resolvers'
-import { decode } from 'jsonwebtoken'
-import { prisma } from './prisma';
-import { Date as DateScalar } from './scalars/date';
 import { runAtMidnight } from './utils/cron';
 import { executeTournamentsQueries } from './backgroundTasks/tournaments'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
@@ -12,25 +6,9 @@ import { execute, subscribe } from 'graphql'
 import { createServer } from 'http'
 import { ApolloServer } from 'apollo-server-express'
 import { findUserByToken } from './utils/user';
+import { config, schema } from './config';
 
-const schema = mergeSchemas({
-  schemas,
-  resolvers: resolvers as IResolversParameter
-})
-
-const server = new ApolloServer({
-  resolvers: {
-    Date: DateScalar
-  },
-  schema,
-  context: async ({ req }) => {
-    // @ts-ignore
-    const user = await findUserByToken(req.headers.authorization)
-    return {
-      user
-    }
-  }
-});
+const server = new ApolloServer(config);
 
 server.start().then(async () => {
   const app = express()

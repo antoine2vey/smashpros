@@ -192,7 +192,7 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
 }
 
 const userEnteredTournament = {
-  subscribe: () => pubsub.asyncIterator([PubSubActions.USER_ENTERED_TOURNAMENT])
+  subscribe: () => pubsub.asyncIterator(PubSubActions.USER_ENTERED_TOURNAMENT)
 }
 
 export const userResolver = {

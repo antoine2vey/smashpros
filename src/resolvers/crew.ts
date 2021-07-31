@@ -46,7 +46,9 @@ const createCrew = async (_, { name, prefix }: { name: string, prefix: string },
       prefix,
       members: {
         connect: [{ id: user.id }]
-      }
+      },
+      banner: '',
+      icon: ''
     },
     include: {
       members: true

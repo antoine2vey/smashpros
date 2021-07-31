@@ -1,7 +1,7 @@
 import { endOfDay, fromUnixTime, isBefore, startOfDay } from 'date-fns'
 import fetch from 'node-fetch'
 import { prisma } from '../prisma'
-import { Tournament } from '../resolvers/tournament'
+import { Tournament } from '../typings/interfaces'
 import logger from '../utils/logger'
 
 function setTournamentsStart() {

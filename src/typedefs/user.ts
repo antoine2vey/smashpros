@@ -16,6 +16,7 @@ export const userType = gql`
     characters: [Character!]
     roles: [Role]
     is_checked_in: Boolean
+    in_tournament: Boolean
   }
 
   type RegisterPayload {
