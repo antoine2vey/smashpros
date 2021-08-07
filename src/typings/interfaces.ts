@@ -56,6 +56,4 @@ export interface UserCreateInput {
   characters: string[]
 }
 
-export interface UserUpdateInput extends UserCreateInput {
-  prefix: string
-}
+export interface UserUpdateInput extends UserCreateInput {}

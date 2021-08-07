@@ -4,7 +4,7 @@ import { combineResolvers } from 'graphql-resolvers'
 import { isAuthenticated, isNotCrewAdmin } from "../middlewares";
 import { getRole } from "../utils/roles";
 import { isCrewAdmin } from "../middlewares/isNotCrewAdmin";
-import { UserInputError } from "apollo-server";
+import { ForbiddenError, UserInputError } from "apollo-server";
 import { updateMemberSchema } from "../validations/crew";
 import { CrewUpdateAction } from "../typings/enums";
 
@@ -69,7 +69,7 @@ const createCrew = async (_, { name, prefix }: { name: string, prefix: string },
 
 const joinCrew = async (_, { id }: { id: string }, { user }) => {
   if (user.crew_id) {
-    return null
+    throw new ForbiddenError('You already have a crew')
   }
 
   return prisma.crew.update({
@@ -80,6 +80,10 @@ const joinCrew = async (_, { id }: { id: string }, { user }) => {
       waiting_members: {
         connect: [{ id: user.id }]
       }
+    },
+    include: {
+      members: true,
+      waiting_members: true
     }
   })
 }

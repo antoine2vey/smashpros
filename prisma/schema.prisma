@@ -15,7 +15,6 @@ model User {
   lat                    Float?
   lng                    Float?
   in_tournament          Boolean      @default(false)
-  prefix                 String?
   crew_id                String?
   password               String
   email                  String       @unique
@@ -73,8 +72,8 @@ model Crew {
   prefix          String
   members         User[] @relation("crew_members")
   waiting_members User[] @relation("crew_waiting_members")
-  icon String
-  banner String
+  icon            String
+  banner          String
 }
 
 model Role {

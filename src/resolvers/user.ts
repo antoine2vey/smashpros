@@ -42,7 +42,7 @@ const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
 
 const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) => {
   const { user } = ctx
-  const { id, email, tag, profilePicture, characters, prefix } = payload
+  const { id, email, tag, profilePicture, characters } = payload
   const { createReadStream, filename, mimetype } = await profilePicture.file
   const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
 
@@ -60,7 +60,6 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
     data: {
       email,
       tag,
-      prefix,
       profile_picture: awsUri,
       characters: {
         connect: mapIdsToPrisma(characters)
@@ -187,7 +186,6 @@ const register = async (_, { payload }: {payload: UserCreateInput}) => {
       } 
     })
   } catch (error) {
-    console.log(error)
     throw new UserInputError('Something went wrong with register.')
   }
 }

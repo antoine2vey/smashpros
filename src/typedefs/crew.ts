@@ -5,7 +5,10 @@ export const crewType = gql`
     id: ID
     name: String
     prefix: String
+    banner: String
+    icon: String
     members: [User]
+    waiting_members: [User]
   }
 
   extend type Query {

@@ -16,6 +16,7 @@ export const config = {
     Upload: GraphQLUpload
   },
   schema,
+  uploads: false,
   context: async ({ req }) => {
     // @ts-ignore
     const user = await findUserByToken(req.headers.authorization)
