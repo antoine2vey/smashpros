@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator nexusPrisma {
+  provider = "nexus-prisma"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -15,7 +19,6 @@ model User {
   lat                    Float?
   lng                    Float?
   in_tournament          Boolean      @default(false)
-  prefix                 String?
   crew_id                String?
   password               String
   email                  String       @unique

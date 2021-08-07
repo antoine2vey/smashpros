@@ -150,7 +150,8 @@ const login = async (_, { email, password }) => {
   }
 }
 
-const register = async (_, { payload }: {payload: UserCreateInput}) => {
+export const register = async (_, { payload }: {payload: UserCreateInput}) => {
+  console.log(payload)
   const { password, email, tag, profilePicture, characters } = payload
   const { createReadStream, filename, mimetype } = await profilePicture
   const id = uuid()

@@ -36,6 +36,14 @@ server.start().then(async () => {
     path: '/'
   })
 
+  // app.use((req, res, next) => {
+  //   console.log(req)
+  //   console.log(res)
+  //   next()
+  // })
+  // app.use(express.urlencoded({ extended: false }))
+  // app.use(express.json())
+
   httpServer.listen({ port: 4000 }, () => {
     console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`);
     // runAtMidnight(executeTournamentsQueries)
