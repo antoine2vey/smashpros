@@ -76,8 +76,8 @@ model Crew {
   prefix          String
   members         User[] @relation("crew_members")
   waiting_members User[] @relation("crew_waiting_members")
-  icon String
-  banner String
+  icon            String
+  banner          String
 }
 
 model Role {

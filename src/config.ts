@@ -14,6 +14,7 @@ export const schema = makeSchema({
 
 export const config = {
   schema,
+  uploads: false,
   context: async ({ req }) => {
     // @ts-ignore
     const user = await findUserByToken(req.headers.authorization)

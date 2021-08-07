@@ -7,6 +7,7 @@ import { createServer } from 'http'
 import { ApolloServer } from 'apollo-server-express'
 import { findUserByToken } from './utils/user';
 import { config, schema } from './config';
+import { graphqlUploadExpress } from 'graphql-upload';
 
 const server = new ApolloServer(config);
 
@@ -30,6 +31,10 @@ server.start().then(async () => {
     server: httpServer,
     path: server.graphqlPath
   })
+
+  app.use(graphqlUploadExpress())
+  app.use(express.urlencoded({ extended: true }))
+  app.use(express.json())
 
   server.applyMiddleware({
     app,

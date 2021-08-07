@@ -41,7 +41,6 @@ export const userType = gql`
     tag: String!
     profilePicture: Upload
     characters: [ID!]
-    prefix: String!
   }
 
   extend type Query {

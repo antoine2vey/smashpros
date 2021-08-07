@@ -18,24 +18,32 @@ export async function findUserByToken(token: string) {
   const key = redisNamingStrategy.user(userId)
   const exists = await cache.exists(key) === 1
   let populatedUser: User & {roles: Role[]} = null
+  populatedUser = await prisma.user.findUnique({
+    where: {
+      id: userId
+    },
+    include: {
+      roles: true
+    }
+  })
 
-  if (!exists) {
-    logger.info(`Creating new user entry in cache (${key})`)
-    populatedUser = await prisma.user.findUnique({
-      where: {
-        id: userId
-      },
-      include: {
-        roles: true
-      }
-    })
+  // if (!exists) {
+  //   logger.info(`Creating new user entry in cache (${key})`)
+  //   populatedUser = await prisma.user.findUnique({
+  //     where: {
+  //       id: userId
+  //     },
+  //     include: {
+  //       roles: true
+  //     }
+  //   })
 
-    cache.setex(key, 60 * 60, JSON.stringify(populatedUser))
-  } else {
-    logger.info(`Found user in cache (${key})`)
-    const cachedUserString = await cache.get(key)
-    populatedUser = JSON.parse(cachedUserString)
-  }
+  //   cache.setex(key, 60 * 60, JSON.stringify(populatedUser))
+  // } else {
+  //   logger.info(`Found user in cache (${key})`)
+  //   const cachedUserString = await cache.get(key)
+  //   populatedUser = JSON.parse(cachedUserString)
+  // }
 
   const user = now > exp ? populatedUser : null
 
