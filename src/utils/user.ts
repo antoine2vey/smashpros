@@ -1,5 +1,5 @@
 import { Role, User } from "@prisma/client"
-import { decode } from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 import { prisma } from "../prisma"
 import { cache } from "../redis"
 import logger from "./logger"
@@ -7,7 +7,7 @@ import redisNamingStrategy from "./redisNamingStrategy"
 
 export async function findUserByToken(token: string) {
   const now = +new Date()
-  const decoded = decode(token)
+  const decoded = jwt.verify(token, process.env.JWT_PASSWORD)
 
   if (!decoded) {
     return null

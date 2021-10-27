@@ -42,7 +42,8 @@ server.start().then(async () => {
   })
   
   httpServer.listen({ port: 4000 }, () => {
-    console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`);
+    console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`)
+    console.log(`Open GQL debugger at https://studio.apollographql.com/sandbox/explorer`)
     // runAtMidnight(executeTournamentsQueries)
   })
 })
