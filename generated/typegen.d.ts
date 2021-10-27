@@ -4,6 +4,8 @@
  */
 
 
+import type { Context } from "./../src/context"
+import type { FieldAuthorizeResolver } from "nexus/dist/plugins/fieldAuthorizePlugin"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
@@ -41,22 +43,25 @@ export interface NexusGenInputs {
     player?: string | null; // String
   }
   UserRegisterPayload: { // input type
-    characters?: string[] | null; // [ID!]
-    email?: string | null; // String
-    password?: string | null; // String
-    profilePicture?: NexusGenScalars['Upload'] | null; // Upload
-    tag?: string | null; // String
+    characters: string[]; // [ID!]!
+    email: string; // String!
+    password: string; // String!
+    profilePicture: NexusGenScalars['Upload']; // Upload!
+    tag: string; // String!
   }
   UserUpdatePayload: { // input type
-    characters?: string[] | null; // [ID!]
-    email?: string | null; // String
-    id?: string | null; // String
-    profilePicture?: NexusGenScalars['Upload'] | null; // Upload
-    tag?: string | null; // String
+    characters: string[]; // [ID!]!
+    email: string; // String!
+    id: string; // String!
+    password: string; // String!
+    profilePicture: NexusGenScalars['Upload']; // Upload!
+    tag: string; // String!
   }
 }
 
 export interface NexusGenEnums {
+  CrewUpdateActionEnum: "ACCEPT" | "DENY"
+  RoleEnum: "ADMIN" | "CREW_ADMIN" | "TOURNAMENT_ORGANIZER" | "USER"
 }
 
 export interface NexusGenScalars {
@@ -71,18 +76,31 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  AuthPayload: { // root type
+    token?: string | null; // String
+  }
   Character: { // root type
     id: string; // ID!
     name: string; // String!
     picture: string; // String!
   }
   Crew: { // root type
+    banner: string; // String!
+    icon: string; // String!
     id: string; // ID!
     name: string; // String!
     prefix: string; // String!
   }
   Mutation: {};
   Query: {};
+  RegisterPayload: { // root type
+    success?: boolean | null; // Boolean
+  }
+  Role: { // root type
+    id: string; // ID!
+    name: NexusGenEnums['RoleEnum']; // RoleEnum!
+  }
+  Subscription: {};
   Tournament: { // root type
     city?: string | null; // String
     countryCode: string; // String!
@@ -92,6 +110,7 @@ export interface NexusGenObjects {
     eventRegistrationClosesAt?: NexusGenScalars['DateTime'] | null; // DateTime
     hasOfflineEvents?: boolean | null; // Boolean
     id: string; // ID!
+    images: string[]; // [String!]!
     isRegistrationOpen?: boolean | null; // Boolean
     lat?: number | null; // Float
     lng?: number | null; // Float
@@ -104,6 +123,7 @@ export interface NexusGenObjects {
     venueName?: string | null; // String
   }
   User: { // root type
+    email: string; // String!
     id: string; // ID!
     profile_picture?: string | null; // String
     tag: string; // String!
@@ -118,9 +138,12 @@ export interface NexusGenUnions {
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  AuthPayload: { // field return type
+    token: string | null; // String
+  }
   Character: { // field return type
     id: string; // ID!
     name: string; // String!
@@ -128,6 +151,8 @@ export interface NexusGenFieldTypes {
     users: NexusGenRootTypes['User'][]; // [User!]!
   }
   Crew: { // field return type
+    banner: string; // String!
+    icon: string; // String!
     id: string; // ID!
     members: NexusGenRootTypes['User'][]; // [User!]!
     name: string; // String!
@@ -135,11 +160,37 @@ export interface NexusGenFieldTypes {
     waiting_members: NexusGenRootTypes['User'][]; // [User!]!
   }
   Mutation: { // field return type
+    askPasswordReset: string | null; // String
+    checkUserIn: boolean | null; // Boolean
+    createCrew: NexusGenRootTypes['Crew'] | null; // Crew
+    favoriteTournament: boolean | null; // Boolean
+    joinCrew: NexusGenRootTypes['Crew'] | null; // Crew
+    kickMember: NexusGenRootTypes['Crew'] | null; // Crew
+    login: NexusGenRootTypes['AuthPayload'] | null; // AuthPayload
+    participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
+    passwordReset: boolean | null; // Boolean
     register: NexusGenRootTypes['User'] | null; // User
+    updateMember: NexusGenRootTypes['Crew'] | null; // Crew
+    updateProfile: NexusGenRootTypes['User'] | null; // User
+    userEnteredTournament: NexusGenRootTypes['User'] | null; // User
   }
   Query: { // field return type
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
-    tournaments: Array<NexusGenRootTypes['Tournament'] | null> | null; // [Tournament]
+    crew: NexusGenRootTypes['Crew'] | null; // Crew
+    crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
+    tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
+    tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
+    usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
+  }
+  RegisterPayload: { // field return type
+    success: boolean | null; // Boolean
+  }
+  Role: { // field return type
+    id: string; // ID!
+    name: NexusGenEnums['RoleEnum']; // RoleEnum!
+  }
+  Subscription: { // field return type
+    userEnteredTournament: NexusGenRootTypes['User']; // User!
   }
   Tournament: { // field return type
     city: string | null; // String
@@ -151,6 +202,7 @@ export interface NexusGenFieldTypes {
     favorited_by: NexusGenRootTypes['User'][]; // [User!]!
     hasOfflineEvents: boolean | null; // Boolean
     id: string; // ID!
+    images: string[]; // [String!]!
     isRegistrationOpen: boolean | null; // Boolean
     lat: number | null; // Float
     lng: number | null; // Float
@@ -165,13 +217,22 @@ export interface NexusGenFieldTypes {
   }
   User: { // field return type
     characters: NexusGenRootTypes['Character'][]; // [Character!]!
+    crew: NexusGenRootTypes['Crew'] | null; // Crew
+    email: string; // String!
     id: string; // ID!
     profile_picture: string | null; // String
+    roles: NexusGenRootTypes['Role'][]; // [Role!]!
     tag: string; // String!
+    tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
+    tournaments_organizer: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
+    waiting_crew: NexusGenRootTypes['Crew'] | null; // Crew
   }
 }
 
 export interface NexusGenFieldTypeNames {
+  AuthPayload: { // field return type name
+    token: 'String'
+  }
   Character: { // field return type name
     id: 'ID'
     name: 'String'
@@ -179,6 +240,8 @@ export interface NexusGenFieldTypeNames {
     users: 'User'
   }
   Crew: { // field return type name
+    banner: 'String'
+    icon: 'String'
     id: 'ID'
     members: 'User'
     name: 'String'
@@ -186,11 +249,37 @@ export interface NexusGenFieldTypeNames {
     waiting_members: 'User'
   }
   Mutation: { // field return type name
+    askPasswordReset: 'String'
+    checkUserIn: 'Boolean'
+    createCrew: 'Crew'
+    favoriteTournament: 'Boolean'
+    joinCrew: 'Crew'
+    kickMember: 'Crew'
+    login: 'AuthPayload'
+    participateTournament: 'Tournament'
+    passwordReset: 'Boolean'
     register: 'User'
+    updateMember: 'Crew'
+    updateProfile: 'User'
+    userEnteredTournament: 'User'
   }
   Query: { // field return type name
     characters: 'Character'
+    crew: 'Crew'
+    crews: 'Crew'
+    tournament: 'Tournament'
     tournaments: 'Tournament'
+    usersByCharacter: 'User'
+  }
+  RegisterPayload: { // field return type name
+    success: 'Boolean'
+  }
+  Role: { // field return type name
+    id: 'ID'
+    name: 'RoleEnum'
+  }
+  Subscription: { // field return type name
+    userEnteredTournament: 'User'
   }
   Tournament: { // field return type name
     city: 'String'
@@ -202,6 +291,7 @@ export interface NexusGenFieldTypeNames {
     favorited_by: 'User'
     hasOfflineEvents: 'Boolean'
     id: 'ID'
+    images: 'String'
     isRegistrationOpen: 'Boolean'
     lat: 'Float'
     lng: 'Float'
@@ -216,21 +306,74 @@ export interface NexusGenFieldTypeNames {
   }
   User: { // field return type name
     characters: 'Character'
+    crew: 'Crew'
+    email: 'String'
     id: 'ID'
     profile_picture: 'String'
+    roles: 'Role'
     tag: 'String'
+    tournaments: 'Tournament'
+    tournaments_organizer: 'Tournament'
+    waiting_crew: 'Crew'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    askPasswordReset: { // args
+      email: string; // String!
+    }
+    checkUserIn: { // args
+      participant: string; // ID!
+      tournament: string; // ID!
+    }
+    createCrew: { // args
+      name: string; // String!
+      prefix: string; // String!
+    }
+    favoriteTournament: { // args
+      id: string; // ID!
+      unfavorite?: boolean | null; // Boolean
+    }
+    joinCrew: { // args
+      id: string; // ID!
+    }
+    kickMember: { // args
+      id: string; // ID!
+    }
+    login: { // args
+      email: string; // String!
+      password: string; // String!
+    }
+    participateTournament: { // args
+      id: string; // ID!
+      unparticipate?: boolean | null; // Boolean
+    }
+    passwordReset: { // args
+      code: string; // String!
+      confirmPassword: string; // String!
+      password: string; // String!
+    }
     register: { // args
-      payload?: NexusGenInputs['UserRegisterPayload'] | null; // UserRegisterPayload
+      payload: NexusGenInputs['UserRegisterPayload']; // UserRegisterPayload!
+    }
+    updateMember: { // args
+      action: NexusGenEnums['CrewUpdateActionEnum']; // CrewUpdateActionEnum!
+      id: string; // ID!
+    }
+    updateProfile: { // args
+      payload: NexusGenInputs['UserUpdatePayload']; // UserUpdatePayload!
+    }
+    userEnteredTournament: { // args
+      tournament: string; // ID!
     }
   }
-  Tournament: {
-    participants: { // args
-      query?: NexusGenInputs['TournamentQuery'] | null; // TournamentQuery
+  Query: {
+    tournament: { // args
+      id: string; // ID!
+    }
+    usersByCharacter: { // args
+      id: string; // ID!
     }
   }
 }
@@ -245,7 +388,7 @@ export type NexusGenObjectNames = keyof NexusGenObjects;
 
 export type NexusGenInputNames = keyof NexusGenInputs;
 
-export type NexusGenEnumNames = never;
+export type NexusGenEnumNames = keyof NexusGenEnums;
 
 export type NexusGenInterfaceNames = never;
 
@@ -266,7 +409,7 @@ export type NexusGenFeaturesConfig = {
 }
 
 export interface NexusGenTypes {
-  context: any;
+  context: Context;
   inputTypes: NexusGenInputs;
   rootTypes: NexusGenRootTypes;
   inputTypeShapes: NexusGenInputs & NexusGenEnums & NexusGenScalars;
@@ -298,6 +441,15 @@ declare global {
   interface NexusGenPluginInputTypeConfig<TypeName extends string> {
   }
   interface NexusGenPluginFieldConfig<TypeName extends string, FieldName extends string> {
+    /**
+     * Authorization for an individual field. Returning "true"
+     * or "Promise<true>" means the field can be accessed.
+     * Returning "false" or "Promise<false>" will respond
+     * with a "Not Authorized" error for the field.
+     * Returning or throwing an error will also prevent the
+     * resolver from executing.
+     */
+    authorize?: FieldAuthorizeResolver<TypeName, FieldName>
   }
   interface NexusGenPluginInputFieldConfig<TypeName extends string, FieldName extends string> {
   }

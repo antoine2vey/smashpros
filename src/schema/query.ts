@@ -1,30 +1,66 @@
-import { list, objectType } from "nexus";
+import { idArg, list, nonNull, objectType } from "nexus";
 import { Context } from "../context";
+import { isAuthenticated, authorizations } from "../authorizations";
+import { crew, crews, characters, tournaments, tournament, usersByCharacter } from "../resolvers";
 
 export const Query = objectType({
   name: 'Query',
   definition: (t) => {
+    // Characters
     t.field('characters', {
       type: list('Character'),
-      resolve(_, args, ctx: Context) {
-        return ctx.prisma.character.findMany({
-          include: {
-            users: true
-          }
-        })
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return characters(...args)
       }
     })
 
+    // Crew
+    t.field('crews', {
+      type: list('Crew'),
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return crews(...args)
+      }
+    })
+
+    t.field('crew', {
+      type: 'Crew',
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return crew(...args)
+      }
+    })
+
+    // Tournament
     t.field('tournaments', {
-      type: list('Tournament'),
-      resolve(_, args, ctx: Context) {
-        return ctx.prisma.tournament.findMany({
-          include: {
-            participants: true,
-            favorited_by: true,
-            organizers: true
-          }
-        })
+      type: list(nonNull('Tournament')),
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return tournaments(...args)
+      }
+    })
+
+    t.field('tournament', {
+      type: 'Tournament',
+      authorize: authorizations(isAuthenticated),
+      args: {
+        id: nonNull(idArg())
+      },
+      resolve(...args) {
+        return tournament(...args)
+      }
+    })
+
+    // User
+    t.field('usersByCharacter', {
+      type: list(nonNull('User')),
+      authorize: authorizations(isAuthenticated),
+      args: {
+        id: nonNull(idArg())
+      },
+      resolve(...args) {
+        return usersByCharacter(...args)
       }
     })
   }

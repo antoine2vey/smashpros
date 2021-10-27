@@ -1,6 +1,10 @@
 import { Character, Role, User } from "@prisma/client";
 import { ReadStream } from "fs";
+import { FieldResolver } from "nexus";
+import { NexusGenArgTypes } from "../../generated/typegen";
 
+export type QueryArg<T extends string> = FieldResolver<"Query", T>
+export type MutationArg<T extends string> = FieldResolver<"Mutation", T>
 export interface Tournament {
   id: number    
   name: string    
@@ -37,23 +41,22 @@ export interface Tournament {
 }
 
 export interface PlayerByCharacterParams {
-  characterId: string
+  id: string
 }
 
 export interface UserCreateInput {
-  id: string
   password: string
   email: string
   tag: string
-  profilePicture: {
-    file: Promise<{
-      filename: string
-      mimetype: string
-      encoding: string
-      createReadStream: () => AWS.S3.Body
-    }>
-  }
+  profilePicture: Promise<{
+    filename: string
+    mimetype: string
+    encoding: string
+    createReadStream: () => AWS.S3.Body
+  }>
   characters: string[]
 }
 
-export interface UserUpdateInput extends UserCreateInput {}
+export interface UserUpdateInput extends UserCreateInput {
+  id: string
+}

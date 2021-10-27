@@ -56,7 +56,7 @@ model Tournament {
   endAt                     DateTime?
   eventRegistrationClosesAt DateTime?
   hasOfflineEvents          Boolean?
-  images                    Json[]
+  images                    String[]
   isRegistrationOpen        Boolean?
   slug                      String
   state                     Int

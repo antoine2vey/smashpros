@@ -1,14 +1,12 @@
 import { RoleEnum } from "@prisma/client";
 import { prisma } from "../prisma";
-import { combineResolvers } from 'graphql-resolvers'
-import { isAuthenticated, isNotCrewAdmin } from "../middlewares";
 import { getRole } from "../utils/roles";
-import { isCrewAdmin } from "../middlewares/isNotCrewAdmin";
 import { ForbiddenError, UserInputError } from "apollo-server";
 import { updateMemberSchema } from "../validations/crew";
 import { CrewUpdateAction } from "../typings/enums";
+import { MutationArg, QueryArg } from "../typings/interfaces";
 
-const crew = async (_, __, { user }) => {
+export const crew: QueryArg<"crew"> = async (_, args, { user, prisma }, info) => {
   if (!user.crew_id) {
     return null
   }
@@ -29,7 +27,7 @@ const crew = async (_, __, { user }) => {
   })
 }
 
-const crews = () => {
+export const crews: QueryArg<"crews"> = (_, args, ctx, info) => {
   return prisma.crew.findMany({
     include: {
       members: true
@@ -37,7 +35,7 @@ const crews = () => {
   })
 }
 
-const createCrew = async (_, { name, prefix }: { name: string, prefix: string }, { user }) => {
+export const createCrew: MutationArg<"createCrew"> = async (_, { name, prefix }, { user }, info) => {
   const CREW_ADMIN_ROLE = await getRole(RoleEnum.CREW_ADMIN)
 
   const crew = await prisma.crew.create({
@@ -67,7 +65,7 @@ const createCrew = async (_, { name, prefix }: { name: string, prefix: string },
   return crew
 }
 
-const joinCrew = async (_, { id }: { id: string }, { user }) => {
+export const joinCrew: MutationArg<"joinCrew"> = async (_, { id }, { user }, info) => {
   if (user.crew_id) {
     throw new ForbiddenError('You already have a crew')
   }
@@ -88,7 +86,7 @@ const joinCrew = async (_, { id }: { id: string }, { user }) => {
   })
 }
 
-const updateWaitingMember = async (_, { id, action }: { id: string, action: CrewUpdateAction }, { user }) => {
+export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, action }, { user }, info) => {
   const { error } = updateMemberSchema.validate(action)
 
   if (error) {
@@ -113,7 +111,7 @@ const updateWaitingMember = async (_, { id, action }: { id: string, action: Crew
   })
 }
 
-const kickMember = async (_, { id }: { id: string }, { user }) => {
+export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user }, info) => {
   return prisma.crew.update({
     where: { id: user.crew_id },
     data: {
@@ -125,38 +123,4 @@ const kickMember = async (_, { id }: { id: string }, { user }) => {
       members: true
     }
   })
-}
-
-export const crewResolver = {
-  Query: {
-    crews: combineResolvers(
-      isAuthenticated,
-      crews
-    ),
-    crew: combineResolvers(
-      isAuthenticated,
-      crew
-    ),
-  },
-  Mutation: {
-    createCrew: combineResolvers(
-      isAuthenticated,
-      isNotCrewAdmin,
-      createCrew
-    ),
-    joinCrew: combineResolvers(
-      isAuthenticated,
-      joinCrew
-    ),
-    updateWaitingMember: combineResolvers(
-      isAuthenticated,
-      isCrewAdmin,
-      updateWaitingMember
-    ),
-    kickMember: combineResolvers(
-      isAuthenticated,
-      isCrewAdmin,
-      kickMember
-    )
-  }
 }

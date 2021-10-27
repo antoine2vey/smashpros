@@ -1,7 +1,7 @@
+import { GraphQLUpload } from "graphql-upload";
 import { Kind } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { asNexusMethod, scalarType } from "nexus";
-import { Grapi } from 'graphql-upload';
 
 export const DateScalar = scalarType({
   name: 'DateTime',
@@ -19,5 +19,6 @@ export const DateScalar = scalarType({
     return null
   },
 })
+
 export const JsonScalar = asNexusMethod(GraphQLJSON, 'json')
-export const UploadScalar = asNexusMethod(TODO, 'Upload')
+export const UploadScalar = asNexusMethod(GraphQLUpload, 'upload')

@@ -5,25 +5,13 @@ import jwt from 'jsonwebtoken'
 import { uploadFile } from "../utils/aws";
 import { v4 as uuid } from 'uuid';
 import { mapIdsToPrisma } from "../utils/prisma";
-import { combineResolvers } from 'graphql-resolvers'
 import { addMinutes, isAfter } from "date-fns";
-import { isAuthenticated } from "../middlewares";
 import { getRole } from "../utils/roles";
 import { RoleEnum } from "@prisma/client";
-import {pubsub} from "../redis";
 import { forgotPasswordSchema, emailSchema, registerSchema } from "../validations/user";
-import { PubSubActions } from "../typings/enums";
-import { PlayerByCharacterParams, UserCreateInput, UserUpdateInput } from "../typings/interfaces"
+import { MutationArg, QueryArg } from "../typings/interfaces"
 
-const users = () => {
-  return prisma.user.findMany({
-    include: {
-      characters: true
-    }
-  })
-}
-
-const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
+export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
   return prisma.user.findMany({
     include: {
       characters: true
@@ -32,7 +20,7 @@ const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
       characters: {
         some: {
           id: {
-            equals: characterId
+            equals: id
           }
         }
       }
@@ -40,10 +28,10 @@ const usersByCharacter = (_, { characterId }: PlayerByCharacterParams) => {
   })
 }
 
-const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) => {
+export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
   const { user } = ctx
   const { id, email, tag, profilePicture, characters } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture.file
+  const { createReadStream, filename, mimetype } = await profilePicture
   const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
 
   if (user.id !== id) {
@@ -68,7 +56,7 @@ const updateProfile = async (_, { payload }: { payload: UserUpdateInput }, ctx) 
   })
 }
 
-const askPasswordReset = async (_, { email }: { email: string }) => {
+export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { email }, ctx, info) => {
   const { error } = emailSchema.validate(email)
   const code = uuid()
   const now = new Date()
@@ -95,8 +83,8 @@ const askPasswordReset = async (_, { email }: { email: string }) => {
   }
 }
 
-const passwordReset = async (_, { code, password, confirm_password }: { code: string, password: string, confirm_password: string }) => {
-  const { error } = forgotPasswordSchema.validate({ code, password, confirm_password })
+export const passwordReset: MutationArg<"passwordReset"> = async (_, { code, password, confirmPassword }, ctx, info) => {
+  const { error } = forgotPasswordSchema.validate({ code, password, confirmPassword })
   const user = await prisma.user.findFirst({ where: { reset_token: code }})
   const now = new Date()
   const isExpired = user ? isAfter(now, user.reset_token_expiration) : false
@@ -127,7 +115,7 @@ const passwordReset = async (_, { code, password, confirm_password }: { code: st
   return true
 }
 
-const login = async (_, { email, password }) => {
+export const login: MutationArg<"login"> = async (_, { email, password }, ctx, info) => {
   const user = await prisma.user.findUnique({ where: { email }, include: { roles: true }})
   
   if (user) {
@@ -149,10 +137,9 @@ const login = async (_, { email, password }) => {
   }
 }
 
-export const register = async (_, { payload }: {payload: UserCreateInput}) => {
-  console.log(payload)
+export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
   const { password, email, tag, profilePicture, characters } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture.file
+  const { createReadStream, filename, mimetype } = await profilePicture
   const id = uuid()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
@@ -187,44 +174,7 @@ export const register = async (_, { payload }: {payload: UserCreateInput}) => {
       } 
     })
   } catch (error) {
+    console.log(error)
     throw new UserInputError('Something went wrong with register.')
-  }
-}
-
-const userEnteredTournament = {
-  subscribe: () => pubsub.asyncIterator(PubSubActions.USER_ENTERED_TOURNAMENT)
-}
-
-export const userResolver = {
-  Query: {
-    users: combineResolvers(
-      isAuthenticated,
-      users
-    ),
-    usersByCharacter: combineResolvers(
-      isAuthenticated,
-      usersByCharacter
-    )
-  },
-  Mutation: {
-    register: combineResolvers(
-      register
-    ),
-    login: combineResolvers(
-      login
-    ),
-    updateProfile: combineResolvers(
-      isAuthenticated,
-      updateProfile
-    ),
-    askPasswordReset: combineResolvers(
-      askPasswordReset
-    ),
-    passwordReset: combineResolvers(
-      passwordReset
-    )
-  },
-  Subscription: {
-    userEnteredTournament
   }
 }

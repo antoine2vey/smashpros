@@ -1,5 +1,5 @@
 import { findUserByToken } from './utils/user';
-import { makeSchema } from 'nexus';
+import { fieldAuthorizePlugin, makeSchema, queryComplexityPlugin } from 'nexus';
 import path from 'path';
 import * as types from './schema'
 import { prisma } from './prisma';
@@ -10,6 +10,17 @@ export const schema = makeSchema({
     schema: path.join(__dirname, '..', 'generated', 'schema.graphql'),
     typegen: path.join(__dirname, '..', 'generated', 'typegen.d.ts'),
   },
+  contextType: {
+    module: require.resolve("./context"),
+    export: "Context"
+  },
+  plugins: [
+    fieldAuthorizePlugin({
+      formatError({ error }) {
+        return error
+      }
+    })
+  ]
 })
 
 export const config = {
