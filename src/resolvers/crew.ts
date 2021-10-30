@@ -5,6 +5,7 @@ import { ForbiddenError, UserInputError } from "apollo-server";
 import { updateMemberSchema } from "../validations/crew";
 import { CrewUpdateAction } from "../typings/enums";
 import { MutationArg, QueryArg } from "../typings/interfaces";
+import { uploadFile } from "../utils/aws";
 
 export const crew: QueryArg<"crew"> = async (_, args, { user, prisma }, info) => {
   if (!user.crew_id) {
@@ -35,32 +36,40 @@ export const crews: QueryArg<"crews"> = (_, args, ctx, info) => {
   })
 }
 
-export const createCrew: MutationArg<"createCrew"> = async (_, { name, prefix }, { user }, info) => {
+export const createCrew: MutationArg<"createCrew"> = async (_, { payload }, { user }, info) => {
+  const { name, prefix, banner, icon } = payload 
   const CREW_ADMIN_ROLE = await getRole(RoleEnum.CREW_ADMIN)
+  const bannerStream = await banner
+  const iconStream = await icon
+  const [bannerUri, iconUri] = await Promise.all([
+    uploadFile(bannerStream.createReadStream, `crew-${name}-banner`, bannerStream.mimetype),
+    uploadFile(iconStream.createReadStream, `crew-${name}-icon`, iconStream.mimetype)
+  ])
 
-  const crew = await prisma.crew.create({
-    data: {
-      name,
-      prefix,
-      members: {
-        connect: [{ id: user.id }]
+  const [crew] = await prisma.$transaction([
+    prisma.crew.create({
+      data: {
+        name,
+        prefix,
+        members: {
+          connect: [{ id: user.id }]
+        },
+        banner: bannerUri,
+        icon: iconUri
       },
-      banner: '',
-      icon: ''
-    },
-    include: {
-      members: true
-    }
-  })
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      roles: {
-        connect: [{ id: CREW_ADMIN_ROLE.id }]
+      include: {
+        members: true
       }
-    }
-  })
+    }),
+    prisma.user.update({
+      where: { id: user.id },
+      data: {
+        roles: {
+          connect: [{ id: CREW_ADMIN_ROLE.id }]
+        }
+      }
+    })
+  ])
 
   return crew
 }

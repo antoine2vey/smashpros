@@ -38,6 +38,12 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  CrewCreationPayload: { // input type
+    banner: NexusGenScalars['Upload']; // Upload!
+    icon: NexusGenScalars['Upload']; // Upload!
+    name: string; // String!
+    prefix: string; // String!
+  }
   TournamentQuery: { // input type
     id?: string | null; // ID
     player?: string | null; // String
@@ -52,7 +58,6 @@ export interface NexusGenInputs {
   UserUpdatePayload: { // input type
     characters: string[]; // [ID!]!
     email: string; // String!
-    id: string; // String!
     password: string; // String!
     profilePicture: NexusGenScalars['Upload']; // Upload!
     tag: string; // String!
@@ -191,6 +196,7 @@ export interface NexusGenFieldTypes {
   }
   Subscription: { // field return type
     userEnteredTournament: NexusGenRootTypes['User']; // User!
+    userLeftTournament: NexusGenRootTypes['User']; // User!
   }
   Tournament: { // field return type
     city: string | null; // String
@@ -280,6 +286,7 @@ export interface NexusGenFieldTypeNames {
   }
   Subscription: { // field return type name
     userEnteredTournament: 'User'
+    userLeftTournament: 'User'
   }
   Tournament: { // field return type name
     city: 'String'
@@ -328,8 +335,7 @@ export interface NexusGenArgTypes {
       tournament: string; // ID!
     }
     createCrew: { // args
-      name: string; // String!
-      prefix: string; // String!
+      payload: NexusGenInputs['CrewCreationPayload']; // CrewCreationPayload!
     }
     favoriteTournament: { // args
       id: string; // ID!

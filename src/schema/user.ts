@@ -47,7 +47,6 @@ export const UserRegisterPayload = inputObjectType({
 export const UserUpdatePayload = inputObjectType({
   name: 'UserUpdatePayload',
   definition(t) {
-    t.nonNull.string('id')
     t.nonNull.string('email')
     t.nonNull.string('tag')
     t.nonNull.string('password')

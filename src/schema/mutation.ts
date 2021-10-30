@@ -1,4 +1,5 @@
 import { arg, booleanArg, idArg, nonNull, objectType, stringArg } from "nexus";
+import { CrewCreationPayload } from ".";
 import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
 import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, updateWaitingMember, userEnteredTournament } from "../resolvers";
 import { askPasswordReset, login, passwordReset, register, updateProfile } from "../resolvers/user";
@@ -13,8 +14,7 @@ export const Mutation = objectType({
       type: 'Crew',
       authorize: authorizations(isAuthenticated, isNotCrewAdmin),
       args: {
-        name: nonNull(stringArg()),
-        prefix: nonNull(stringArg())
+        payload: nonNull(CrewCreationPayload)
       },
       resolve(...args) {
         return createCrew(...args)

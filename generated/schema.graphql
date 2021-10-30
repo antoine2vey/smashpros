@@ -23,6 +23,13 @@ type Crew {
   waiting_members: [User!]!
 }
 
+input CrewCreationPayload {
+  banner: Upload!
+  icon: Upload!
+  name: String!
+  prefix: String!
+}
+
 enum CrewUpdateActionEnum {
   ACCEPT
   DENY
@@ -39,7 +46,7 @@ scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/fi
 type Mutation {
   askPasswordReset(email: String!): String
   checkUserIn(participant: ID!, tournament: ID!): Boolean
-  createCrew(name: String!, prefix: String!): Crew
+  createCrew(payload: CrewCreationPayload!): Crew
   favoriteTournament(id: ID!, unfavorite: Boolean = false): Boolean
   joinCrew(id: ID!): Crew
   kickMember(id: ID!): Crew
@@ -79,6 +86,7 @@ enum RoleEnum {
 
 type Subscription {
   userEnteredTournament: User!
+  userLeftTournament: User!
 }
 
 type Tournament {
@@ -137,7 +145,6 @@ input UserRegisterPayload {
 input UserUpdatePayload {
   characters: [ID!]!
   email: String!
-  id: String!
   password: String!
   profilePicture: Upload!
   tag: String!

@@ -30,20 +30,16 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
 
 export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
   const { user } = ctx
-  const { id, email, tag, profilePicture, characters } = payload
+  const { email, tag, profilePicture, characters } = payload
   const { createReadStream, filename, mimetype } = await profilePicture
-  const awsUri = await uploadFile(createReadStream, `${id}-${filename}`, mimetype)
-
-  if (user.id !== id) {
-    throw new AuthenticationError('Not allowed')  
-  }
+  const awsUri = await uploadFile(createReadStream, `${user.id}-${filename}`, mimetype)
 
   return prisma.user.update({
     include: {
       characters: true
     },
     where: {
-      id
+      id: user.id
     },
     data: {
       email,

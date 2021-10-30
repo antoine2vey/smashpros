@@ -74,10 +74,10 @@ model Crew {
   id              String @id @default(uuid())
   name            String @unique
   prefix          String
-  members         User[] @relation("crew_members")
-  waiting_members User[] @relation("crew_waiting_members")
   icon            String
   banner          String
+  members         User[] @relation("crew_members")
+  waiting_members User[] @relation("crew_waiting_members")
 }
 
 model Role {

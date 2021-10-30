@@ -2,7 +2,6 @@ import { PubSubActions } from "../typings/enums"
 import { prisma } from "../prisma"
 import { pubsub } from "../redis"
 import { MutationArg, QueryArg } from "../typings/interfaces"
-import { FieldResolver } from "nexus"
 
 export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
   return prisma.tournament.findMany({
@@ -77,7 +76,7 @@ export const participateTournament: MutationArg<"participateTournament"> = async
   })
 }
 
-export const checkUserIn: FieldResolver<"Mutation", "checkUserIn"> = async (_, { participant, tournament }, { user }, info) => {
+export const checkUserIn: MutationArg<"checkUserIn"> = async (_, { participant, tournament }, { user }, info) => {
   // Geet tournament where user is an organizer, we alreeady checked his role
   const tourney = await prisma.tournament.findFirst({
     where: {
@@ -122,6 +121,24 @@ export const userEnteredTournament: MutationArg<"userEnteredTournament"> = async
     }
   })
 
-  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { userEnteredTournament: update })
+  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { user: update })
+  return update
+}
+
+export const userLeftTournament: MutationArg<"userLeftTournament"> = async (_, { tournament }, { user }, info) => {
+  const update = await prisma.user.update({
+    where: {
+      id: user.id
+    },
+    data: {
+      in_tournament: false,
+    },
+    include: {
+      characters: true,
+      roles: true
+    }
+  })
+
+  pubsub.publish(PubSubActions.USER_LEFT_TOURNAMENT, { user: update })
   return update
 }

@@ -10,8 +10,17 @@ export const Subscription = subscriptionType({
       subscribe() {
         return pubsub.asyncIterator(PubSubActions.USER_ENTERED_TOURNAMENT)
       },
-      resolve({ userEnteredTournament }) {
-        return userEnteredTournament
+      resolve({ user }) {
+        return user
+      }
+    }),
+    t.field('userLeftTournament', {
+      type: nonNull('User'),
+      subscribe() {
+        return pubsub.asyncIterator(PubSubActions.USER_LEFT_TOURNAMENT)
+      },
+      resolve({ user }) {
+        return user
       }
     })
   }

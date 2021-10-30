@@ -6,6 +6,10 @@ import logger from "./logger"
 import redisNamingStrategy from "./redisNamingStrategy"
 
 export async function findUserByToken(token: string) {
+  if (!token) {
+    return null
+  }
+
   const now = +new Date()
   const decoded = jwt.verify(token, process.env.JWT_PASSWORD)
 
