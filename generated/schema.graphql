@@ -148,6 +148,8 @@ input UserUpdatePayload {
   characters: [ID!]!
   email: String!
   password: String!
-  profilePicture: Upload!
+  profilePicture: Upload
   tag: String!
+  twitchUsername: String!
+  twitterUsername: String!
 }

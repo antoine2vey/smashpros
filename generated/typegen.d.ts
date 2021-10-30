@@ -59,8 +59,10 @@ export interface NexusGenInputs {
     characters: string[]; // [ID!]!
     email: string; // String!
     password: string; // String!
-    profilePicture: NexusGenScalars['Upload']; // Upload!
+    profilePicture?: NexusGenScalars['Upload'] | null; // Upload
     tag: string; // String!
+    twitchUsername: string; // String!
+    twitterUsername: string; // String!
   }
 }
 

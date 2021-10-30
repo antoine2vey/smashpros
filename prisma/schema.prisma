@@ -34,6 +34,8 @@ model User {
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
   tournaments            Tournament[] @relation("user_tournaments")
   tournaments_organizer  Tournament[] @relation("user_tournaments_organizer")
+  twitter_username String?
+  twitch_username String?
 }
 
 model Character {

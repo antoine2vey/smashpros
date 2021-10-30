@@ -51,19 +51,21 @@ export const UserUpdatePayload = inputObjectType({
     t.nonNull.string('email')
     t.nonNull.string('tag')
     t.nonNull.string('password')
-    t.nonNull.upload('profilePicture')
     t.nonNull.list.nonNull.id('characters')
+    t.nonNull.string('twitterUsername')
+    t.nonNull.string('twitchUsername')
+    t.upload('profilePicture')
   }
 })
 
-export const RegisterPayload = objectType({
+export const RegisterPayload = inputObjectType({
   name: 'RegisterPayload',
   definition(t) {
     t.boolean('success')
   }
 })
 
-export const AuthPayload = objectType({
+export const AuthPayload = inputObjectType({
   name: 'AuthPayload',
   definition(t) {
     t.string('token')
