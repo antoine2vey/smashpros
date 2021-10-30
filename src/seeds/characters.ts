@@ -75,6 +75,7 @@ const characters = [
   character('Simon', 'https://www.ssbwiki.com/images/5/52/SimonHeadSSBUWebsite.png'),
   character('Snake', 'https://www.ssbwiki.com/images/9/9f/SnakeHeadSSBUWebsite.png'),
   character('Sonic', 'https://www.ssbwiki.com/images/b/b7/SonicHeadSSBUWebsite.png'),
+  character('Sora', 'https://ssb.wiki.gallery/images/6/61/SoraHeadSSBUWebsite.png'),
   character('Steve', 'https://www.ssbwiki.com/images/4/4f/SteveHeadSSBUWebsite.png'),
   character('Terry', 'https://www.ssbwiki.com/images/2/2e/TerryHeadSSBUWebsite.png'),
   character('Toon Link', 'https://www.ssbwiki.com/images/b/bf/ToonLinkHeadSSBUWebsite.png'),
@@ -88,25 +89,14 @@ const characters = [
   character('Zero Suit Samus', 'https://www.ssbwiki.com/images/5/5a/ZeroSuitSamusHeadSSBUWebsite.png')
 ]
 
-function loadCharacters() {
-  const createCharacters = []
+export function loadCharacters() {
+  logger.info('Creating characters ...')
+  const batch = []
 
   for (let character of characters) {
     const promise = prisma.character.create({ data: character })
-    createCharacters.push(promise)
+    batch.push(promise)
   }
 
-  return Promise.all(createCharacters)
+  return Promise.all(batch)
 }
-
-logger.info('Creating characters ...')
-loadCharacters()
-  .then(() => {
-    logger.info('Created characters!')
-  })
-  .catch((error) => {
-    logger.error('Error during character creation...', error)
-  })
-  .finally(() => {
-    process.exit(0)
-  })

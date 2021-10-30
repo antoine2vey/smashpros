@@ -100,7 +100,7 @@ function loadTournaments() {
           endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
           eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
           hasOfflineEvents: tournament.hasOfflineEvents,
-          images: tournament.images,
+          images: tournament.images.map(image => image.url),
           isRegistrationOpen: tournament.isRegistrationOpen,
           slug: tournament.slug,
           state: tournament.state,

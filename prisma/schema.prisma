@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator nexusPrisma {
+  provider = "nexus-prisma"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -15,7 +19,6 @@ model User {
   lat                    Float?
   lng                    Float?
   in_tournament          Boolean      @default(false)
-  prefix                 String?
   crew_id                String?
   password               String
   email                  String       @unique
@@ -53,7 +56,7 @@ model Tournament {
   endAt                     DateTime?
   eventRegistrationClosesAt DateTime?
   hasOfflineEvents          Boolean?
-  images                    Json[]
+  images                    String[]
   isRegistrationOpen        Boolean?
   slug                      String
   state                     Int
@@ -71,10 +74,10 @@ model Crew {
   id              String @id @default(uuid())
   name            String @unique
   prefix          String
+  icon            String
+  banner          String
   members         User[] @relation("crew_members")
   waiting_members User[] @relation("crew_waiting_members")
-  icon String
-  banner String
 }
 
 model Role {

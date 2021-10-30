@@ -1,30 +1,18 @@
-import { combineResolvers } from "graphql-resolvers"
-import { isEmpty } from "lodash"
 import { PubSubActions } from "../typings/enums"
-import { isAuthenticated } from "../middlewares"
-import { isTO } from "../middlewares/isTO"
 import { prisma } from "../prisma"
 import { pubsub } from "../redis"
-import { Tournament } from "../typings/interfaces"
+import { MutationArg, QueryArg } from "../typings/interfaces"
 
-const tournaments = async () => {
+export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
   return prisma.tournament.findMany({
     include: {
-      participants: {
-        include: {
-          characters: true
-        }
-      },
-      favorited_by: {
-        include: {
-          characters: true
-        }
-      }
+      participants: true,
+      favorited_by: true
     }
   })
 }
 
-const tournament = async (_, args: { id: string }, ctx, info) => {
+export const tournament: QueryArg<"tournament"> = async (_, args, ctx, info) => {
   return prisma.tournament.findUnique({
     where: {
       id: args.id
@@ -44,8 +32,8 @@ const tournament = async (_, args: { id: string }, ctx, info) => {
   })
 }
 
-const favoriteTournament = async (_, { id, unfav }: { id: string, unfav: boolean }, ctx) => {
-  const action = unfav ? 'disconnect' : 'connect'
+export const favoriteTournament: MutationArg<"favoriteTournament"> = async (_, { id, unfavorite }, ctx, info) => {
+  const action = unfavorite ? 'disconnect' : 'connect'
 
   await prisma.tournament.update({
     where: {
@@ -61,7 +49,7 @@ const favoriteTournament = async (_, { id, unfav }: { id: string, unfav: boolean
   return true
 }
 
-const participateTournament = async (_, { id, unparticipate }: { id: string, unparticipate?: boolean }, ctx) => {
+export const participateTournament: MutationArg<"participateTournament"> = async (_, { id, unparticipate }, ctx, info) => {
   const action = unparticipate ? 'disconnect' : 'connect'
 
   return prisma.tournament.update({
@@ -88,27 +76,7 @@ const participateTournament = async (_, { id, unparticipate }: { id: string, un
   })
 }
 
-const participants = (tournament: Tournament, { query }) => {
-  if (isEmpty(query)) {
-    // Return all participants if no filter
-    return tournament.participants
-  }
-
-  const { character, player }: { character: string; player: string } = query
-  return tournament.participants.filter(participant => {
-    if (character) {
-      return participant.characters.some(char => char.id === character)
-    }
-
-    if (player) {
-      return participant.tag.includes(player)
-    }
-
-    return true
-  })
-}
-
-const checkUserIn = async (_, { participant, tournament }: { participant: string, tournament: string }, { user }) => {
+export const checkUserIn: MutationArg<"checkUserIn"> = async (_, { participant, tournament }, { user }, info) => {
   // Geet tournament where user is an organizer, we alreeady checked his role
   const tourney = await prisma.tournament.findFirst({
     where: {
@@ -139,7 +107,7 @@ const checkUserIn = async (_, { participant, tournament }: { participant: string
   return false
 }
 
-const userEnteredTournament = async (_, { tournament }: { tournament: string }, { user }) => {
+export const userEnteredTournament: MutationArg<"userEnteredTournament"> = async (_, { tournament }, { user }, info) => {
   const update = await prisma.user.update({
     where: {
       id: user.id
@@ -153,41 +121,24 @@ const userEnteredTournament = async (_, { tournament }: { tournament: string }, 
     }
   })
 
-  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { userEnteredTournament: update })
+  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { user: update })
   return update
 }
 
-export const tournamentResolver = {
-  Tournament: {
-    participants
-  },
-  Query: {
-    tournaments: combineResolvers(
-      isAuthenticated,
-      tournaments
-    ),
-    tournament: combineResolvers(
-      isAuthenticated,
-      tournament
-    )
-  },
-  Mutation: {
-    favoriteTournament: combineResolvers(
-      isAuthenticated,
-      favoriteTournament
-    ),
-    participateTournament: combineResolvers(
-      isAuthenticated,
-      participateTournament
-    ),
-    checkUserIn: combineResolvers(
-      isAuthenticated,
-      isTO,
-      checkUserIn
-    ),
-    userEnteredTournament: combineResolvers(
-      isAuthenticated,
-      userEnteredTournament
-    )
-  }
+export const userLeftTournament: MutationArg<"userLeftTournament"> = async (_, { tournament }, { user }, info) => {
+  const update = await prisma.user.update({
+    where: {
+      id: user.id
+    },
+    data: {
+      in_tournament: false,
+    },
+    include: {
+      characters: true,
+      roles: true
+    }
+  })
+
+  pubsub.publish(PubSubActions.USER_LEFT_TOURNAMENT, { user: update })
+  return update
 }

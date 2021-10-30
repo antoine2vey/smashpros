@@ -7,6 +7,7 @@ import { createServer } from 'http'
 import { ApolloServer } from 'apollo-server-express'
 import { findUserByToken } from './utils/user';
 import { config, schema } from './config';
+import { graphqlUploadExpress } from 'graphql-upload';
 
 const server = new ApolloServer(config);
 
@@ -31,13 +32,18 @@ server.start().then(async () => {
     path: server.graphqlPath
   })
 
+  app.use(graphqlUploadExpress())
+  app.use(express.urlencoded({ extended: true }))
+  app.use(express.json())
+
   server.applyMiddleware({
     app,
     path: '/'
   })
-
+  
   httpServer.listen({ port: 4000 }, () => {
-    console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`);
+    console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`)
+    console.log(`Open GQL debugger at https://studio.apollographql.com/sandbox/explorer`)
     // runAtMidnight(executeTournamentsQueries)
   })
 })

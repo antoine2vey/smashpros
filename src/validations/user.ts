@@ -11,7 +11,7 @@ export const registerSchema = Joi.object({
 export const forgotPasswordSchema = Joi.object({
   code: Joi.string().required(),
   password: Joi.string().min(4).required(),
-  confirm_password: Joi.any().equal(Joi.ref('password')).required()
+  confirmPassword: Joi.any().equal(Joi.ref('password')).required()
 })
 
 export const emailSchema = Joi.string().email()

@@ -1,14 +1,5 @@
-import { prisma } from "../prisma";
-import { combineResolvers } from 'graphql-resolvers'
+import { QueryArg } from "../typings/interfaces"
 
-const characters = () => {
-  return prisma.character.findMany()
-}
-
-export const characterResolver = {
-  Query: {
-    characters: combineResolvers(
-      characters
-    )
-  }
+export const characters: QueryArg<"characters"> = (_, args, ctx, info) => {
+  return ctx.prisma.character.findMany()
 }

@@ -1,6 +1,5 @@
 import { RoleEnum } from '@prisma/client'
 import { ForbiddenError } from 'apollo-server'
-import { skip } from 'graphql-resolvers'
 import { hasNotRole } from '../utils/roles'
 
 export const isAdmin = (_, __, { user }) => {
@@ -8,5 +7,5 @@ export const isAdmin = (_, __, { user }) => {
     throw new ForbiddenError("Not enough rights to do that")
   }
   
-  return skip
+  return true
 }
