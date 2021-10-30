@@ -57,6 +57,7 @@ type Mutation {
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
   updateProfile(payload: UserUpdatePayload!): User
   userEnteredTournament(tournament: ID!): User
+  userLeftTournament(tournament: ID!): User
 }
 
 type Query {
@@ -126,6 +127,7 @@ type User {
   crew: Crew
   email: String!
   id: ID!
+  in_tournament: Boolean!
   profile_picture: String
   roles: [Role!]!
   tag: String!

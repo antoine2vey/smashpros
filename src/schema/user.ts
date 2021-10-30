@@ -30,6 +30,7 @@ export const UserObjectType = objectType({
     t.field(User.crew)
     t.field(User.email)
     t.field(User.waiting_crew)
+    t.field(User.in_tournament)
   }
 })
 

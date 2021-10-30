@@ -130,6 +130,7 @@ export interface NexusGenObjects {
   User: { // root type
     email: string; // String!
     id: string; // ID!
+    in_tournament: boolean; // Boolean!
     profile_picture?: string | null; // String
     tag: string; // String!
   }
@@ -178,6 +179,7 @@ export interface NexusGenFieldTypes {
     updateMember: NexusGenRootTypes['Crew'] | null; // Crew
     updateProfile: NexusGenRootTypes['User'] | null; // User
     userEnteredTournament: NexusGenRootTypes['User'] | null; // User
+    userLeftTournament: NexusGenRootTypes['User'] | null; // User
   }
   Query: { // field return type
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
@@ -226,6 +228,7 @@ export interface NexusGenFieldTypes {
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     email: string; // String!
     id: string; // ID!
+    in_tournament: boolean; // Boolean!
     profile_picture: string | null; // String
     roles: NexusGenRootTypes['Role'][]; // [Role!]!
     tag: string; // String!
@@ -268,6 +271,7 @@ export interface NexusGenFieldTypeNames {
     updateMember: 'Crew'
     updateProfile: 'User'
     userEnteredTournament: 'User'
+    userLeftTournament: 'User'
   }
   Query: { // field return type name
     characters: 'Character'
@@ -316,6 +320,7 @@ export interface NexusGenFieldTypeNames {
     crew: 'Crew'
     email: 'String'
     id: 'ID'
+    in_tournament: 'Boolean'
     profile_picture: 'String'
     roles: 'Role'
     tag: 'String'
@@ -371,6 +376,9 @@ export interface NexusGenArgTypes {
       payload: NexusGenInputs['UserUpdatePayload']; // UserUpdatePayload!
     }
     userEnteredTournament: { // args
+      tournament: string; // ID!
+    }
+    userLeftTournament: { // args
       tournament: string; // ID!
     }
   }
