@@ -29,10 +29,15 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
 }
 
 export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
+  let awsUri: string;
   const { user } = ctx
   const { email, tag, profilePicture, characters } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture
-  const awsUri = await uploadFile(createReadStream, `${user.id}-${filename}`, mimetype)
+  
+  // If we have a profile picture, update it
+  if (profilePicture) {
+    const { createReadStream, filename, mimetype } = await profilePicture
+    awsUri = await uploadFile(createReadStream, `${user.id}-${filename}`, mimetype)
+  }
 
   return prisma.user.update({
     include: {
@@ -44,7 +49,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
     data: {
       email,
       tag,
-      profile_picture: awsUri,
+      ...(profilePicture && {profile_picture: awsUri}),
       characters: {
         connect: mapIdsToPrisma(characters)
       }
