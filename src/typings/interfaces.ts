@@ -1,6 +1,7 @@
 import { Character, Role, User } from "@prisma/client";
 import { ReadStream } from "fs";
 import { FieldResolver } from "nexus";
+import { Readable } from "stream";
 import { NexusGenArgTypes } from "../../generated/typegen";
 
 export type QueryArg<T extends string> = FieldResolver<"Query", T>
@@ -53,7 +54,7 @@ export interface UserCreateInput {
     filename: string
     mimetype: string
     encoding: string
-    createReadStream: () => AWS.S3.Body
+    createReadStream: () => Readable
   }>
   characters: string[]
 }

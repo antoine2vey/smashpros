@@ -2,8 +2,7 @@ import { prisma } from "../prisma";
 import bcrypt from 'bcrypt'
 import { AuthenticationError, UserInputError } from "apollo-server";
 import jwt from 'jsonwebtoken'
-import { uploadFile } from "../utils/aws";
-import { v4 as uuid } from 'uuid';
+import { uploadFile } from "../utils/storage";
 import { mapIdsToPrisma } from "../utils/prisma";
 import { addMinutes, isAfter } from "date-fns";
 import { getRole } from "../utils/roles";
@@ -12,6 +11,7 @@ import { forgotPasswordSchema, emailSchema, registerSchema, smashGGSlug } from "
 import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
 import smashGGClient from "../smashGGClient";
 import { gql } from "graphql-request";
+import { randomUUID } from "crypto";
 
 export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
   return prisma.user.findMany({
@@ -31,14 +31,14 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
 }
 
 export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
-  let awsUri: string;
+  let uri: string;
   const { user } = ctx
   const { email, tag, profilePicture, characters } = payload
   
   // If we have a profile picture, update it
   if (profilePicture) {
     const { createReadStream, filename, mimetype } = await profilePicture
-    awsUri = await uploadFile(createReadStream, `${user.id}-${filename}`, mimetype)
+    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, mimetype)
   }
 
   return prisma.user.update({
@@ -51,7 +51,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
     data: {
       email,
       tag,
-      ...(profilePicture && {profile_picture: awsUri}),
+      ...(profilePicture && {profile_picture: uri}),
       characters: {
         connect: mapIdsToPrisma(characters)
       }
@@ -61,7 +61,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
 
 export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { email }, ctx, info) => {
   const { error } = emailSchema.validate(email)
-  const code = uuid()
+  const code = randomUUID()
   const now = new Date()
   const expiration = addMinutes(now, 10)
 
@@ -143,7 +143,7 @@ export const login: MutationArg<"login"> = async (_, { email, password }, ctx, i
 export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
   const { password, email, tag, profilePicture, characters } = payload
   const { createReadStream, filename, mimetype } = await profilePicture
-  const id = uuid()
+  const id = randomUUID()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
 
@@ -153,7 +153,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
 
   try {
     const salt = await bcrypt.genSalt(saltRounds)
-    const [hash, awsUri, role] = await Promise.all([
+    const [hash, uri, role] = await Promise.all([
       bcrypt.hash(password, salt),
       uploadFile(createReadStream, `${id}-${filename}`, mimetype),
       getRole(RoleEnum.USER)
@@ -167,7 +167,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
         email,
         tag,
         password: hash,
-        profile_picture: awsUri,
+        profile_picture: uri,
         roles: {
           connect: [{ id: role.id }]
         },

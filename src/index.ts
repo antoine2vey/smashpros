@@ -8,6 +8,7 @@ import { ApolloServer } from 'apollo-server-express'
 import { findUserByToken } from './utils/user';
 import { config, schema } from './config';
 import { graphqlUploadExpress } from 'graphql-upload';
+import { ensureBucketExists } from './utils/storage';
 
 const server = new ApolloServer(config);
 
