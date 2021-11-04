@@ -199,7 +199,8 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
       }
     }
   `
-  const { user } = await smashGGClient.request<{ user: SmashGG.User | null }, { slug: string }>(query, { slug })
+  const { user } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug })
+
   if (!user) {
     return null
   }
