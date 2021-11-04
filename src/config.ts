@@ -1,5 +1,5 @@
 import { findUserByToken } from './utils/user';
-import { fieldAuthorizePlugin, makeSchema, queryComplexityPlugin } from 'nexus';
+import { fieldAuthorizePlugin, makeSchema } from 'nexus';
 import path from 'path';
 import * as types from './schema'
 import { prisma } from './prisma';

@@ -8,7 +8,7 @@ import { mapIdsToPrisma } from "../utils/prisma";
 import { addMinutes, isAfter } from "date-fns";
 import { getRole } from "../utils/roles";
 import { RoleEnum } from "@prisma/client";
-import { forgotPasswordSchema, emailSchema, registerSchema } from "../validations/user";
+import { forgotPasswordSchema, emailSchema, registerSchema, smashGGSlug } from "../validations/user";
 import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
 import smashGGClient from "../smashGGClient";
 import { gql } from "graphql-request";
@@ -182,27 +182,27 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
   }
 }
 
-export const synchronizeSmashGG = async (_, { slug }, ctx) => {
+export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx, info) => {
+  const { error } = smashGGSlug.validate(slug)
+
+  if (error) {
+    throw new UserInputError(error.message)
+  }
+
   const query = gql`
-    query profile(slug: String!) {
+    query profile($slug: String!) {
       user(slug: $slug) {
-        id
         discriminator
         player {
-          id
           gamerTag
-          prefix
-        }
-        tournaments {
-          nodes {
-            name
-            startAt
-            id
-          }
         }
       }
     }
   `
-  const data = await smashGGClient.request<{ user: SmashGG.User | null }, { slug: string }>(query, { slug })
-  return data
+  const { user } = await smashGGClient.request<{ user: SmashGG.User | null }, { slug: string }>(query, { slug })
+  if (!user) {
+    return null
+  }
+
+  return user.player.gamerTag
 }

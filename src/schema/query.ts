@@ -1,7 +1,7 @@
-import { idArg, list, nonNull, objectType } from "nexus";
+import { idArg, list, nonNull, objectType, stringArg } from "nexus";
 import { Context } from "../context";
 import { isAuthenticated, authorizations } from "../authorizations";
-import { crew, crews, characters, tournaments, tournament, usersByCharacter } from "../resolvers";
+import { crew, crews, characters, tournaments, tournament, usersByCharacter, suggestedName } from "../resolvers";
 
 export const Query = objectType({
   name: 'Query',
@@ -61,6 +61,16 @@ export const Query = objectType({
       },
       resolve(...args) {
         return usersByCharacter(...args)
+      }
+    })
+
+    t.field('suggestedName', {
+      type: 'String',
+      args: {
+        slug: nonNull(stringArg())
+      },
+      resolve(...args) {
+        return suggestedName(...args)
       }
     })
   }

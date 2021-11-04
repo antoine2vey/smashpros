@@ -191,6 +191,7 @@ export interface NexusGenFieldTypes {
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
+    suggestedName: string | null; // String
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
@@ -280,6 +281,7 @@ export interface NexusGenFieldTypeNames {
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
+    suggestedName: 'String'
     tournament: 'Tournament'
     tournaments: 'Tournament'
     usersByCharacter: 'User'
@@ -383,6 +385,9 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    suggestedName: { // args
+      slug: string; // String!
+    }
     tournament: { // args
       id: string; // ID!
     }

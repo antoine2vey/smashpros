@@ -64,6 +64,7 @@ type Query {
   characters: [Character]
   crew: Crew
   crews: [Crew]
+  suggestedName(slug: String!): String
   tournament(id: ID!): Tournament
   tournaments: [Tournament!]
   usersByCharacter(id: ID!): [User!]
