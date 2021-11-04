@@ -69,7 +69,7 @@ type Query {
   usersByCharacter(id: ID!): [User!]
 }
 
-type RegisterPayload {
+input RegisterPayload {
   success: Boolean
 }
 
@@ -141,7 +141,10 @@ input UserRegisterPayload {
   email: String!
   password: String!
   profilePicture: Upload!
+  smashGGProfile: String
   tag: String!
+  twitchUsername: String
+  twitterUsername: String
 }
 
 input UserUpdatePayload {
@@ -149,7 +152,8 @@ input UserUpdatePayload {
   email: String!
   password: String!
   profilePicture: Upload
+  smashGGProfile: String
   tag: String!
-  twitchUsername: String!
-  twitterUsername: String!
+  twitchUsername: String
+  twitterUsername: String
 }

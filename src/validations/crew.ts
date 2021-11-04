@@ -1,6 +1,6 @@
 import Joi from "joi";
-import { CrewUpdateAction } from "../typings/enums";
+import { CrewActions } from "../typings/enums";
 
 export const updateMemberSchema = Joi
   .string()
-  .valid(CrewUpdateAction.ACCEPT, CrewUpdateAction.DENY)
+  .valid(CrewActions.Update.ACCEPT, CrewActions.Update.DENY)

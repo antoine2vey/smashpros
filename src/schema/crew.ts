@@ -1,6 +1,6 @@
 import { enumType, inputObjectType, objectType } from "nexus";
 import { Crew } from 'nexus-prisma'
-import { CrewUpdateAction } from "../typings/enums";
+import { CrewActions } from "../typings/enums";
 
 export const CrewObjectType = objectType({
   name: Crew.$name,
@@ -18,7 +18,7 @@ export const CrewObjectType = objectType({
 
 export const CrewUpdateActionEnum = enumType({
   name: 'CrewUpdateActionEnum',
-  members: [CrewUpdateAction.ACCEPT, CrewUpdateAction.DENY]
+  members: [CrewActions.Update.ACCEPT, CrewActions.Update.DENY]
 })
 
 export const CrewCreationPayload = inputObjectType({

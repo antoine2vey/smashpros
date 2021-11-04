@@ -36,6 +36,7 @@ model User {
   tournaments_organizer  Tournament[] @relation("user_tournaments_organizer")
   twitter_username String?
   twitch_username String?
+  smashgg_slug String?
 }
 
 model Character {

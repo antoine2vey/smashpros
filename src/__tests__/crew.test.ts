@@ -2,7 +2,7 @@ import { Crew, User } from "@prisma/client"
 import { ApolloServer, gql } from "apollo-server-express"
 import { config } from "../config"
 import { prisma } from "../prisma"
-import { CrewUpdateAction } from "../typings/enums"
+import { CrewActions } from "../typings/enums"
 import { createTestClient } from "./utils/apolloServerTesting"
 import closeAllConnections from "./utils/closeConnections"
 import { createUser, getToken, getUser, removeToken, setToken } from "./utils/user"
@@ -293,7 +293,7 @@ describe('GraphQL crew endpoints', () => {
       const { data, errors } = await mutate(QUERY, {
         variables: {
           id: user.id,
-          action: CrewUpdateAction.ACCEPT
+          action: CrewActions.Update.ACCEPT
         }
       })
 
@@ -324,7 +324,7 @@ describe('GraphQL crew endpoints', () => {
       const { data, errors } = await mutate(QUERY, {
         variables: {
           id: user.id,
-          action: CrewUpdateAction.ACCEPT
+          action: CrewActions.Update.ACCEPT
         }
       })
 
@@ -359,7 +359,7 @@ describe('GraphQL crew endpoints', () => {
       }>(QUERY, {
         variables: {
           id: user.id,
-          action: CrewUpdateAction.ACCEPT
+          action: CrewActions.Update.ACCEPT
         }
       })
 
@@ -395,7 +395,7 @@ describe('GraphQL crew endpoints', () => {
       }>(QUERY, {
         variables: {
           id: user.id,
-          action: CrewUpdateAction.DENY
+          action: CrewActions.Update.DENY
         }
       })
 

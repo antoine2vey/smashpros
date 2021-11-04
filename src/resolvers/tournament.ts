@@ -1,4 +1,4 @@
-import { PubSubActions } from "../typings/enums"
+import { PubSub } from "../typings/enums"
 import { prisma } from "../prisma"
 import { pubsub } from "../redis"
 import { MutationArg, QueryArg } from "../typings/interfaces"
@@ -121,7 +121,7 @@ export const userEnteredTournament: MutationArg<"userEnteredTournament"> = async
     }
   })
 
-  pubsub.publish(PubSubActions.USER_ENTERED_TOURNAMENT, { user: update })
+  pubsub.publish(PubSub.Actions.USER_ENTERED_TOURNAMENT, { user: update })
   return update
 }
 
@@ -139,6 +139,6 @@ export const userLeftTournament: MutationArg<"userLeftTournament"> = async (_, {
     }
   })
 
-  pubsub.publish(PubSubActions.USER_LEFT_TOURNAMENT, { user: update })
+  pubsub.publish(PubSub.Actions.USER_LEFT_TOURNAMENT, { user: update })
   return update
 }

@@ -1,7 +1,9 @@
 import { endOfDay, fromUnixTime, isBefore, startOfDay } from 'date-fns'
+import { gql } from 'graphql-request'
 import fetch from 'node-fetch'
 import { prisma } from '../prisma'
-import { Tournament } from '../typings/interfaces'
+import smashGGClient from '../smashGGClient'
+import { SmashGG } from '../typings/interfaces'
 import logger from '../utils/logger'
 
 function setTournamentsStart() {
@@ -30,10 +32,8 @@ function cleanOutdatedTournaments() {
   })
 }
 
-function loadTournaments() {
-  const BASE_URL = 'https://api.smash.gg/gql/alpha'
-  const variables = null
-  const query = `
+async function loadTournaments() {
+  const query = gql`
     query {
       tournaments(query: {
         filter: {
@@ -70,68 +70,51 @@ function loadTournaments() {
         }
       }
     }
-    `
+  `
 
-  return new Promise((resolve, reject) => {
-    fetch(BASE_URL, {
-      method: 'POST',
-      body: JSON.stringify({ query, variables }),
-      headers: {
-        'authorization': 'Bearer ' + process.env.SMASHGG_API_KEY,
-        'content-type': 'application/json'
-      }
-    })
-    .then(res => res.json())
-    .then(async ({ data }) => {
-      const tournaments: Tournament[] = data.tournaments.nodes
-    
-      // Create all tournaments, upsert if needed
-      const createTournaments = tournaments.map(tournament => {
-        const tourney = {
-          name: tournament.name,
-          lat: tournament.lat,
-          lng: tournament.lng,
-          tournament_id: tournament.id,
-          city: tournament.city,
-          countryCode: tournament.countryCode,
-          createdAt: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
-          currency: tournament.currency,
-          numAttendees: tournament.numAttendees,
-          endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
-          eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
-          hasOfflineEvents: tournament.hasOfflineEvents,
-          images: tournament.images.map(image => image.url),
-          isRegistrationOpen: tournament.isRegistrationOpen,
-          slug: tournament.slug,
-          state: tournament.state,
-          venueName: tournament.venueName,
-          venueAddress: tournament.venueAddress,
-          startAt: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
-        }
-
-        const now = new Date()
-        if (isBefore(tourney.endAt, now)) {
-          logger.warn(`Tourney ${tourney.name} is outdated, not upserting.`)
-          return null
-        }
-    
-        return prisma.tournament.upsert({
-          where: {
-            tournament_id: tournament.id
-          },
-          create: tourney,
-          update: tourney
-        })
-      })
+  const data = await smashGGClient.request<SmashGG.Tournament>(query)
+  const tournaments = data.tournaments.nodes
       
-      try {
-        const tourneys = await Promise.all(createTournaments)
-        resolve(tourneys)
-      } catch (error) {
-        reject(error)
-      }
+  // Create all tournaments, upsert if needed
+  const createTournaments = tournaments.map(tournament => {
+    const now = new Date()
+    const tourney = {
+      name: tournament.name,
+      lat: tournament.lat,
+      lng: tournament.lng,
+      tournament_id: tournament.id,
+      city: tournament.city,
+      countryCode: tournament.countryCode,
+      createdAt: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
+      currency: tournament.currency,
+      numAttendees: tournament.numAttendees,
+      endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
+      eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
+      hasOfflineEvents: tournament.hasOfflineEvents,
+      images: tournament.images.map(image => image.url),
+      isRegistrationOpen: tournament.isRegistrationOpen,
+      slug: tournament.slug,
+      state: tournament.state,
+      venueName: tournament.venueName,
+      venueAddress: tournament.venueAddress,
+      startAt: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
+    }
+
+    if (isBefore(tourney.endAt, now)) {
+      logger.warn(`Tourney ${tourney.name} is outdated, not upserting.`)
+      return null
+    }
+
+    return prisma.tournament.upsert({
+      where: {
+        tournament_id: tournament.id
+      },
+      create: tourney,
+      update: tourney
     })
   })
+
+  return Promise.all(createTournaments)
 }
 
 export async function executeTournamentsQueries() {

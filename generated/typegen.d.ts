@@ -44,6 +44,9 @@ export interface NexusGenInputs {
     name: string; // String!
     prefix: string; // String!
   }
+  RegisterPayload: { // input type
+    success?: boolean | null; // Boolean
+  }
   TournamentQuery: { // input type
     id?: string | null; // ID
     player?: string | null; // String
@@ -53,16 +56,20 @@ export interface NexusGenInputs {
     email: string; // String!
     password: string; // String!
     profilePicture: NexusGenScalars['Upload']; // Upload!
+    smashGGProfile?: string | null; // String
     tag: string; // String!
+    twitchUsername?: string | null; // String
+    twitterUsername?: string | null; // String
   }
   UserUpdatePayload: { // input type
     characters: string[]; // [ID!]!
     email: string; // String!
     password: string; // String!
     profilePicture?: NexusGenScalars['Upload'] | null; // Upload
+    smashGGProfile?: string | null; // String
     tag: string; // String!
-    twitchUsername: string; // String!
-    twitterUsername: string; // String!
+    twitchUsername?: string | null; // String
+    twitterUsername?: string | null; // String
   }
 }
 
@@ -100,9 +107,6 @@ export interface NexusGenObjects {
   }
   Mutation: {};
   Query: {};
-  RegisterPayload: { // root type
-    success?: boolean | null; // Boolean
-  }
   Role: { // root type
     id: string; // ID!
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
@@ -190,9 +194,6 @@ export interface NexusGenFieldTypes {
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
-  }
-  RegisterPayload: { // field return type
-    success: boolean | null; // Boolean
   }
   Role: { // field return type
     id: string; // ID!
@@ -282,9 +283,6 @@ export interface NexusGenFieldTypeNames {
     tournament: 'Tournament'
     tournaments: 'Tournament'
     usersByCharacter: 'User'
-  }
-  RegisterPayload: { // field return type name
-    success: 'Boolean'
   }
   Role: { // field return type name
     id: 'ID'

@@ -9,7 +9,9 @@ import { addMinutes, isAfter } from "date-fns";
 import { getRole } from "../utils/roles";
 import { RoleEnum } from "@prisma/client";
 import { forgotPasswordSchema, emailSchema, registerSchema } from "../validations/user";
-import { MutationArg, QueryArg } from "../typings/interfaces"
+import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
+import smashGGClient from "../smashGGClient";
+import { gql } from "graphql-request";
 
 export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
   return prisma.user.findMany({
@@ -178,4 +180,29 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
     console.log(error)
     throw new UserInputError('Something went wrong with register.')
   }
+}
+
+export const synchronizeSmashGG = async (_, { slug }, ctx) => {
+  const query = gql`
+    query profile(slug: String!) {
+      user(slug: $slug) {
+        id
+        discriminator
+        player {
+          id
+          gamerTag
+          prefix
+        }
+        tournaments {
+          nodes {
+            name
+            startAt
+            id
+          }
+        }
+      }
+    }
+  `
+  const data = await smashGGClient.request<{ user: SmashGG.User | null }, { slug: string }>(query, { slug })
+  return data
 }

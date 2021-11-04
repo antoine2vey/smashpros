@@ -5,7 +5,8 @@ import { NexusGenArgTypes } from "../../generated/typegen";
 
 export type QueryArg<T extends string> = FieldResolver<"Query", T>
 export type MutationArg<T extends string> = FieldResolver<"Mutation", T>
-export interface Tournament {
+
+export interface ITournament {
   id: number    
   name: string    
   lat: number
@@ -59,4 +60,29 @@ export interface UserCreateInput {
 
 export interface UserUpdateInput extends UserCreateInput {
   id: string
+}
+
+export namespace SmashGG {
+  export interface User {
+    id: string
+    discriminator: string
+    player: {
+      id: number
+      gamerTag: string
+      prefix: string
+    }
+    tournaments: {
+      nodes: {
+        name: string
+        startAt: string
+        id: string
+      }[]
+    }
+  }
+
+  export interface Tournament {
+    tournaments: {
+      nodes: ITournament[]
+    }
+  }
 }

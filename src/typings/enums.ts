@@ -1,11 +1,15 @@
-export enum CrewUpdateAction {
-  DENY = 'DENY',
-  ACCEPT = 'ACCEPT'
+export namespace CrewActions {
+  export enum Update {
+    DENY = 'DENY',
+    ACCEPT = 'ACCEPT'
+  }
+
+  export type UpdateType = Update.ACCEPT | Update.DENY
 }
 
-export type CrewUpdateValue = CrewUpdateAction.ACCEPT | CrewUpdateAction.DENY
-
-export enum PubSubActions {
-  USER_ENTERED_TOURNAMENT = 'USER_ENTERED_TOURNAMENT',
-  USER_LEFT_TOURNAMENT = 'USER_LEFT_TOURNAMENT'
+export namespace PubSub {
+  export enum Actions {
+    USER_ENTERED_TOURNAMENT = 'USER_ENTERED_TOURNAMENT',
+    USER_LEFT_TOURNAMENT = 'USER_LEFT_TOURNAMENT'
+  }
 }

@@ -11,7 +11,7 @@ export const schema = makeSchema({
     typegen: path.join(__dirname, '..', 'generated', 'typegen.d.ts'),
   },
   contextType: {
-    module: require.resolve("./context"),
+    module: path.resolve(__dirname, 'context.ts'),
     export: "Context"
   },
   plugins: [

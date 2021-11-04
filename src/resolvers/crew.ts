@@ -3,7 +3,7 @@ import { prisma } from "../prisma";
 import { getRole } from "../utils/roles";
 import { ForbiddenError, UserInputError } from "apollo-server";
 import { updateMemberSchema } from "../validations/crew";
-import { CrewUpdateAction } from "../typings/enums";
+import { CrewActions } from "../typings/enums";
 import { MutationArg, QueryArg } from "../typings/interfaces";
 import { uploadFile } from "../utils/aws";
 
@@ -110,7 +110,7 @@ export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, 
       },
       members: {
         // Switch user to members if he is accepted, else do not connect
-        connect: action === CrewUpdateAction.ACCEPT ? [{ id }] : []
+        connect: action === CrewActions.Update.ACCEPT ? [{ id }] : []
       }
     },
     include: {
