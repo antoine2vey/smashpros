@@ -54,6 +54,7 @@ type Mutation {
   participateTournament(id: ID!, unparticipate: Boolean): Tournament
   passwordReset(code: String!, confirmPassword: String!, password: String!): Boolean
   register(payload: UserRegisterPayload!): User
+  synchronizeTournaments: [Tournament]
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
   updateProfile(payload: UserUpdatePayload!): User
   userEnteredTournament(tournament: ID!): User
@@ -106,7 +107,7 @@ type Tournament {
   lat: Float
   lng: Float
   name: String!
-  numAttendees: Int!
+  numAttendees: Int
   participants: [User!]!
   slug: String!
   state: Int!

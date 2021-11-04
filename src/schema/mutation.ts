@@ -1,7 +1,7 @@
-import { arg, booleanArg, idArg, nonNull, objectType, stringArg } from "nexus";
+import { arg, booleanArg, idArg, list, nonNull, objectType, stringArg } from "nexus";
 import { CrewCreationPayload } from ".";
 import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
-import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
+import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, synchronizeTournaments, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
 import { askPasswordReset, login, passwordReset, register, updateProfile } from "../resolvers/user";
 import { CrewUpdateActionEnum } from "./crew";
 import { UserRegisterPayload, UserUpdatePayload } from "./user";
@@ -166,6 +166,14 @@ export const Mutation = objectType({
       },
       resolve(...args) {
         return userLeftTournament(...args)
+      }
+    })
+
+    t.field('synchronizeTournaments', {
+      type: list('Tournament'),
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return synchronizeTournaments(...args)
       }
     })
   }

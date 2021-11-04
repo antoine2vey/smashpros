@@ -1,7 +1,9 @@
 import { PubSub } from "../typings/enums"
 import { prisma } from "../prisma"
 import { pubsub } from "../redis"
-import { MutationArg, QueryArg } from "../typings/interfaces"
+import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
+import { gql } from "graphql-request"
+import smashGGClient from "../smashGGClient"
 
 export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
   return prisma.tournament.findMany({
@@ -141,4 +143,50 @@ export const userLeftTournament: MutationArg<"userLeftTournament"> = async (_, {
 
   pubsub.publish(PubSub.Actions.USER_LEFT_TOURNAMENT, { user: update })
   return update
+}
+
+
+export const synchronizeTournaments: MutationArg<"synchronizeTournaments"> = async (_, {}, { user }, info) => {
+  const { smashgg_slug, id } = user
+  const query = gql`
+    query userTournaments($slug: String!) {
+      user(slug: $slug) {
+        tournaments(query: {
+          filter: {
+            videogameId: 1386,
+            upcoming: true
+          },
+          perPage: 500
+        }) {
+          nodes {
+            id
+            name
+          }
+        }
+      }
+    }
+  `
+  // Get all tournaments for the smashGG user
+  const { user: { tournaments } } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug: smashgg_slug })
+  const tournamentsId = tournaments.nodes.map(tournament => tournament.id)
+  // Find all tournaments that matches DB ones
+  const foundTournaments = await prisma.tournament.findMany({
+    where: {
+      tournament_id: { in: tournamentsId }
+    }
+  })
+  
+  // Register user for all DB tournaments
+  await prisma.user.update({
+    where: {
+      id
+    },
+    data: {
+      tournaments: {
+        connect: foundTournaments.map(tournament => ({ id: tournament.id }))
+      }
+    }
+  })
+  
+  return foundTournaments
 }

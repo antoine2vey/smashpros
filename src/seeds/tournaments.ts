@@ -18,7 +18,8 @@ export async function loadTournaments() {
           videogameIds: [1386]
           upcoming: true
         }
-        sortBy: "startAt asc"
+        sortBy: "startAt asc",
+        perPage: 500
       }) {
         nodes {
           id

@@ -55,7 +55,7 @@ model Tournament {
   countryCode               String
   createdAt                 DateTime?
   currency                  String
-  numAttendees              Int
+  numAttendees              Int?
   endAt                     DateTime?
   eventRegistrationClosesAt DateTime?
   hasOfflineEvents          Boolean?

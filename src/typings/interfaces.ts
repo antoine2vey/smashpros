@@ -64,7 +64,7 @@ export interface UserUpdateInput extends UserCreateInput {
 
 export namespace SmashGG {
   export interface User {
-    id: string
+    id: number
     discriminator: string
     player: {
       id: number
@@ -75,7 +75,7 @@ export namespace SmashGG {
       nodes: {
         name: string
         startAt: string
-        id: string
+        id: number
       }[]
     }
   }

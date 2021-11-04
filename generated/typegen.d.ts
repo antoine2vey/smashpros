@@ -126,7 +126,7 @@ export interface NexusGenObjects {
     lat?: number | null; // Float
     lng?: number | null; // Float
     name: string; // String!
-    numAttendees: number; // Int!
+    numAttendees?: number | null; // Int
     slug: string; // String!
     state: number; // Int!
     tournament_id: number; // Int!
@@ -182,6 +182,7 @@ export interface NexusGenFieldTypes {
     participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     passwordReset: boolean | null; // Boolean
     register: NexusGenRootTypes['User'] | null; // User
+    synchronizeTournaments: Array<NexusGenRootTypes['Tournament'] | null> | null; // [Tournament]
     updateMember: NexusGenRootTypes['Crew'] | null; // Crew
     updateProfile: NexusGenRootTypes['User'] | null; // User
     userEnteredTournament: NexusGenRootTypes['User'] | null; // User
@@ -219,7 +220,7 @@ export interface NexusGenFieldTypes {
     lat: number | null; // Float
     lng: number | null; // Float
     name: string; // String!
-    numAttendees: number; // Int!
+    numAttendees: number | null; // Int
     participants: NexusGenRootTypes['User'][]; // [User!]!
     slug: string; // String!
     state: number; // Int!
@@ -272,6 +273,7 @@ export interface NexusGenFieldTypeNames {
     participateTournament: 'Tournament'
     passwordReset: 'Boolean'
     register: 'User'
+    synchronizeTournaments: 'Tournament'
     updateMember: 'Crew'
     updateProfile: 'User'
     userEnteredTournament: 'User'
