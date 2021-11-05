@@ -33,7 +33,7 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
 export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
   let uri: string;
   const { user } = ctx
-  const { email, tag, profilePicture, characters } = payload
+  const { email, tag, profilePicture, characters, twitterUsername, twitchUsername } = payload
   
   // If we have a profile picture, update it
   if (profilePicture) {
@@ -52,6 +52,8 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
       email,
       tag,
       ...(profilePicture && {profile_picture: uri}),
+      ...(twitterUsername && { twitter_username: twitterUsername }),
+      ...(twitchUsername && { twitch_username: twitchUsername }),
       characters: {
         connect: mapIdsToPrisma(characters)
       }
