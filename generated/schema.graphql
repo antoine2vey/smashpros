@@ -108,7 +108,7 @@ type Tournament {
   lng: Float
   name: String!
   numAttendees: Int
-  participants: [User!]!
+  participants(characters: [ID!]): [User!]!
   slug: String!
   state: Int!
   tournament_id: Int!

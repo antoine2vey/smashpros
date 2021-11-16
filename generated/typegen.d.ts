@@ -397,6 +397,11 @@ export interface NexusGenArgTypes {
       id: string; // ID!
     }
   }
+  Tournament: {
+    participants: { // args
+      characters?: string[] | null; // [ID!]
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

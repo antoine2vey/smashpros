@@ -1,4 +1,4 @@
-import { inputObjectType, objectType } from "nexus"
+import { inputObjectType, list, nonNull, objectType } from "nexus"
 import { Tournament } from 'nexus-prisma'
 
 export const TournamentObjectType = objectType({
@@ -25,7 +25,29 @@ export const TournamentObjectType = objectType({
     t.field(Tournament.venueName)
     t.field(Tournament.venueAddress)
     t.field(Tournament.favorited_by)
-    t.field(Tournament.participants)
+    t.field(Tournament.participants.name, {
+      type: Tournament.participants.type,
+      description: Tournament.participants.description,
+      args: {
+        characters: list(nonNull('ID'))
+      },
+      resolve: async (root, args) => {
+        // @ts-ignore idkkkk :(
+        const { participants } = root
+
+        // If no args, send root participants
+        if (!args.characters) {
+          return participants
+        }
+
+        // Else, apply filter on every player, find them for characters
+        return participants.filter(player => (
+          player.characters.some(character => (
+            args.characters.includes(character.id)
+          ))
+        ))
+      }
+    })
   }
 })
 
