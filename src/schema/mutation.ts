@@ -1,7 +1,7 @@
-import { arg, booleanArg, idArg, list, nonNull, objectType, stringArg } from "nexus";
-import { CrewCreationPayload } from ".";
+import { arg, booleanArg, idArg, intArg, list, nonNull, objectType, stringArg } from "nexus";
+import { CrewCreationPayload, MatchStateEnumType } from ".";
 import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
-import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, synchronizeTournaments, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
+import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, sendMatchInvite, synchronizeTournaments, updateMatchScore, updateMatchState, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
 import { askPasswordReset, login, passwordReset, register, updateProfile } from "../resolvers/user";
 import { CrewUpdateActionEnum } from "./crew";
 import { UserRegisterPayload, UserUpdatePayload } from "./user";
@@ -174,6 +174,46 @@ export const Mutation = objectType({
       authorize: authorizations(isAuthenticated),
       resolve(...args) {
         return synchronizeTournaments(...args)
+      }
+    })
+
+    // Matches
+    t.field('sendMatchInvite', {
+      type: 'Match',
+      args: {
+        to: nonNull(idArg()),
+        totalMatches: nonNull(intArg()),
+        isMoneymatch: booleanArg(),
+        amount: intArg()
+      },
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return sendMatchInvite(...args)
+      }
+    })
+
+    t.field('updateMatchState', {
+      type: 'Match',
+      args: {
+        state: nonNull(MatchStateEnumType),
+        id: nonNull(idArg()),
+      },
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return updateMatchState(...args)
+      }
+    })
+
+    t.field('updateMatchScore', {
+      type: 'Match',
+      args: {
+        id: nonNull(idArg()),
+        initiatorCharacter: nonNull(idArg()),
+        adversaryCharacter: nonNull(idArg())
+      },
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return updateMatchScore(...args)
       }
     })
   }

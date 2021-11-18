@@ -7,6 +7,11 @@ const users = [
     email: "antoine@smashpros.io",
     password: "antoine",
     tag: "shaark"
+  },
+  {
+    email: "glutonny@smashpros.io",
+    password: "glutonny",
+    tag: "Glutonny"
   }
 ]
 

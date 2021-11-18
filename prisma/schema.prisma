@@ -34,18 +34,25 @@ model User {
   notification_token       String?      @unique
   crew                     Crew?        @relation("crew_members", fields: [crew_id], references: [id])
   waiting_crew             Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
+  matches_invited          Match[]      @relation("matches_invited")
+  matches_initiated        Match[]      @relation("matches_initiated")
   characters               Character[]
   roles                    Role[]
   favorited_tournaments    Tournament[] @relation("favorited_tournaments")
   tournaments              Tournament[] @relation("user_tournaments")
   tournaments_organizer    Tournament[] @relation("user_tournaments_organizer")
+  adversary_battle         Battle[]     @relation("battle_adversary")
+  initiator_battle         Battle[]     @relation("battle_initiator")
+  won_battles              Battle[]     @relation("battle_winner")
 }
 
 model Character {
-  id      String @id @default(uuid())
-  name    String @unique
-  picture String
-  users   User[]
+  id                         String   @id @default(uuid())
+  name                       String   @unique
+  picture                    String
+  users                      User[]
+  adversary_character_battle Battle[] @relation("battle_adversary_character")
+  initiator_character_battle Battle[] @relation("battle_initiator_character")
 }
 
 model Tournament {
@@ -89,6 +96,46 @@ model Role {
   id    String   @id @default(uuid())
   name  RoleEnum @unique
   users User[]
+}
+
+model Match {
+  id             String     @id @default(uuid())
+  total_matches  Int        @default(1)
+  state          MatchState @default(HOLD)
+  initiator_id   String
+  intiator_wins  Int        @default(0)
+  adversary_id   String
+  adversary_wins Int        @default(0)
+  is_moneymatch  Boolean    @default(false)
+  amount         Int?       @default(0)
+  adversary      User       @relation("matches_invited", fields: [adversary_id], references: [id])
+  initiator      User       @relation("matches_initiated", fields: [initiator_id], references: [id])
+  battles        Battle[]
+}
+
+model Battle {
+  id                     String    @id @default(uuid())
+  match                  Match     @relation(fields: [match_id], references: [id])
+  match_id               String
+  adversary              User      @relation("battle_adversary", fields: [adversary_id], references: [id])
+  adversary_id           String
+  adversary_character    Character @relation("battle_adversary_character", fields: [adversary_character_id], references: [id])
+  adversary_character_id String
+
+  initiator              User      @relation("battle_initiator", fields: [initiator_id], references: [id])
+  initiator_id           String
+  initiator_character    Character @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
+  initiator_character_id String
+
+  winner    User?   @relation("battle_winner", fields: [winner_id], references: [id])
+  winner_id String?
+}
+
+enum MatchState {
+  HOLD
+  STARTED
+  REFUSED
+  FINISHED
 }
 
 enum RoleEnum {

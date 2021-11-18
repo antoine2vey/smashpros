@@ -75,6 +75,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   CrewUpdateActionEnum: "ACCEPT" | "DENY"
+  MatchState: "FINISHED" | "HOLD" | "REFUSED" | "STARTED"
   RoleEnum: "ADMIN" | "CREW_ADMIN" | "TOURNAMENT_ORGANIZER" | "USER"
 }
 
@@ -93,6 +94,9 @@ export interface NexusGenObjects {
   AuthPayload: { // root type
     token?: string | null; // String
   }
+  Battle: { // root type
+    id: string; // ID!
+  }
   Character: { // root type
     id: string; // ID!
     name: string; // String!
@@ -104,6 +108,15 @@ export interface NexusGenObjects {
     id: string; // ID!
     name: string; // String!
     prefix: string; // String!
+  }
+  Match: { // root type
+    adversary_wins: number; // Int!
+    amount?: number | null; // Int
+    id: string; // ID!
+    intiator_wins: number; // Int!
+    is_moneymatch: boolean; // Boolean!
+    state: NexusGenEnums['MatchState']; // MatchState!
+    total_matches: number; // Int!
   }
   Mutation: {};
   Query: {};
@@ -156,6 +169,14 @@ export interface NexusGenFieldTypes {
   AuthPayload: { // field return type
     token: string | null; // String
   }
+  Battle: { // field return type
+    adversary: NexusGenRootTypes['User']; // User!
+    adversary_character: NexusGenRootTypes['Character']; // Character!
+    id: string; // ID!
+    initiator: NexusGenRootTypes['User']; // User!
+    initiator_character: NexusGenRootTypes['Character']; // Character!
+    winner: NexusGenRootTypes['User'] | null; // User
+  }
   Character: { // field return type
     id: string; // ID!
     name: string; // String!
@@ -171,6 +192,18 @@ export interface NexusGenFieldTypes {
     prefix: string; // String!
     waiting_members: NexusGenRootTypes['User'][]; // [User!]!
   }
+  Match: { // field return type
+    adversary: NexusGenRootTypes['User']; // User!
+    adversary_wins: number; // Int!
+    amount: number | null; // Int
+    battles: NexusGenRootTypes['Battle'][]; // [Battle!]!
+    id: string; // ID!
+    initiator: NexusGenRootTypes['User']; // User!
+    intiator_wins: number; // Int!
+    is_moneymatch: boolean; // Boolean!
+    state: NexusGenEnums['MatchState']; // MatchState!
+    total_matches: number; // Int!
+  }
   Mutation: { // field return type
     askPasswordReset: string | null; // String
     checkUserIn: boolean | null; // Boolean
@@ -182,16 +215,21 @@ export interface NexusGenFieldTypes {
     participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     passwordReset: boolean | null; // Boolean
     register: NexusGenRootTypes['User'] | null; // User
+    sendMatchInvite: NexusGenRootTypes['Match'] | null; // Match
     synchronizeTournaments: Array<NexusGenRootTypes['Tournament'] | null> | null; // [Tournament]
+    updateMatchScore: NexusGenRootTypes['Match'] | null; // Match
+    updateMatchState: NexusGenRootTypes['Match'] | null; // Match
     updateMember: NexusGenRootTypes['Crew'] | null; // Crew
     updateProfile: NexusGenRootTypes['User'] | null; // User
     userEnteredTournament: NexusGenRootTypes['User'] | null; // User
     userLeftTournament: NexusGenRootTypes['User'] | null; // User
   }
   Query: { // field return type
+    battles: NexusGenRootTypes['Battle'][] | null; // [Battle!]
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
+    matches: NexusGenRootTypes['Match'][] | null; // [Match!]
     suggestedName: string | null; // String
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
@@ -247,6 +285,14 @@ export interface NexusGenFieldTypeNames {
   AuthPayload: { // field return type name
     token: 'String'
   }
+  Battle: { // field return type name
+    adversary: 'User'
+    adversary_character: 'Character'
+    id: 'ID'
+    initiator: 'User'
+    initiator_character: 'Character'
+    winner: 'User'
+  }
   Character: { // field return type name
     id: 'ID'
     name: 'String'
@@ -262,6 +308,18 @@ export interface NexusGenFieldTypeNames {
     prefix: 'String'
     waiting_members: 'User'
   }
+  Match: { // field return type name
+    adversary: 'User'
+    adversary_wins: 'Int'
+    amount: 'Int'
+    battles: 'Battle'
+    id: 'ID'
+    initiator: 'User'
+    intiator_wins: 'Int'
+    is_moneymatch: 'Boolean'
+    state: 'MatchState'
+    total_matches: 'Int'
+  }
   Mutation: { // field return type name
     askPasswordReset: 'String'
     checkUserIn: 'Boolean'
@@ -273,16 +331,21 @@ export interface NexusGenFieldTypeNames {
     participateTournament: 'Tournament'
     passwordReset: 'Boolean'
     register: 'User'
+    sendMatchInvite: 'Match'
     synchronizeTournaments: 'Tournament'
+    updateMatchScore: 'Match'
+    updateMatchState: 'Match'
     updateMember: 'Crew'
     updateProfile: 'User'
     userEnteredTournament: 'User'
     userLeftTournament: 'User'
   }
   Query: { // field return type name
+    battles: 'Battle'
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
+    matches: 'Match'
     suggestedName: 'String'
     tournament: 'Tournament'
     tournaments: 'Tournament'
@@ -371,6 +434,21 @@ export interface NexusGenArgTypes {
     }
     register: { // args
       payload: NexusGenInputs['UserRegisterPayload']; // UserRegisterPayload!
+    }
+    sendMatchInvite: { // args
+      amount?: number | null; // Int
+      isMoneymatch?: boolean | null; // Boolean
+      to: string; // ID!
+      totalMatches: number; // Int!
+    }
+    updateMatchScore: { // args
+      adversaryCharacter: string; // ID!
+      id: string; // ID!
+      initiatorCharacter: string; // ID!
+    }
+    updateMatchState: { // args
+      id: string; // ID!
+      state: NexusGenEnums['MatchState']; // MatchState!
     }
     updateMember: { // args
       action: NexusGenEnums['CrewUpdateActionEnum']; // CrewUpdateActionEnum!

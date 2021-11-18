@@ -13,6 +13,7 @@
     "chalk": "^4.1.0",
     "date-fns": "^2.16.1",
     "dotenv": "^10.0.0",
+    "firebase-admin": "^10.0.0",
     "graphql": "^15.7.0",
     "graphql-redis-subscriptions": "^2.4.0",
     "graphql-request": "^3.6.1",

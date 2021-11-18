@@ -6,6 +6,15 @@ type AuthPayload {
   token: String
 }
 
+type Battle {
+  adversary: User!
+  adversary_character: Character!
+  id: ID!
+  initiator: User!
+  initiator_character: Character!
+  winner: User
+}
+
 type Character {
   id: ID!
   name: String!
@@ -43,6 +52,26 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
 
+type Match {
+  adversary: User!
+  adversary_wins: Int!
+  amount: Int
+  battles: [Battle!]!
+  id: ID!
+  initiator: User!
+  intiator_wins: Int!
+  is_moneymatch: Boolean!
+  state: MatchState!
+  total_matches: Int!
+}
+
+enum MatchState {
+  FINISHED
+  HOLD
+  REFUSED
+  STARTED
+}
+
 type Mutation {
   askPasswordReset(email: String!): String
   checkUserIn(participant: ID!, tournament: ID!): Boolean
@@ -54,7 +83,10 @@ type Mutation {
   participateTournament(id: ID!, unparticipate: Boolean): Tournament
   passwordReset(code: String!, confirmPassword: String!, password: String!): Boolean
   register(payload: UserRegisterPayload!): User
+  sendMatchInvite(amount: Int, isMoneymatch: Boolean, to: ID!, totalMatches: Int!): Match
   synchronizeTournaments: [Tournament]
+  updateMatchScore(adversaryCharacter: ID!, id: ID!, initiatorCharacter: ID!): Match
+  updateMatchState(id: ID!, state: MatchState!): Match
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
   updateProfile(payload: UserUpdatePayload!): User
   userEnteredTournament(tournament: ID!): User
@@ -62,9 +94,11 @@ type Mutation {
 }
 
 type Query {
+  battles: [Battle!]
   characters: [Character]
   crew: Crew
   crews: [Crew]
+  matches: [Match!]
   suggestedName(slug: String!): String
   tournament(id: ID!): Tournament
   tournaments: [Tournament!]

@@ -12,7 +12,8 @@ export const Subscription = subscriptionType({
       resolve({ user }) {
         return user
       }
-    }),
+    })
+
     t.field('userLeftTournament', {
       type: nonNull('User'),
       subscribe() {
