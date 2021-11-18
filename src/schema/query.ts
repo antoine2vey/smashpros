@@ -81,5 +81,10 @@ export const Query = objectType({
         return matches(...args)
       }
     })
+
+    // Battles
+    t.field('battles', {
+      type: list(nonNull('Battle'))
+    })
   }
 })

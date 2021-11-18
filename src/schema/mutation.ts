@@ -207,7 +207,9 @@ export const Mutation = objectType({
     t.field('updateMatchScore', {
       type: 'Match',
       args: {
-        id: nonNull(idArg())
+        id: nonNull(idArg()),
+        initiatorCharacter: nonNull(idArg()),
+        adversaryCharacter: nonNull(idArg())
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {

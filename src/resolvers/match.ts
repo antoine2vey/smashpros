@@ -95,7 +95,7 @@ export const updateMatchState: MutationArg<"updateMatchState"> = async (_, args,
 }
 
 export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args, { user }, info) => {
-  const { id } = args
+  const { id, adversaryCharacter, initiatorCharacter } = args
   const match = await prisma.match.findUnique({ where: { id } })
   const isInitiator = match.initiator_id === user.id
   const isAdversary = match.adversary_id === user.id
@@ -113,7 +113,7 @@ export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args,
   const initiatorWin = bestOfWinner(match.total_matches, match.intiator_wins + 1)
   const adversaryWin = bestOfWinner(match.total_matches, match.adversary_wins + 1)
   // If so, set the state to finished
-  const state = (initiatorWin || adversaryWin) ? MatchState.FINISHED : match.state
+  const computedMatchState = (initiatorWin || adversaryWin) ? MatchState.FINISHED : match.state
 
   return prisma.match.update({
     where: {
@@ -126,7 +126,20 @@ export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args,
       adversary_wins: {
         increment: isAdversary ? 1 : 0
       },
-      state
+      state: computedMatchState,
+      battles: {
+        create: {
+          adversary: { connect: { id: match.adversary_id }},
+          initiator: { connect: { id: match.initiator_id }},
+          adversary_character: { connect: { id: adversaryCharacter }},
+          initiator_character: { connect: { id: initiatorCharacter }},
+          winner: {
+            connect: {
+              id: (initiatorWin ? match.initiator_id : match.adversary_id)
+            }
+          }
+        }
+      }
     }
   })
 }

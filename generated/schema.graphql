@@ -6,6 +6,15 @@ type AuthPayload {
   token: String
 }
 
+type Battle {
+  adversary: User!
+  adversary_character: Character!
+  id: ID!
+  initiator: User!
+  initiator_character: Character!
+  winner: User
+}
+
 type Character {
   id: ID!
   name: String!
@@ -47,6 +56,7 @@ type Match {
   adversary: User!
   adversary_wins: Int!
   amount: Int
+  battles: [Battle!]!
   id: ID!
   initiator: User!
   intiator_wins: Int!
@@ -75,7 +85,7 @@ type Mutation {
   register(payload: UserRegisterPayload!): User
   sendMatchInvite(amount: Int, isMoneymatch: Boolean, to: ID!, totalMatches: Int!): Match
   synchronizeTournaments: [Tournament]
-  updateMatchScore(id: ID!): Match
+  updateMatchScore(adversaryCharacter: ID!, id: ID!, initiatorCharacter: ID!): Match
   updateMatchState(id: ID!, state: MatchState!): Match
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
   updateProfile(payload: UserUpdatePayload!): User
@@ -84,6 +94,7 @@ type Mutation {
 }
 
 type Query {
+  battles: [Battle!]
   characters: [Character]
   crew: Crew
   crews: [Crew]

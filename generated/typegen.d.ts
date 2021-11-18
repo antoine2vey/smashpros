@@ -94,6 +94,9 @@ export interface NexusGenObjects {
   AuthPayload: { // root type
     token?: string | null; // String
   }
+  Battle: { // root type
+    id: string; // ID!
+  }
   Character: { // root type
     id: string; // ID!
     name: string; // String!
@@ -166,6 +169,14 @@ export interface NexusGenFieldTypes {
   AuthPayload: { // field return type
     token: string | null; // String
   }
+  Battle: { // field return type
+    adversary: NexusGenRootTypes['User']; // User!
+    adversary_character: NexusGenRootTypes['Character']; // Character!
+    id: string; // ID!
+    initiator: NexusGenRootTypes['User']; // User!
+    initiator_character: NexusGenRootTypes['Character']; // Character!
+    winner: NexusGenRootTypes['User'] | null; // User
+  }
   Character: { // field return type
     id: string; // ID!
     name: string; // String!
@@ -185,6 +196,7 @@ export interface NexusGenFieldTypes {
     adversary: NexusGenRootTypes['User']; // User!
     adversary_wins: number; // Int!
     amount: number | null; // Int
+    battles: NexusGenRootTypes['Battle'][]; // [Battle!]!
     id: string; // ID!
     initiator: NexusGenRootTypes['User']; // User!
     intiator_wins: number; // Int!
@@ -213,6 +225,7 @@ export interface NexusGenFieldTypes {
     userLeftTournament: NexusGenRootTypes['User'] | null; // User
   }
   Query: { // field return type
+    battles: NexusGenRootTypes['Battle'][] | null; // [Battle!]
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
@@ -272,6 +285,14 @@ export interface NexusGenFieldTypeNames {
   AuthPayload: { // field return type name
     token: 'String'
   }
+  Battle: { // field return type name
+    adversary: 'User'
+    adversary_character: 'Character'
+    id: 'ID'
+    initiator: 'User'
+    initiator_character: 'Character'
+    winner: 'User'
+  }
   Character: { // field return type name
     id: 'ID'
     name: 'String'
@@ -291,6 +312,7 @@ export interface NexusGenFieldTypeNames {
     adversary: 'User'
     adversary_wins: 'Int'
     amount: 'Int'
+    battles: 'Battle'
     id: 'ID'
     initiator: 'User'
     intiator_wins: 'Int'
@@ -319,6 +341,7 @@ export interface NexusGenFieldTypeNames {
     userLeftTournament: 'User'
   }
   Query: { // field return type name
+    battles: 'Battle'
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
@@ -419,7 +442,9 @@ export interface NexusGenArgTypes {
       totalMatches: number; // Int!
     }
     updateMatchScore: { // args
+      adversaryCharacter: string; // ID!
       id: string; // ID!
+      initiatorCharacter: string; // ID!
     }
     updateMatchState: { // args
       id: string; // ID!

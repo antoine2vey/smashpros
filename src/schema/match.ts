@@ -1,6 +1,19 @@
 import { MatchState } from ".prisma/client"
 import { enumType, objectType } from "nexus"
-import { Match } from 'nexus-prisma'
+import { Battle, Match } from 'nexus-prisma'
+
+export const BattleObjectType = objectType({
+  name: Battle.$name,
+  description: Battle.$description,
+  definition: (t) => {
+    t.field(Battle.id)
+    t.field(Battle.adversary)
+    t.field(Battle.initiator)
+    t.field(Battle.initiator_character)
+    t.field(Battle.adversary_character)
+    t.field(Battle.winner)
+  }
+})
 
 export const MatchObjectType = objectType({
   name: Match.$name,
@@ -15,6 +28,7 @@ export const MatchObjectType = objectType({
     t.field(Match.intiator_wins)
     t.field(Match.adversary_wins)
     t.field(Match.state)
+    t.field(Match.battles)
   }
 })
 
