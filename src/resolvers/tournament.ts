@@ -8,8 +8,16 @@ import smashGGClient from "../smashGGClient"
 export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
   return prisma.tournament.findMany({
     include: {
-      participants: true,
-      favorited_by: true
+      participants: {
+        where: {
+          allow_searchability: true
+        }
+      },
+      favorited_by: {
+        where: {
+          allow_searchability: true
+        }
+      }
     }
   })
 }
@@ -21,11 +29,17 @@ export const tournament: QueryArg<"tournament"> = async (_, args, ctx, info) => 
     },
     include: {
       participants: {
+        where: {
+          allow_searchability: true
+        },
         include: {
           characters: true
         }
       },
       favorited_by: {
+        where: {
+          allow_searchability: true
+        },
         include: {
           characters: true
         }

@@ -12,38 +12,39 @@ datasource db {
 }
 
 model User {
-  id                       String       @id @default(uuid())
-  created_at               DateTime     @default(now())
-  updated_at               DateTime     @updatedAt
-  profile_picture          String?
-  lat                      Float?
-  lng                      Float?
-  in_tournament            Boolean      @default(false)
-  crew_id                  String?
-  password                 String
-  email                    String       @unique
-  tag                      String
-  reset_token              String?
-  reset_token_expiration   DateTime?
-  waiting_crew_id          String?
-  is_checked_in            Boolean      @default(false)
-  twitch_username          String?
-  twitter_username         String?
-  smashgg_slug             String?      @unique
-  authorized_notifications Boolean      @default(false)
-  notification_token       String?      @unique
-  crew                     Crew?        @relation("crew_members", fields: [crew_id], references: [id])
-  waiting_crew             Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
-  matches_invited          Match[]      @relation("matches_invited")
-  matches_initiated        Match[]      @relation("matches_initiated")
-  characters               Character[]
-  roles                    Role[]
-  favorited_tournaments    Tournament[] @relation("favorited_tournaments")
-  tournaments              Tournament[] @relation("user_tournaments")
-  tournaments_organizer    Tournament[] @relation("user_tournaments_organizer")
-  adversary_battle         Battle[]     @relation("battle_adversary")
-  initiator_battle         Battle[]     @relation("battle_initiator")
-  won_battles              Battle[]     @relation("battle_winner")
+  id                     String       @id @default(uuid())
+  created_at             DateTime     @default(now())
+  updated_at             DateTime     @updatedAt
+  profile_picture        String?
+  lat                    Float?
+  lng                    Float?
+  in_tournament          Boolean      @default(false)
+  crew_id                String?
+  password               String
+  email                  String       @unique
+  tag                    String
+  reset_token            String?
+  reset_token_expiration DateTime?
+  waiting_crew_id        String?
+  is_checked_in          Boolean      @default(false)
+  twitch_username        String?
+  twitter_username       String?
+  smashgg_slug           String?      @unique
+  notification_token     String?      @unique
+  allow_notifications    Boolean      @default(false)
+  allow_searchability    Boolean      @default(true)
+  crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
+  waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
+  matches_invited        Match[]      @relation("matches_invited")
+  matches_initiated      Match[]      @relation("matches_initiated")
+  characters             Character[]
+  roles                  Role[]
+  favorited_tournaments  Tournament[] @relation("favorited_tournaments")
+  tournaments            Tournament[] @relation("user_tournaments")
+  tournaments_organizer  Tournament[] @relation("user_tournaments_organizer")
+  adversary_battle       Battle[]     @relation("battle_adversary")
+  initiator_battle       Battle[]     @relation("battle_initiator")
+  won_battles            Battle[]     @relation("battle_winner")
 }
 
 model Character {

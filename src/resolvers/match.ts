@@ -135,7 +135,7 @@ export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args,
           initiator_character: { connect: { id: initiatorCharacter }},
           winner: {
             connect: {
-              id: (initiatorWin ? match.initiator_id : match.adversary_id)
+              id: user.id
             }
           }
         }

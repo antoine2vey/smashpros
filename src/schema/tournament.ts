@@ -41,11 +41,13 @@ export const TournamentObjectType = objectType({
         }
 
         // Else, apply filter on every player, find them for characters
-        return participants.filter(player => (
-          player.characters.some(character => (
-            args.characters.includes(character.id)
+        return participants
+          // Find all players by character
+          .filter(player => (
+            player.characters.some(character => (
+              args.characters.includes(character.id)
+            ))
           ))
-        ))
       }
     })
   }
