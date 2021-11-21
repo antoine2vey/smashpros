@@ -2,6 +2,7 @@ import { Match, MatchState, User } from ".prisma/client"
 import { UserInputError } from "apollo-server-errors"
 import { prisma } from "../prisma"
 import { MutationArg, QueryArg } from "../typings/interfaces"
+import { sendNotification } from "../utils/notifications"
 
 function matchGuard(match: Match, user: User) {
   const isInitiator = match.initiator_id === user.id
@@ -55,16 +56,32 @@ export const sendMatchInvite: MutationArg<"sendMatchInvite"> = async (_, args, {
   if (isMoneymatch && (!amount || amount <= 0)) {
     throw new UserInputError("Amount has to exist or be superior to zero if it's a moneymatch")
   }
-  
-  return prisma.match.create({
+
+  const adversary = await prisma.user.findUnique({ where: { id: to } })
+  const match = await prisma.match.create({
     data: {
       total_matches: totalMatches,
-      adversary: { connect: { id: to }},
+      adversary: { connect: { id: adversary.id }},
       initiator: { connect: { id: user.id }},
       amount: amount || 0,
       is_moneymatch: isMoneymatch || false
     }
   })
+
+  if (adversary.notification_token && adversary.allow_notifications) {
+    // Send notification to user
+    await sendNotification(adversary.notification_token, {
+      notification: {
+        title: `${user.tag} invited you to a match!`,
+        body: `Click and game on 🎮`
+      },
+      data: {
+        matchId: match.id
+      }
+    })
+  }
+  
+  return match
 }
 
 export const updateMatchState: MutationArg<"updateMatchState"> = async (_, args, { user }, info) => {

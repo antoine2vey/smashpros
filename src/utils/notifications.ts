@@ -1,17 +1,23 @@
-import { getMessaging, TokenMessage } from "firebase-admin/messaging";
+import { applicationDefault, initializeApp } from "firebase-admin/app";
+import { BaseMessage, getMessaging, TokenMessage } from "firebase-admin/messaging";
+import path from "path";
 import logger from "./logger";
+
+initializeApp({
+  credential: applicationDefault()
+})
 
 const messaging = getMessaging()
 
-function getMessage(token: string, data: { [key: string]: any }): TokenMessage {
+function getMessage(token: string, payload: BaseMessage): TokenMessage {
   return {
-    data,
+    ...payload,
     token
   }
 }
 
-export async function sendNotification(to: string, data: { [key: string]: any }) {
-  const message = getMessage(to, data)
+export async function sendNotification(to: string, payload: BaseMessage) {
+  const message = getMessage(to, payload)
 
   return messaging
     .send(message)
