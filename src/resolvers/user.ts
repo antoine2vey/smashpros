@@ -143,7 +143,7 @@ export const login: MutationArg<"login"> = async (_, { email, password }, ctx, i
 }
 
 export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
-  const { password, email, tag, profilePicture, characters } = payload
+  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId } = payload
   const { createReadStream, filename, mimetype } = await profilePicture
   const id = randomUUID()
   const saltRounds = 10
@@ -170,6 +170,9 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
         tag,
         password: hash,
         profile_picture: uri,
+        smashgg_player_id: smashGGPlayerId,
+        smashgg_user_id: smashGGUserId,
+        smashgg_slug: smashGGSlug,
         roles: {
           connect: [{ id: role.id }]
         },
@@ -194,8 +197,9 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
   const query = gql`
     query profile($slug: String!) {
       user(slug: $slug) {
-        discriminator
+        id
         player {
+          id
           gamerTag
         }
       }
@@ -207,5 +211,9 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
     return null
   }
 
-  return user.player.gamerTag
+  return {
+    tag: user.player.gamerTag,
+    smashGGPlayerId: user.player.id,
+    smashGGUserId: user.id
+  }
 }

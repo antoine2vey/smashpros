@@ -7,9 +7,33 @@ import { NexusGenArgTypes } from "../../generated/typegen";
 export type QueryArg<T extends string> = FieldResolver<"Query", T>
 export type MutationArg<T extends string> = FieldResolver<"Mutation", T>
 
+export interface PageInfo {
+  total: number
+  totalPages: number
+  page: number
+  perPage: number
+}
+
+export interface IEvent {
+  id: number
+  name: string
+  numEntrants: number
+  entrants: {
+    pageInfo: PageInfo
+    nodes: {
+      participants: [{
+        player: {
+          id: number
+        }
+      }] | []
+    }[]
+  }
+}
+
 export interface ITournament {
-  id: number    
-  name: string    
+  id: number
+  event_id: number
+  name: string  
   lat: number
   lng: number
   tournament_id: string    
@@ -31,6 +55,9 @@ export interface ITournament {
   state: number
   venueName?: string
   venueAddress?: string
+  events: IEvent[]
+  url: string
+  tier: string
 
   participants?:( User & {
     characters: Character[]
@@ -83,7 +110,21 @@ export namespace SmashGG {
 
   export interface Tournament {
     tournaments: {
+      pageInfo: PageInfo
       nodes: ITournament[]
     }
+  }
+
+  export interface Event {
+    event: IEvent
+  }
+
+  export interface EventArgs {
+    page: number
+    id: number
+  }
+  
+  export interface TournamentArgs {
+    page: number
   }
 }

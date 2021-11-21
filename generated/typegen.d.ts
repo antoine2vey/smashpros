@@ -56,7 +56,9 @@ export interface NexusGenInputs {
     email: string; // String!
     password: string; // String!
     profilePicture: NexusGenScalars['Upload']; // Upload!
-    smashGGProfile?: string | null; // String
+    smashGGPlayerId?: number | null; // Int
+    smashGGSlug?: string | null; // String
+    smashGGUserId?: number | null; // Int
     tag: string; // String!
     twitchUsername?: string | null; // String
     twitterUsername?: string | null; // String
@@ -66,7 +68,9 @@ export interface NexusGenInputs {
     email: string; // String!
     password: string; // String!
     profilePicture?: NexusGenScalars['Upload'] | null; // Upload
-    smashGGProfile?: string | null; // String
+    smashGGPlayerId?: number | null; // Int
+    smashGGSlug?: string | null; // String
+    smashGGUserId?: number | null; // Int
     tag: string; // String!
     twitchUsername?: string | null; // String
     twitterUsername?: string | null; // String
@@ -109,6 +113,14 @@ export interface NexusGenObjects {
     name: string; // String!
     prefix: string; // String!
   }
+  Event: { // root type
+    event_id: number; // Int!
+    id: string; // ID!
+    name: string; // String!
+    num_attendees: number; // Int!
+    tier: string; // String!
+    valid: boolean; // Boolean!
+  }
   Match: { // root type
     adversary_wins: number; // Int!
     amount?: number | null; // Int
@@ -125,26 +137,31 @@ export interface NexusGenObjects {
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
   }
   Subscription: {};
+  SuggestedName: { // root type
+    smashGGPlayerId: number; // Int!
+    smashGGUserId: number; // Int!
+    tag: string; // String!
+  }
   Tournament: { // root type
     city?: string | null; // String
-    countryCode: string; // String!
-    createdAt?: NexusGenScalars['DateTime'] | null; // DateTime
+    country_code: string; // String!
+    created_at?: NexusGenScalars['DateTime'] | null; // DateTime
     currency: string; // String!
-    endAt?: NexusGenScalars['DateTime'] | null; // DateTime
-    eventRegistrationClosesAt?: NexusGenScalars['DateTime'] | null; // DateTime
-    hasOfflineEvents?: boolean | null; // Boolean
+    end_at?: NexusGenScalars['DateTime'] | null; // DateTime
+    event_registration_closes_at?: NexusGenScalars['DateTime'] | null; // DateTime
+    has_offline_events?: boolean | null; // Boolean
     id: string; // ID!
     images: string[]; // [String!]!
-    isRegistrationOpen?: boolean | null; // Boolean
+    is_registration_open?: boolean | null; // Boolean
     lat?: number | null; // Float
     lng?: number | null; // Float
     name: string; // String!
-    numAttendees?: number | null; // Int
+    num_attendees?: number | null; // Int
     slug: string; // String!
     state: number; // Int!
     tournament_id: number; // Int!
-    venueAddress?: string | null; // String
-    venueName?: string | null; // String
+    venue_address?: string | null; // String
+    venue_name?: string | null; // String
   }
   User: { // root type
     email: string; // String!
@@ -192,6 +209,15 @@ export interface NexusGenFieldTypes {
     prefix: string; // String!
     waiting_members: NexusGenRootTypes['User'][]; // [User!]!
   }
+  Event: { // field return type
+    event_id: number; // Int!
+    id: string; // ID!
+    name: string; // String!
+    num_attendees: number; // Int!
+    tier: string; // String!
+    tournament: NexusGenRootTypes['Tournament']; // Tournament!
+    valid: boolean; // Boolean!
+  }
   Match: { // field return type
     adversary: NexusGenRootTypes['User']; // User!
     adversary_wins: number; // Int!
@@ -229,8 +255,9 @@ export interface NexusGenFieldTypes {
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
+    events: NexusGenRootTypes['Event'][] | null; // [Event!]
     matches: NexusGenRootTypes['Match'][] | null; // [Match!]
-    suggestedName: string | null; // String
+    suggestedName: NexusGenRootTypes['SuggestedName'] | null; // SuggestedName
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
@@ -243,28 +270,34 @@ export interface NexusGenFieldTypes {
     userEnteredTournament: NexusGenRootTypes['User']; // User!
     userLeftTournament: NexusGenRootTypes['User']; // User!
   }
+  SuggestedName: { // field return type
+    smashGGPlayerId: number; // Int!
+    smashGGUserId: number; // Int!
+    tag: string; // String!
+  }
   Tournament: { // field return type
     city: string | null; // String
-    countryCode: string; // String!
-    createdAt: NexusGenScalars['DateTime'] | null; // DateTime
+    country_code: string; // String!
+    created_at: NexusGenScalars['DateTime'] | null; // DateTime
     currency: string; // String!
-    endAt: NexusGenScalars['DateTime'] | null; // DateTime
-    eventRegistrationClosesAt: NexusGenScalars['DateTime'] | null; // DateTime
+    end_at: NexusGenScalars['DateTime'] | null; // DateTime
+    event_registration_closes_at: NexusGenScalars['DateTime'] | null; // DateTime
+    events: NexusGenRootTypes['Event'][]; // [Event!]!
     favorited_by: NexusGenRootTypes['User'][]; // [User!]!
-    hasOfflineEvents: boolean | null; // Boolean
+    has_offline_events: boolean | null; // Boolean
     id: string; // ID!
     images: string[]; // [String!]!
-    isRegistrationOpen: boolean | null; // Boolean
+    is_registration_open: boolean | null; // Boolean
     lat: number | null; // Float
     lng: number | null; // Float
     name: string; // String!
-    numAttendees: number | null; // Int
+    num_attendees: number | null; // Int
     participants: NexusGenRootTypes['User'][]; // [User!]!
     slug: string; // String!
     state: number; // Int!
     tournament_id: number; // Int!
-    venueAddress: string | null; // String
-    venueName: string | null; // String
+    venue_address: string | null; // String
+    venue_name: string | null; // String
   }
   User: { // field return type
     characters: NexusGenRootTypes['Character'][]; // [Character!]!
@@ -308,6 +341,15 @@ export interface NexusGenFieldTypeNames {
     prefix: 'String'
     waiting_members: 'User'
   }
+  Event: { // field return type name
+    event_id: 'Int'
+    id: 'ID'
+    name: 'String'
+    num_attendees: 'Int'
+    tier: 'String'
+    tournament: 'Tournament'
+    valid: 'Boolean'
+  }
   Match: { // field return type name
     adversary: 'User'
     adversary_wins: 'Int'
@@ -345,8 +387,9 @@ export interface NexusGenFieldTypeNames {
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
+    events: 'Event'
     matches: 'Match'
-    suggestedName: 'String'
+    suggestedName: 'SuggestedName'
     tournament: 'Tournament'
     tournaments: 'Tournament'
     usersByCharacter: 'User'
@@ -359,28 +402,34 @@ export interface NexusGenFieldTypeNames {
     userEnteredTournament: 'User'
     userLeftTournament: 'User'
   }
+  SuggestedName: { // field return type name
+    smashGGPlayerId: 'Int'
+    smashGGUserId: 'Int'
+    tag: 'String'
+  }
   Tournament: { // field return type name
     city: 'String'
-    countryCode: 'String'
-    createdAt: 'DateTime'
+    country_code: 'String'
+    created_at: 'DateTime'
     currency: 'String'
-    endAt: 'DateTime'
-    eventRegistrationClosesAt: 'DateTime'
+    end_at: 'DateTime'
+    event_registration_closes_at: 'DateTime'
+    events: 'Event'
     favorited_by: 'User'
-    hasOfflineEvents: 'Boolean'
+    has_offline_events: 'Boolean'
     id: 'ID'
     images: 'String'
-    isRegistrationOpen: 'Boolean'
+    is_registration_open: 'Boolean'
     lat: 'Float'
     lng: 'Float'
     name: 'String'
-    numAttendees: 'Int'
+    num_attendees: 'Int'
     participants: 'User'
     slug: 'String'
     state: 'Int'
     tournament_id: 'Int'
-    venueAddress: 'String'
-    venueName: 'String'
+    venue_address: 'String'
+    venue_name: 'String'
   }
   User: { // field return type name
     characters: 'Character'

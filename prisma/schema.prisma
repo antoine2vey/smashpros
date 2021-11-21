@@ -30,6 +30,8 @@ model User {
   twitch_username        String?
   twitter_username       String?
   smashgg_slug           String?      @unique
+  smashgg_player_id      Int?         @unique
+  smashgg_user_id        Int?         @unique
   notification_token     String?      @unique
   allow_notifications    Boolean      @default(false)
   allow_searchability    Boolean      @default(true)
@@ -57,30 +59,43 @@ model Character {
 }
 
 model Tournament {
-  id                        String    @id @default(uuid())
-  name                      String    @unique
-  lat                       Float?
-  lng                       Float?
-  city                      String?
-  countryCode               String
-  createdAt                 DateTime?
-  currency                  String
-  numAttendees              Int?
-  endAt                     DateTime?
-  eventRegistrationClosesAt DateTime?
-  hasOfflineEvents          Boolean?
-  images                    String[]
-  isRegistrationOpen        Boolean?
-  slug                      String
-  state                     Int
-  venueName                 String?
-  venueAddress              String?
-  tournament_id             Int       @unique
-  startAt                   DateTime?
-  is_started                Boolean   @default(false)
-  favorited_by              User[]    @relation("favorited_tournaments")
-  participants              User[]    @relation("user_tournaments")
-  organizers                User[]    @relation("user_tournaments_organizer")
+  id                           String    @id @default(uuid())
+  name                         String
+  lat                          Float?
+  lng                          Float?
+  city                         String?
+  country_code                 String
+  created_at                   DateTime?
+  currency                     String
+  num_attendees                Int?
+  end_at                       DateTime?
+  event_registration_closes_at DateTime?
+  has_offline_events           Boolean?
+  images                       String[]
+  is_registration_open         Boolean?
+  slug                         String
+  state                        Int
+  url                          String
+  venue_name                   String?
+  venue_address                String?
+  tournament_id                Int       @unique
+  start_at                     DateTime?
+  is_started                   Boolean   @default(false)
+  favorited_by                 User[]    @relation("favorited_tournaments")
+  participants                 User[]    @relation("user_tournaments")
+  organizers                   User[]    @relation("user_tournaments_organizer")
+  events                       Event[]
+}
+
+model Event {
+  id            String     @id @default(uuid())
+  event_id      Int        @unique
+  name          String
+  tournament    Tournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  tournament_id String
+  tier          String
+  num_attendees Int
+  valid         Boolean
 }
 
 model Crew {

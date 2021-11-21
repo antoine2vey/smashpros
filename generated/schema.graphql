@@ -47,6 +47,16 @@ enum CrewUpdateActionEnum {
 """Date custom scalar type"""
 scalar DateTime
 
+type Event {
+  event_id: Int!
+  id: ID!
+  name: String!
+  num_attendees: Int!
+  tier: String!
+  tournament: Tournament!
+  valid: Boolean!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -98,8 +108,9 @@ type Query {
   characters: [Character]
   crew: Crew
   crews: [Crew]
+  events: [Event!]
   matches: [Match!]
-  suggestedName(slug: String!): String
+  suggestedName(slug: String!): SuggestedName
   tournament(id: ID!): Tournament
   tournaments: [Tournament!]
   usersByCharacter(id: ID!): [User!]
@@ -126,28 +137,35 @@ type Subscription {
   userLeftTournament: User!
 }
 
+type SuggestedName {
+  smashGGPlayerId: Int!
+  smashGGUserId: Int!
+  tag: String!
+}
+
 type Tournament {
   city: String
-  countryCode: String!
-  createdAt: DateTime
+  country_code: String!
+  created_at: DateTime
   currency: String!
-  endAt: DateTime
-  eventRegistrationClosesAt: DateTime
+  end_at: DateTime
+  event_registration_closes_at: DateTime
+  events: [Event!]!
   favorited_by: [User!]!
-  hasOfflineEvents: Boolean
+  has_offline_events: Boolean
   id: ID!
   images: [String!]!
-  isRegistrationOpen: Boolean
+  is_registration_open: Boolean
   lat: Float
   lng: Float
   name: String!
-  numAttendees: Int
+  num_attendees: Int
   participants(characters: [ID!]): [User!]!
   slug: String!
   state: Int!
   tournament_id: Int!
-  venueAddress: String
-  venueName: String
+  venue_address: String
+  venue_name: String
 }
 
 input TournamentQuery {
@@ -177,7 +195,9 @@ input UserRegisterPayload {
   email: String!
   password: String!
   profilePicture: Upload!
-  smashGGProfile: String
+  smashGGPlayerId: Int
+  smashGGSlug: String
+  smashGGUserId: Int
   tag: String!
   twitchUsername: String
   twitterUsername: String
@@ -188,7 +208,9 @@ input UserUpdatePayload {
   email: String!
   password: String!
   profilePicture: Upload
-  smashGGProfile: String
+  smashGGPlayerId: Int
+  smashGGSlug: String
+  smashGGUserId: Int
   tag: String!
   twitchUsername: String
   twitterUsername: String

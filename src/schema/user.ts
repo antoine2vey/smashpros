@@ -44,7 +44,9 @@ export const UserRegisterPayload = inputObjectType({
     t.nonNull.list.nonNull.id('characters')
     t.string('twitterUsername')
     t.string('twitchUsername')
-    t.string('smashGGProfile')
+    t.string('smashGGSlug')
+    t.int('smashGGPlayerId')
+    t.int('smashGGUserId')
   }
 })
 
@@ -57,7 +59,9 @@ export const UserUpdatePayload = inputObjectType({
     t.nonNull.list.nonNull.id('characters')
     t.string('twitterUsername')
     t.string('twitchUsername')
-    t.string('smashGGProfile')
+    t.string('smashGGSlug')
+    t.int('smashGGPlayerId')
+    t.int('smashGGUserId')
     t.upload('profilePicture')
   }
 })
@@ -73,5 +77,14 @@ export const AuthPayload = objectType({
   name: 'AuthPayload',
   definition(t) {
     t.string('token')
+  }
+})
+
+export const SuggestedName = objectType({
+  name: 'SuggestedName',
+  definition(t) {
+    t.nonNull.string('tag')
+    t.nonNull.int('smashGGPlayerId')
+    t.nonNull.int('smashGGUserId')
   }
 })

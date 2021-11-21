@@ -1,82 +1,64 @@
 import { fromUnixTime, isBefore } from 'date-fns'
-import dotenv from 'dotenv'
-import { gql } from 'graphql-request'
-import fetch from "node-fetch"
 import { prisma } from '../prisma'
-import smashGGClient from '../smashGGClient'
-import { SmashGG } from '../typings/interfaces'
 import logger from '../utils/logger'
+import { eligibility, fetchEvents, fetchTournaments, getAllConnectedUsersForTournament, tier } from '../utils/tournament'
 
 export async function loadTournaments() {
-  logger.info('Creating tournaments ...')
+  logger.info('fetching tournaments') 
+  const tourneys = await fetchTournaments()
+  const events = await fetchEvents(tourneys)
 
-  const query = gql`
-    query {
-      tournaments(query: {
-        filter: {
-          countryCode: "FR"
-          videogameIds: [1386]
-          upcoming: true
-        }
-        sortBy: "startAt asc",
-        perPage: 500
-      }) {
-        nodes {
-          id
-          name
-          city
-          countryCode
-          createdAt
-          currency
-          numAttendees
-          startAt
-          endAt
-          eventRegistrationClosesAt
-          hasOfflineEvents
-          hashtag
-          images {
-            id
-            url
-          }
-          isRegistrationOpen
-          lat
-          lng
-          slug
-          state
-          venueName
-          venueAddress
-        }
-      }
-    }
-  `
-  const data = await smashGGClient.request<SmashGG.Tournament>(query)
-  const tournaments = data.tournaments.nodes
+  logger.info('mapping events to tournaments')
+  const tournaments = tourneys.map(tournament => ({
+    ...tournament,
+    events: tournament.events.map(event => events.find(e => e.id === event.id))
+  }))
+
+
   // Create all tournaments, upsert if needed
-  const createTournaments = tournaments.map(tournament => {
+  const createTournaments = tournaments.map(async tournament => {
+    const foundConnectedUsers = await getAllConnectedUsersForTournament(tournament)
+
     const tourney = {
       name: tournament.name,
       lat: tournament.lat,
       lng: tournament.lng,
       tournament_id: tournament.id,
       city: tournament.city,
-      countryCode: tournament.countryCode,
-      createdAt: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
+      country_code: tournament.countryCode,
+      created_at: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
       currency: tournament.currency,
-      numAttendees: tournament.numAttendees,
-      endAt: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
-      eventRegistrationClosesAt: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
+      num_attendees: tournament.numAttendees,
+      end_at: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
+      event_registration_closes_at: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
       images: tournament.images.map(image => image.url),
-      isRegistrationOpen: tournament.isRegistrationOpen,
+      is_registration_open: tournament.isRegistrationOpen,
       slug: tournament.slug,
       state: tournament.state,
-      venueName: tournament.venueName,
-      venueAddress: tournament.venueAddress,
-      startAt: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
+      venue_name: tournament.venueName,
+      venue_address: tournament.venueAddress,
+      start_at: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
+      url: tournament.url,
+      events: {
+        createMany: {
+          data: tournament.events.map(event => ({
+            event_id: event.id,
+            name: event.name,
+            num_attendees: event.numEntrants || 0,
+            tier: tier(event.numEntrants),
+            valid: eligibility(event.name.toLowerCase())
+          })),
+          skipDuplicates: true
+        }
+      },
+      participants: {
+        connect: foundConnectedUsers
+      }
     }
 
     const now = new Date()
-    if (isBefore(tourney.endAt, now)) {
-      logger.warn(`Tourney ${tourney.name} is outdated, not upserting. (${tourney.endAt})`)
+    if (isBefore(tourney.end_at, now)) {
+      logger.warn(`Tourney ${tourney.name} is outdated, not upserting. (${tourney.end_at})`)
       return null
     }
 
@@ -93,7 +75,7 @@ export async function loadTournaments() {
       create: tourney,
       update: tourney
     })
-  }) 
-  
-  return Promise.all(createTournaments)
+  })
+
+  await Promise.all(createTournaments)
 }
