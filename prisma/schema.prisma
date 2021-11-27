@@ -100,13 +100,15 @@ model Event {
 }
 
 model Crew {
-  id              String @id @default(uuid())
-  name            String @unique
+  id              String   @id @default(uuid())
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  name            String   @unique
   prefix          String
   icon            String
   banner          String
-  members         User[] @relation("crew_members")
-  waiting_members User[] @relation("crew_waiting_members")
+  members         User[]   @relation("crew_members")
+  waiting_members User[]   @relation("crew_waiting_members")
 }
 
 model Role {
@@ -117,6 +119,7 @@ model Role {
 
 model Match {
   id             String      @id @default(uuid())
+  created_at     DateTime    @default(now())
   total_matches  Int         @default(1)
   state          MatchState  @default(HOLD)
   initiator_id   String
