@@ -85,6 +85,7 @@ model Tournament {
   participants                 User[]    @relation("user_tournaments")
   organizers                   User[]    @relation("user_tournaments_organizer")
   events                       Event[]
+  matches                      Match[]   @relation("matches_tournament")
 }
 
 model Event {
@@ -115,18 +116,20 @@ model Role {
 }
 
 model Match {
-  id             String     @id @default(uuid())
-  total_matches  Int        @default(1)
-  state          MatchState @default(HOLD)
+  id             String      @id @default(uuid())
+  total_matches  Int         @default(1)
+  state          MatchState  @default(HOLD)
   initiator_id   String
-  intiator_wins  Int        @default(0)
+  intiator_wins  Int         @default(0)
   adversary_id   String
-  adversary_wins Int        @default(0)
-  is_moneymatch  Boolean    @default(false)
-  amount         Int?       @default(0)
-  adversary      User       @relation("matches_invited", fields: [adversary_id], references: [id])
-  initiator      User       @relation("matches_initiated", fields: [initiator_id], references: [id])
+  adversary_wins Int         @default(0)
+  is_moneymatch  Boolean     @default(false)
+  amount         Int?        @default(0)
+  adversary      User        @relation("matches_invited", fields: [adversary_id], references: [id])
+  initiator      User        @relation("matches_initiated", fields: [initiator_id], references: [id])
   battles        Battle[]
+  tournament     Tournament? @relation("matches_tournament", fields: [tournament_id], references: [id])
+  tournament_id  String?
 }
 
 model Battle {
