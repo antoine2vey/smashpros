@@ -5,7 +5,7 @@ import { ForbiddenError, UserInputError } from "apollo-server";
 import { updateMemberSchema } from "../validations/crew";
 import { CrewActions } from "../typings/enums";
 import { MutationArg, QueryArg } from "../typings/interfaces";
-import { uploadFile } from "../utils/storage";
+import { resizers, uploadFile } from "../utils/storage";
 import { randomUUID } from "crypto";
 
 export const crew: QueryArg<"crew"> = async (_, args, { user, prisma }, info) => {
@@ -43,8 +43,8 @@ export const createCrew: MutationArg<"createCrew"> = async (_, { payload }, { us
   const bannerStream = await banner
   const iconStream = await icon
   const [bannerUri, iconUri] = await Promise.all([
-    uploadFile(bannerStream.createReadStream, `${randomUUID()}-${bannerStream.filename}`, bannerStream.mimetype),
-    uploadFile(iconStream.createReadStream, `${randomUUID()}-${iconStream.filename}`, iconStream.mimetype)
+    uploadFile(bannerStream.createReadStream, `${randomUUID()}-${bannerStream.filename}`, resizers.banner),
+    uploadFile(iconStream.createReadStream, `${randomUUID()}-${iconStream.filename}`, resizers.crew)
   ])
 
   const [crew] = await prisma.$transaction([

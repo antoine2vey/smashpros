@@ -2,7 +2,7 @@ import { prisma } from "../prisma";
 import bcrypt from 'bcrypt'
 import { AuthenticationError, UserInputError } from "apollo-server";
 import jwt from 'jsonwebtoken'
-import { uploadFile } from "../utils/storage";
+import { resizers, uploadFile } from "../utils/storage";
 import { mapIdsToPrisma } from "../utils/prisma";
 import { addMinutes, isAfter } from "date-fns";
 import { getRole } from "../utils/roles";
@@ -38,7 +38,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
   // If we have a profile picture, update it
   if (profilePicture) {
     const { createReadStream, filename, mimetype } = await profilePicture
-    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, mimetype)
+    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, resizers.profile)
   }
 
   return prisma.user.update({
@@ -157,7 +157,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
     const salt = await bcrypt.genSalt(saltRounds)
     const [hash, uri, role] = await Promise.all([
       bcrypt.hash(password, salt),
-      uploadFile(createReadStream, `${id}-${filename}`, mimetype),
+      uploadFile(createReadStream, `${id}-${filename}`, resizers.profile),
       getRole(RoleEnum.USER)
     ])
 
@@ -179,7 +179,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
         characters: {
           connect: mapIdsToPrisma(characters)
         }
-      } 
+      }
     })
   } catch (error) {
     console.log(error)
