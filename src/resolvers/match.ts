@@ -3,6 +3,7 @@ import { UserInputError } from "apollo-server-errors"
 import { prisma } from "../prisma"
 import { MutationArg, QueryArg } from "../typings/interfaces"
 import { sendNotification } from "../utils/notifications"
+import { getCursorForArgs } from "../utils/prisma"
 
 function matchGuard(match: Match, user: User) {
   const isInitiator = match.initiator_id === user.id
@@ -25,8 +26,10 @@ function bestOfWinner(totalMatches: number, wins: number) {
 }
 
 export const matches: QueryArg<"matches"> = async (_, args, { user }, info) => {
+  const cursor = getCursorForArgs('id', args)
   // Find all matches where user is either initiator or adversary
   return prisma.match.findMany({
+    ...cursor,
     where: {
       OR: [
         {

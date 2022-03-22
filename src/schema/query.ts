@@ -1,4 +1,4 @@
-import { idArg, list, nonNull, objectType, stringArg } from "nexus";
+import { connectionPlugin, idArg, list, nonNull, objectType, stringArg } from "nexus";
 import { Context } from "../context";
 import { isAuthenticated, authorizations } from "../authorizations";
 import { crew, crews, characters, tournaments, tournament, usersByCharacter, suggestedName, matches } from "../resolvers";
@@ -34,10 +34,13 @@ export const Query = objectType({
     })
 
     // Tournament
-    t.field('tournaments', {
-      type: list(nonNull('Tournament')),
+    t.connectionField('tournaments', {
+      type: 'Tournament',
       authorize: authorizations(isAuthenticated),
-      resolve(...args) {
+      cursorFromNode(node, args, ctx, info) {
+        return connectionPlugin.base64Encode(node.tournament_id.toString())
+      },
+      nodes(...args) {
         return tournaments(...args)
       }
     })
@@ -76,9 +79,13 @@ export const Query = objectType({
     })
 
     // Matches
-    t.field('matches', {
-      type: list(nonNull('Match')),
-      resolve(...args) {
+    t.connectionField('matches', {
+      type: 'Match',
+      authorize: authorizations(isAuthenticated),
+      cursorFromNode(node, args, ctx, info) {
+        return connectionPlugin.base64Encode(node.id)
+      },
+      nodes(...args) {
         return matches(...args)
       }
     })

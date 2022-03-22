@@ -1,5 +1,5 @@
-import { inputObjectType, list, nonNull, objectType } from "nexus"
-import { Event, Tournament } from 'nexus-prisma'
+import { connectionPlugin, inputObjectType, list, nonNull, objectType } from "nexus"
+import { Event, Tournament, User } from 'nexus-prisma'
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -40,14 +40,19 @@ export const TournamentObjectType = objectType({
     t.field(Tournament.venue_address)
     t.field(Tournament.favorited_by)
     t.field(Tournament.events)
-    t.field(Tournament.participants.name, {
-      type: Tournament.participants.type,
+
+    t.connectionField(Tournament.participants.name, {
+      type: User.$name,
+      edgeFields: false,
       description: Tournament.participants.description,
-      args: {
+      additionalArgs: {
         characters: list(nonNull('ID'))
       },
-      resolve: async (root, args) => {
-        // @ts-ignore idkkkk :(
+      cursorFromNode(node) {
+        return connectionPlugin.base64Encode(node.smashgg_player_id.toString())
+      },
+      nodes(root, args) {
+        //@ts-ignore
         const { participants } = root
 
         // If no args, send root participants

@@ -5,8 +5,8 @@
 
 
 import type { Context } from "./../src/context"
+import type { core, connectionPluginCore } from "nexus"
 import type { FieldAuthorizeResolver } from "nexus/dist/plugins/fieldAuthorizePlugin"
-import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
     /**
@@ -29,6 +29,15 @@ declare global {
      * The `Upload` scalar type represents a file upload.
      */
     upload<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "Upload";
+    /**
+     * Adds a Relay-style connection to the type, with numerous options for configuration
+     *
+     * @see https://nexusjs.org/docs/plugins/connection
+     */
+    connectionField<FieldName extends string>(
+      fieldName: FieldName,
+      config: connectionPluginCore.ConnectionFieldConfig<TypeName, FieldName>
+    ): void
   }
 }
 
@@ -130,7 +139,21 @@ export interface NexusGenObjects {
     state: NexusGenEnums['MatchState']; // MatchState!
     total_matches: number; // Int!
   }
+  MatchConnection: { // root type
+    edges?: Array<NexusGenRootTypes['MatchEdge'] | null> | null; // [MatchEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  MatchEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['Match'] | null; // Match
+  }
   Mutation: {};
+  PageInfo: { // root type
+    endCursor?: string | null; // String
+    hasNextPage: boolean; // Boolean!
+    hasPreviousPage: boolean; // Boolean!
+    startCursor?: string | null; // String
+  }
   Query: {};
   Role: { // root type
     id: string; // ID!
@@ -163,12 +186,29 @@ export interface NexusGenObjects {
     venue_address?: string | null; // String
     venue_name?: string | null; // String
   }
+  TournamentConnection: { // root type
+    edges?: Array<NexusGenRootTypes['TournamentEdge'] | null> | null; // [TournamentEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  TournamentEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['Tournament'] | null; // Tournament
+  }
   User: { // root type
     email: string; // String!
     id: string; // ID!
     in_tournament: boolean; // Boolean!
     profile_picture?: string | null; // String
+    smashgg_player_id?: number | null; // Int
     tag: string; // String!
+  }
+  UserConnection: { // root type
+    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  UserEdge: { // root type
+    cursor: string; // String!
+    node?: NexusGenRootTypes['User'] | null; // User
   }
 }
 
@@ -230,6 +270,14 @@ export interface NexusGenFieldTypes {
     state: NexusGenEnums['MatchState']; // MatchState!
     total_matches: number; // Int!
   }
+  MatchConnection: { // field return type
+    edges: Array<NexusGenRootTypes['MatchEdge'] | null> | null; // [MatchEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  MatchEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['Match'] | null; // Match
+  }
   Mutation: { // field return type
     askPasswordReset: string | null; // String
     checkUserIn: boolean | null; // Boolean
@@ -250,16 +298,22 @@ export interface NexusGenFieldTypes {
     userEnteredTournament: NexusGenRootTypes['User'] | null; // User
     userLeftTournament: NexusGenRootTypes['User'] | null; // User
   }
+  PageInfo: { // field return type
+    endCursor: string | null; // String
+    hasNextPage: boolean; // Boolean!
+    hasPreviousPage: boolean; // Boolean!
+    startCursor: string | null; // String
+  }
   Query: { // field return type
     battles: NexusGenRootTypes['Battle'][] | null; // [Battle!]
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
     events: NexusGenRootTypes['Event'][] | null; // [Event!]
-    matches: NexusGenRootTypes['Match'][] | null; // [Match!]
+    matches: NexusGenRootTypes['MatchConnection'] | null; // MatchConnection
     suggestedName: NexusGenRootTypes['SuggestedName'] | null; // SuggestedName
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
-    tournaments: NexusGenRootTypes['Tournament'][] | null; // [Tournament!]
+    tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
   }
   Role: { // field return type
@@ -292,12 +346,20 @@ export interface NexusGenFieldTypes {
     lng: number | null; // Float
     name: string; // String!
     num_attendees: number | null; // Int
-    participants: NexusGenRootTypes['User'][]; // [User!]!
+    participants: NexusGenRootTypes['UserConnection'] | null; // UserConnection
     slug: string; // String!
     state: number; // Int!
     tournament_id: number; // Int!
     venue_address: string | null; // String
     venue_name: string | null; // String
+  }
+  TournamentConnection: { // field return type
+    edges: Array<NexusGenRootTypes['TournamentEdge'] | null> | null; // [TournamentEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  TournamentEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['Tournament'] | null; // Tournament
   }
   User: { // field return type
     characters: NexusGenRootTypes['Character'][]; // [Character!]!
@@ -307,10 +369,19 @@ export interface NexusGenFieldTypes {
     in_tournament: boolean; // Boolean!
     profile_picture: string | null; // String
     roles: NexusGenRootTypes['Role'][]; // [Role!]!
+    smashgg_player_id: number | null; // Int
     tag: string; // String!
     tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     tournaments_organizer: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     waiting_crew: NexusGenRootTypes['Crew'] | null; // Crew
+  }
+  UserConnection: { // field return type
+    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
+  UserEdge: { // field return type
+    cursor: string; // String!
+    node: NexusGenRootTypes['User'] | null; // User
   }
 }
 
@@ -362,6 +433,14 @@ export interface NexusGenFieldTypeNames {
     state: 'MatchState'
     total_matches: 'Int'
   }
+  MatchConnection: { // field return type name
+    edges: 'MatchEdge'
+    pageInfo: 'PageInfo'
+  }
+  MatchEdge: { // field return type name
+    cursor: 'String'
+    node: 'Match'
+  }
   Mutation: { // field return type name
     askPasswordReset: 'String'
     checkUserIn: 'Boolean'
@@ -382,16 +461,22 @@ export interface NexusGenFieldTypeNames {
     userEnteredTournament: 'User'
     userLeftTournament: 'User'
   }
+  PageInfo: { // field return type name
+    endCursor: 'String'
+    hasNextPage: 'Boolean'
+    hasPreviousPage: 'Boolean'
+    startCursor: 'String'
+  }
   Query: { // field return type name
     battles: 'Battle'
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
     events: 'Event'
-    matches: 'Match'
+    matches: 'MatchConnection'
     suggestedName: 'SuggestedName'
     tournament: 'Tournament'
-    tournaments: 'Tournament'
+    tournaments: 'TournamentConnection'
     usersByCharacter: 'User'
   }
   Role: { // field return type name
@@ -424,12 +509,20 @@ export interface NexusGenFieldTypeNames {
     lng: 'Float'
     name: 'String'
     num_attendees: 'Int'
-    participants: 'User'
+    participants: 'UserConnection'
     slug: 'String'
     state: 'Int'
     tournament_id: 'Int'
     venue_address: 'String'
     venue_name: 'String'
+  }
+  TournamentConnection: { // field return type name
+    edges: 'TournamentEdge'
+    pageInfo: 'PageInfo'
+  }
+  TournamentEdge: { // field return type name
+    cursor: 'String'
+    node: 'Tournament'
   }
   User: { // field return type name
     characters: 'Character'
@@ -439,10 +532,19 @@ export interface NexusGenFieldTypeNames {
     in_tournament: 'Boolean'
     profile_picture: 'String'
     roles: 'Role'
+    smashgg_player_id: 'Int'
     tag: 'String'
     tournaments: 'Tournament'
     tournaments_organizer: 'Tournament'
     waiting_crew: 'Crew'
+  }
+  UserConnection: { // field return type name
+    edges: 'UserEdge'
+    pageInfo: 'PageInfo'
+  }
+  UserEdge: { // field return type name
+    cursor: 'String'
+    node: 'User'
   }
 }
 
@@ -514,11 +616,23 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    matches: { // args
+      after?: string | null; // String
+      before?: string | null; // String
+      first?: number | null; // Int
+      last?: number | null; // Int
+    }
     suggestedName: { // args
       slug: string; // String!
     }
     tournament: { // args
       id: string; // ID!
+    }
+    tournaments: { // args
+      after?: string | null; // String
+      before?: string | null; // String
+      first?: number | null; // Int
+      last?: number | null; // Int
     }
     usersByCharacter: { // args
       id: string; // ID!
@@ -526,7 +640,11 @@ export interface NexusGenArgTypes {
   }
   Tournament: {
     participants: { // args
+      after?: string | null; // String
+      before?: string | null; // String
       characters?: string[] | null; // [ID!]
+      first?: number | null; // Int
+      last?: number | null; // Int
     }
   }
 }
@@ -594,6 +712,7 @@ declare global {
   interface NexusGenPluginInputTypeConfig<TypeName extends string> {
   }
   interface NexusGenPluginFieldConfig<TypeName extends string, FieldName extends string> {
+    
     /**
      * Authorization for an individual field. Returning "true"
      * or "Promise<true>" means the field can be accessed.

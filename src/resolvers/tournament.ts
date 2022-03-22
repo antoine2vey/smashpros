@@ -1,12 +1,17 @@
+import { gql } from "graphql-request"
+import { Prisma } from "@prisma/client"
 import { PubSub } from "../typings/enums"
 import { prisma } from "../prisma"
 import { pubsub } from "../redis"
 import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
-import { gql } from "graphql-request"
+import { getCursorForArgs } from "../utils/prisma"
 import smashGGClient from "../smashGGClient"
 
 export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
+  const cursor = getCursorForArgs('tournament_id', args)
+
   return prisma.tournament.findMany({
+    ...cursor,
     include: {
       participants: {
         where: {
@@ -18,6 +23,9 @@ export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) =
           allow_searchability: true
         }
       }
+    },
+    orderBy: {
+      start_at: 'asc'
     }
   })
 }
