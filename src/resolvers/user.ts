@@ -220,6 +220,6 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
     tag: user.player.gamerTag,
     smashGGPlayerId: user.player.id,
     smashGGUserId: user.id,
-    profilePicture: user.images[0].url
+    profilePicture: user.images.length > 0 ? user.images[0].url : null
   }
 }

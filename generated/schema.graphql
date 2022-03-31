@@ -207,7 +207,7 @@ type Subscription {
 }
 
 type SuggestedName {
-  profilePicture: String!
+  profilePicture: String
   smashGGPlayerId: Int!
   smashGGUserId: Int!
   tag: String!

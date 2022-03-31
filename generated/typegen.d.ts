@@ -161,7 +161,7 @@ export interface NexusGenObjects {
   }
   Subscription: {};
   SuggestedName: { // root type
-    profilePicture: string; // String!
+    profilePicture?: string | null; // String
     smashGGPlayerId: number; // Int!
     smashGGUserId: number; // Int!
     tag: string; // String!
@@ -326,7 +326,7 @@ export interface NexusGenFieldTypes {
     userLeftTournament: NexusGenRootTypes['User']; // User!
   }
   SuggestedName: { // field return type
-    profilePicture: string; // String!
+    profilePicture: string | null; // String
     smashGGPlayerId: number; // Int!
     smashGGUserId: number; // Int!
     tag: string; // String!
