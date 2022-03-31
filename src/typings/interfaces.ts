@@ -106,6 +106,9 @@ export namespace SmashGG {
         id: number
       }[]
     }
+    images: {
+      url: string
+    }[]
   }
 
   export interface Tournament {

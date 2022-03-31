@@ -161,6 +161,7 @@ export interface NexusGenObjects {
   }
   Subscription: {};
   SuggestedName: { // root type
+    profilePicture: string; // String!
     smashGGPlayerId: number; // Int!
     smashGGUserId: number; // Int!
     tag: string; // String!
@@ -325,6 +326,7 @@ export interface NexusGenFieldTypes {
     userLeftTournament: NexusGenRootTypes['User']; // User!
   }
   SuggestedName: { // field return type
+    profilePicture: string; // String!
     smashGGPlayerId: number; // Int!
     smashGGUserId: number; // Int!
     tag: string; // String!
@@ -488,6 +490,7 @@ export interface NexusGenFieldTypeNames {
     userLeftTournament: 'User'
   }
   SuggestedName: { // field return type name
+    profilePicture: 'String'
     smashGGPlayerId: 'Int'
     smashGGUserId: 'Int'
     tag: 'String'

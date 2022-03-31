@@ -149,6 +149,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
 
+
   if (error) {
     throw new UserInputError(error.message)
   }
@@ -202,10 +203,14 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
           id
           gamerTag
         }
+        images {
+          url
+        }
       }
     }
   `
-  const { user } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug })
+
+  const { user } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug })
 
   if (!user) {
     return null
@@ -214,6 +219,7 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
   return {
     tag: user.player.gamerTag,
     smashGGPlayerId: user.player.id,
-    smashGGUserId: user.id
+    smashGGUserId: user.id,
+    profilePicture: user.images[0].url
   }
 }

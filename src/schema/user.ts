@@ -87,5 +87,6 @@ export const SuggestedName = objectType({
     t.nonNull.string('tag')
     t.nonNull.int('smashGGPlayerId')
     t.nonNull.int('smashGGUserId')
+    t.nonNull.string('profilePicture')
   }
 })
