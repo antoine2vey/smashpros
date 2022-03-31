@@ -5,13 +5,13 @@ import { Readable } from "stream";
 import logger from "./logger";
 
 const keyFilename = path.join(__dirname, '..', '..', 'smashpros-51cf4f6569d5.json')
-const storage = new Storage({ keyFilename })
+const storage = new Storage({ keyFilename })
 const bucket = storage.bucket('smashpros')
 
 export const resizers = {
-  profile: sharp().resize(150, 150).png(),
-  crew: sharp().resize(200, 200).png(),
-  banner: sharp().resize(null, 250).png()
+  profile: sharp().resize(150, 150).jpeg(),
+  crew: sharp().resize(200, 200).jpeg(),
+  banner: sharp().resize(null, 250).jpeg()
 }
 
 export async function ensureBucketExists() {
