@@ -8,10 +8,10 @@ const keyFilename = path.join(__dirname, '..', '..', 'smashpros-51cf4f6569d5.jso
 const storage = new Storage({ keyFilename })
 const bucket = storage.bucket('smashpros')
 
-export const resizers = {
-  profile: sharp().resize(150, 150).jpeg(),
-  crew: sharp().resize(200, 200).jpeg(),
-  banner: sharp().resize(null, 250).jpeg()
+export const sizes: {[key: string]: [number | null, number | null]}  = {
+  profile: [150, 150],
+  crew: [200, 200],
+  banner: [null, 250]
 }
 
 export async function ensureBucketExists() {
@@ -25,16 +25,16 @@ export async function ensureBucketExists() {
 export async function uploadFile(
   createReadStream: () => Readable,
   filename: string,
-  resizer?: sharp.Sharp
+  sizes?: [number | null, number | null]
 ): Promise<string> {
   const blob = bucket.file(filename)
   const stream = createReadStream()
 
   return new Promise((resolve, reject) => {
-    stream
-      .pipe(resizer)
+    return stream
+      .pipe(sharp().resize(...sizes).png())
       .pipe(
-        blob.createWriteStream()
+        blob.createWriteStream({ resumable: false, gzip: true })
           .on('finish', async () => {
             try {
               await bucket.file(filename).makePublic()
@@ -45,6 +45,6 @@ export async function uploadFile(
             }
           })
           .on('error', reject)
-      ) 
+      )
   })
 }
