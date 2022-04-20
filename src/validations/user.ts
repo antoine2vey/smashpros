@@ -7,10 +7,13 @@ export const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   tag: Joi.string().required(),
   profilePicture: Joi.any().required(),
+  profilePictureUrl: Joi.string(),
   characters: Joi.array().required(),
   twitterUsername: Joi.string(),
   twitchUsername: Joi.string(),
-  smashGGProfile: smashGGSlug
+  smashGGSlug: smashGGSlug.allow(null),
+  smashGGUserId: Joi.number().allow(null),
+  smashGGPlayerId: Joi.number().allow(null)
 })
 
 export const forgotPasswordSchema = Joi.object({

@@ -48,6 +48,7 @@ export const UserRegisterPayload = inputObjectType({
     t.string('smashGGSlug')
     t.int('smashGGPlayerId')
     t.int('smashGGUserId')
+    t.string('profilePictureUrl')
   }
 })
 
@@ -77,7 +78,15 @@ export const RegisterPayload = inputObjectType({
 export const AuthPayload = objectType({
   name: 'AuthPayload',
   definition(t) {
-    t.string('token')
+    t.string('accessToken')
+    t.string('refreshToken')
+  }
+})
+
+export const RefreshPayload = objectType({
+  name: 'RefreshPayload',
+  definition(t) {
+    t.string('accessToken')
   }
 })
 

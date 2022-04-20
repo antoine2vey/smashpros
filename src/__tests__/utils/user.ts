@@ -19,7 +19,7 @@ export async function getToken(email: string) {
   const user = await getUser(email)
   const userId = user.id
   const userRoles = user.roles.map(role => role.name)
-  const token = jwt.sign({ userId, userRoles }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
+  const token = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
 
   return token
 }

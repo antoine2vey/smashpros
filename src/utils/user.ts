@@ -11,7 +11,7 @@ export async function findUserByToken(token: string) {
   }
 
   const now = +new Date()
-  const decoded = jwt.verify(token, process.env.JWT_PASSWORD)
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 
   if (!decoded) {
     return null

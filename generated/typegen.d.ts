@@ -65,6 +65,7 @@ export interface NexusGenInputs {
     email: string; // String!
     password: string; // String!
     profilePicture: NexusGenScalars['Upload']; // Upload!
+    profilePictureUrl?: string | null; // String
     smashGGPlayerId?: number | null; // Int
     smashGGSlug?: string | null; // String
     smashGGUserId?: number | null; // Int
@@ -105,7 +106,8 @@ export interface NexusGenScalars {
 
 export interface NexusGenObjects {
   AuthPayload: { // root type
-    token?: string | null; // String
+    accessToken?: string | null; // String
+    refreshToken?: string | null; // String
   }
   Battle: { // root type
     id: string; // ID!
@@ -155,6 +157,9 @@ export interface NexusGenObjects {
     startCursor?: string | null; // String
   }
   Query: {};
+  RefreshPayload: { // root type
+    accessToken?: string | null; // String
+  }
   Role: { // root type
     id: string; // ID!
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
@@ -225,7 +230,8 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnu
 
 export interface NexusGenFieldTypes {
   AuthPayload: { // field return type
-    token: string | null; // String
+    accessToken: string | null; // String
+    refreshToken: string | null; // String
   }
   Battle: { // field return type
     adversary: NexusGenRootTypes['User']; // User!
@@ -289,6 +295,7 @@ export interface NexusGenFieldTypes {
     login: NexusGenRootTypes['AuthPayload'] | null; // AuthPayload
     participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     passwordReset: boolean | null; // Boolean
+    refresh: NexusGenRootTypes['RefreshPayload'] | null; // RefreshPayload
     register: NexusGenRootTypes['User'] | null; // User
     sendMatchInvite: NexusGenRootTypes['Match'] | null; // Match
     synchronizeTournaments: Array<NexusGenRootTypes['Tournament'] | null> | null; // [Tournament]
@@ -316,6 +323,9 @@ export interface NexusGenFieldTypes {
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
+  }
+  RefreshPayload: { // field return type
+    accessToken: string | null; // String
   }
   Role: { // field return type
     id: string; // ID!
@@ -389,7 +399,8 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   AuthPayload: { // field return type name
-    token: 'String'
+    accessToken: 'String'
+    refreshToken: 'String'
   }
   Battle: { // field return type name
     adversary: 'User'
@@ -453,6 +464,7 @@ export interface NexusGenFieldTypeNames {
     login: 'AuthPayload'
     participateTournament: 'Tournament'
     passwordReset: 'Boolean'
+    refresh: 'RefreshPayload'
     register: 'User'
     sendMatchInvite: 'Match'
     synchronizeTournaments: 'Tournament'
@@ -480,6 +492,9 @@ export interface NexusGenFieldTypeNames {
     tournament: 'Tournament'
     tournaments: 'TournamentConnection'
     usersByCharacter: 'User'
+  }
+  RefreshPayload: { // field return type name
+    accessToken: 'String'
   }
   Role: { // field return type name
     id: 'ID'
@@ -585,6 +600,9 @@ export interface NexusGenArgTypes {
       code: string; // String!
       confirmPassword: string; // String!
       password: string; // String!
+    }
+    refresh: { // args
+      refreshToken: string; // String!
     }
     register: { // args
       payload: NexusGenInputs['UserRegisterPayload']; // UserRegisterPayload!

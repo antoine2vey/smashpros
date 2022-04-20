@@ -2,7 +2,7 @@ import { arg, booleanArg, idArg, intArg, list, nonNull, objectType, stringArg } 
 import { CrewCreationPayload, MatchStateEnumType } from ".";
 import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
 import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, sendMatchInvite, synchronizeTournaments, updateMatchScore, updateMatchState, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
-import { askPasswordReset, login, passwordReset, register, updateProfile } from "../resolvers/user";
+import { askPasswordReset, login, passwordReset, refresh, register, updateProfile } from "../resolvers/user";
 import { CrewUpdateActionEnum } from "./crew";
 import { UserRegisterPayload, UserUpdatePayload } from "./user";
 
@@ -74,6 +74,16 @@ export const Mutation = objectType({
       },
       resolve(...args) {
         return login(...args)
+      }
+    })
+
+    t.field('refresh', {
+      type: 'RefreshPayload',
+      args: {
+        refreshToken: nonNull(stringArg())
+      },
+      resolve(...args) {
+        return refresh(...args)
       }
     })
 

@@ -10,7 +10,7 @@ export const Query = objectType({
     // Characters
     t.field('characters', {
       type: list('Character'),
-      authorize: authorizations(isAuthenticated),
+      // authorize: authorizations(isAuthenticated),
       resolve(...args) {
         return characters(...args)
       }

@@ -2,7 +2,7 @@ import { prisma } from "../prisma";
 import bcrypt from 'bcrypt'
 import { AuthenticationError, UserInputError } from "apollo-server";
 import jwt from 'jsonwebtoken'
-import { resizers, uploadFile } from "../utils/storage";
+import { sizes, uploadFile } from "../utils/storage";
 import { mapIdsToPrisma } from "../utils/prisma";
 import { addMinutes, isAfter } from "date-fns";
 import { getRole } from "../utils/roles";
@@ -12,6 +12,7 @@ import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
 import smashGGClient from "../smashGGClient";
 import { gql } from "graphql-request";
 import { randomUUID } from "crypto";
+import { cache, cacheKeys } from "../redis";
 
 export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
   return prisma.user.findMany({
@@ -121,7 +122,7 @@ export const passwordReset: MutationArg<"passwordReset"> = async (_, { code, pas
 }
 
 export const login: MutationArg<"login"> = async (_, { email, password }, ctx, info) => {
-  const user = await prisma.user.findUnique({ where: { email }, include: { roles: true }})
+  const user = await prisma.user.findUnique({ where: { email }, include: { roles: true }})
   
   if (user) {
     const match = await bcrypt.compare(password, user.password)
@@ -132,23 +133,49 @@ export const login: MutationArg<"login"> = async (_, { email, password }, ctx, i
 
     const userId = user.id
     const userRoles = user.roles.map(role => role.name)
-    const token = jwt.sign({ userId, userRoles }, process.env.JWT_PASSWORD, { expiresIn: '1h' })
+    const accessToken = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' })
+    const refreshToken = jwt.sign({ userId, userRoles }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1y' })
+
+    await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
 
     return {
-      token
+      accessToken,
+      refreshToken
     }
   } else {
     throw new AuthenticationError('Bad credentials')
   }
 }
 
+export const refresh: MutationArg<"refresh"> = async (_, { refreshToken }, ctx, info) => {
+  const exists = await cache.hexists(cacheKeys.refreshTokens, refreshToken)
+
+  if (exists) {
+    const token = await cache.hget(cacheKeys.refreshTokens, refreshToken)
+    // @ts-ignore
+    const { userId } = jwt.decode(token)
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { roles: true }})
+    const userRoles = user.roles.map(role => role.name)
+    const accessToken = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' })
+
+    await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
+
+    return {
+      accessToken
+    }
+  } else {
+    // token does not exist, it's been revoked
+    throw new AuthenticationError('Something bad happened')
+  }
+}
+
 export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
-  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId } = payload
+  // @todo: use profilepictureuri
+  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId, profilePictureUrl } = payload
   const { createReadStream, filename, mimetype } = await profilePicture
   const id = randomUUID()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
-
 
   if (error) {
     throw new UserInputError(error.message)
@@ -158,7 +185,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
     const salt = await bcrypt.genSalt(saltRounds)
     const [hash, uri, role] = await Promise.all([
       bcrypt.hash(password, salt),
-      uploadFile(createReadStream, `${id}-${filename}`, resizers.profile),
+      uploadFile(createReadStream, `${id}-${filename}`, sizes.profile),
       getRole(RoleEnum.USER)
     ])
 
@@ -189,6 +216,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
 }
 
 export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx, info) => {
+  console.log(slug)
   const { error } = smashGGSlug.validate(slug)
 
   if (error) {

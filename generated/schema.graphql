@@ -3,7 +3,8 @@
 
 
 type AuthPayload {
-  token: String
+  accessToken: String
+  refreshToken: String
 }
 
 type Battle {
@@ -112,6 +113,7 @@ type Mutation {
   login(email: String!, password: String!): AuthPayload
   participateTournament(id: ID!, unparticipate: Boolean): Tournament
   passwordReset(code: String!, confirmPassword: String!, password: String!): Boolean
+  refresh(refreshToken: String!): RefreshPayload
   register(payload: UserRegisterPayload!): User
   sendMatchInvite(amount: Int, isMoneymatch: Boolean, to: ID!, totalMatches: Int!): Match
   synchronizeTournaments: [Tournament]
@@ -183,6 +185,10 @@ type Query {
     last: Int
   ): TournamentConnection
   usersByCharacter(id: ID!): [User!]
+}
+
+type RefreshPayload {
+  accessToken: String
 }
 
 input RegisterPayload {
@@ -319,6 +325,7 @@ input UserRegisterPayload {
   email: String!
   password: String!
   profilePicture: Upload!
+  profilePictureUrl: String
   smashGGPlayerId: Int
   smashGGSlug: String
   smashGGUserId: Int
