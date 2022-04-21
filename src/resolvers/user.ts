@@ -12,7 +12,22 @@ import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
 import smashGGClient from "../smashGGClient";
 import { gql } from "graphql-request";
 import { randomUUID } from "crypto";
-import { cache, cacheKeys } from "../redis";
+import { cache, cacheKeys } from "../redis"
+
+const query = gql`
+  query profile($slug: String!) {
+    user(slug: $slug) {
+      id
+      player {
+        id
+        gamerTag
+      }
+      images {
+        url
+      }
+    }
+  }
+`
 
 export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
   return prisma.user.findMany({
@@ -39,7 +54,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
   // If we have a profile picture, update it
   if (profilePicture) {
     const { createReadStream, filename, mimetype } = await profilePicture
-    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, resizers.profile)
+    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, sizes.profile)
   }
 
   return prisma.user.update({
@@ -177,6 +192,14 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
 
+  if (smashGGSlug) {
+    const exists = await prisma.user.findUnique({ where: { smashgg_slug: smashGGSlug }})
+
+    if (exists) {
+      throw new UserInputError('SmashGG Id is already used')
+    }
+  }
+
   if (error) {
     throw new UserInputError(error.message)
   }
@@ -210,38 +233,26 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
       }
     })
   } catch (error) {
-    console.log(error)
     throw new UserInputError('Something went wrong with register.')
   }
 }
 
 export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx, info) => {
-  console.log(slug)
   const { error } = smashGGSlug.validate(slug)
+  const exists = await prisma.user.findUnique({ where: { smashgg_slug: slug }})
+
+  if (!!exists) {
+    throw new UserInputError('SmashGG Id already used')
+  }
 
   if (error) {
     throw new UserInputError(error.message)
   }
 
-  const query = gql`
-    query profile($slug: String!) {
-      user(slug: $slug) {
-        id
-        player {
-          id
-          gamerTag
-        }
-        images {
-          url
-        }
-      }
-    }
-  `
-
   const { user } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug })
 
   if (!user) {
-    return null
+    throw new UserInputError('SmashGG Id does not exists')
   }
 
   return {
