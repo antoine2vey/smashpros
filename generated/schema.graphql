@@ -232,6 +232,7 @@ type Tournament {
   id: ID!
   images: [String!]!
   is_registration_open: Boolean
+  is_started: Boolean!
   lat: Float
   lng: Float
   name: String!
@@ -251,6 +252,7 @@ type Tournament {
     last: Int
   ): UserConnection
   slug: String!
+  start_at: DateTime
   state: Int!
   tournament_id: Int!
   venue_address: String

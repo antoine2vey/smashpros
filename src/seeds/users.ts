@@ -1,26 +1,37 @@
 import { prisma } from "../prisma"
 import bcrypt from 'bcrypt'
 import logger from "../utils/logger"
+import { faker } from '@faker-js/faker';
 
 const users = [
   {
     email: "antoine@smashpros.io",
     password: "antoine",
     tag: "shaark",
-    smashgg_player_id: 2143265
+    smashgg_player_id: 2143265,
+    profile_picture: faker.image.avatar()
   },
   {
     email: "glutonny@smashpros.io",
     password: "glutonny",
     tag: "Glutonny",
-    smashgg_player_id: 6122
+    smashgg_player_id: 6122,
+    profile_picture: faker.image.avatar()
   },
   {
     email: "og@smashpros.io",
     password: "og",
     tag: "Ogey",
-    smashgg_player_id: 64991
-  }
+    smashgg_player_id: 64991,
+    profile_picture: faker.image.avatar()
+  },
+  ...Array(100).fill(undefined).map(() => ({
+    email: faker.internet.email(),
+    password: faker.internet.password(10),
+    tag: faker.random.word(),
+    profile_picture: faker.image.avatar(),
+    smashgg_player_id: null
+  }))
 ]
 
 export async function loadUsers() {
@@ -29,6 +40,7 @@ export async function loadUsers() {
   await prisma.event.deleteMany({})
   await prisma.tournament.deleteMany({})
   await prisma.role.deleteMany({})
+  await prisma.crew.deleteMany({})
 
   logger.info('Creating users ...')
   const batch = []
@@ -44,7 +56,8 @@ export async function loadUsers() {
           password: hash,
           email: user.email,
           tag: user.tag,
-          smashgg_player_id: user.smashgg_player_id
+          smashgg_player_id: user.smashgg_player_id,
+          profile_picture: user.profile_picture
         }
       })
     )

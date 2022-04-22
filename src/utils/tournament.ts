@@ -115,6 +115,7 @@ export async function fetchTournaments(accumulator: ITournament[] = [], page = 1
         filter: {
           videogameIds: [1386]
           upcoming: true
+          countryCode: "FR"
         }
         sortBy: "startAt asc"
         page: $page

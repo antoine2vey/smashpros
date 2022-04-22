@@ -182,11 +182,13 @@ export interface NexusGenObjects {
     id: string; // ID!
     images: string[]; // [String!]!
     is_registration_open?: boolean | null; // Boolean
+    is_started: boolean; // Boolean!
     lat?: number | null; // Float
     lng?: number | null; // Float
     name: string; // String!
     num_attendees?: number | null; // Int
     slug: string; // String!
+    start_at?: NexusGenScalars['DateTime'] | null; // DateTime
     state: number; // Int!
     tournament_id: number; // Int!
     venue_address?: string | null; // String
@@ -354,12 +356,14 @@ export interface NexusGenFieldTypes {
     id: string; // ID!
     images: string[]; // [String!]!
     is_registration_open: boolean | null; // Boolean
+    is_started: boolean; // Boolean!
     lat: number | null; // Float
     lng: number | null; // Float
     name: string; // String!
     num_attendees: number | null; // Int
     participants: NexusGenRootTypes['UserConnection'] | null; // UserConnection
     slug: string; // String!
+    start_at: NexusGenScalars['DateTime'] | null; // DateTime
     state: number; // Int!
     tournament_id: number; // Int!
     venue_address: string | null; // String
@@ -523,12 +527,14 @@ export interface NexusGenFieldTypeNames {
     id: 'ID'
     images: 'String'
     is_registration_open: 'Boolean'
+    is_started: 'Boolean'
     lat: 'Float'
     lng: 'Float'
     name: 'String'
     num_attendees: 'Int'
     participants: 'UserConnection'
     slug: 'String'
+    start_at: 'DateTime'
     state: 'Int'
     tournament_id: 'Int'
     venue_address: 'String'

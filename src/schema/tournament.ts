@@ -28,6 +28,8 @@ export const TournamentObjectType = objectType({
     t.field(Tournament.currency)
     t.field(Tournament.num_attendees)
     t.field(Tournament.end_at)
+    t.field(Tournament.start_at)
+    t.field(Tournament.is_started)
     t.field(Tournament.event_registration_closes_at)
     t.field(Tournament.has_offline_events)
     t.field(Tournament.images)
@@ -43,17 +45,16 @@ export const TournamentObjectType = objectType({
 
     t.connectionField(Tournament.participants.name, {
       type: User.$name,
-      edgeFields: false,
       description: Tournament.participants.description,
       additionalArgs: {
         characters: list(nonNull('ID'))
       },
       cursorFromNode(node) {
-        return connectionPlugin.base64Encode(node.smashgg_player_id.toString())
+        return connectionPlugin.base64Encode(node.id.toString())
       },
       nodes(root, args) {
         //@ts-ignore
-        const { participants } = root
+        const { participants } = root
 
         // If no args, send root participants
         if (!args.characters) {

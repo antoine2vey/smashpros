@@ -97,7 +97,7 @@ export const joinCrew: MutationArg<"joinCrew"> = async (_, { id }, { user }, in
 }
 
 export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, action }, { user }, info) => {
-  const { error } = updateMemberSchema.validate(action)
+  const { error } = updateMemberSchema.validate(action)
 
   if (error) {
     throw new UserInputError(error.message)
