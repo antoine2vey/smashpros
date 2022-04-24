@@ -21,6 +21,37 @@ export function getCursorForArgs(
     last
   }: PaginationArgs
 ) {
+  let cursor: {[x: string]: number}
+  const hasCursor = !!after || !!before
+  const skip = hasCursor ? 1 : 0
+  const take = first
+
+  if (after) {
+    cursor = {
+      [field]: +connectionPlugin.base64Decode(after)
+    }
+  } else if (before) {
+    cursor = {
+      [field]: +connectionPlugin.base64Decode(before)
+    }
+  }
+
+  return {
+    skip,
+    take,
+    cursor
+  }
+}
+
+export function getCursorForStringArgs(
+  field: string,
+  {
+    after,
+    before,
+    first,
+    last
+  }: PaginationArgs
+) {
   let cursor: {[x: string]: string}
   const hasCursor = !!after || !!before
   const skip = hasCursor ? 1 : 0

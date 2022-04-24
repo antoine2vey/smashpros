@@ -36,14 +36,6 @@ export const tournament: QueryArg<"tournament"> = async (_, args, ctx, info) => 
       id: args.id
     },
     include: {
-      participants: {
-        where: {
-          allow_searchability: true
-        },
-        include: {
-          characters: true
-        }
-      },
       favorited_by: {
         where: {
           allow_searchability: true

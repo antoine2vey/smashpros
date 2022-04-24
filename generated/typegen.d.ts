@@ -202,6 +202,10 @@ export interface NexusGenObjects {
     cursor: string; // String!
     node?: NexusGenRootTypes['Tournament'] | null; // Tournament
   }
+  TournamentParticipants_Connection: { // root type
+    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
   User: { // root type
     email: string; // String!
     id: string; // ID!
@@ -209,10 +213,6 @@ export interface NexusGenObjects {
     profile_picture?: string | null; // String
     smashgg_player_id?: number | null; // Int
     tag: string; // String!
-  }
-  UserConnection: { // root type
-    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   UserEdge: { // root type
     cursor: string; // String!
@@ -361,7 +361,7 @@ export interface NexusGenFieldTypes {
     lng: number | null; // Float
     name: string; // String!
     num_attendees: number | null; // Int
-    participants: NexusGenRootTypes['UserConnection'] | null; // UserConnection
+    participants: NexusGenRootTypes['TournamentParticipants_Connection'] | null; // TournamentParticipants_Connection
     slug: string; // String!
     start_at: NexusGenScalars['DateTime'] | null; // DateTime
     state: number; // Int!
@@ -377,6 +377,11 @@ export interface NexusGenFieldTypes {
     cursor: string; // String!
     node: NexusGenRootTypes['Tournament'] | null; // Tournament
   }
+  TournamentParticipants_Connection: { // field return type
+    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+    totalCount: number | null; // Int
+  }
   User: { // field return type
     characters: NexusGenRootTypes['Character'][]; // [Character!]!
     crew: NexusGenRootTypes['Crew'] | null; // Crew
@@ -390,10 +395,6 @@ export interface NexusGenFieldTypes {
     tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     tournaments_organizer: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     waiting_crew: NexusGenRootTypes['Crew'] | null; // Crew
-  }
-  UserConnection: { // field return type
-    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
-    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   UserEdge: { // field return type
     cursor: string; // String!
@@ -532,7 +533,7 @@ export interface NexusGenFieldTypeNames {
     lng: 'Float'
     name: 'String'
     num_attendees: 'Int'
-    participants: 'UserConnection'
+    participants: 'TournamentParticipants_Connection'
     slug: 'String'
     start_at: 'DateTime'
     state: 'Int'
@@ -548,6 +549,11 @@ export interface NexusGenFieldTypeNames {
     cursor: 'String'
     node: 'Tournament'
   }
+  TournamentParticipants_Connection: { // field return type name
+    edges: 'UserEdge'
+    pageInfo: 'PageInfo'
+    totalCount: 'Int'
+  }
   User: { // field return type name
     characters: 'Character'
     crew: 'Crew'
@@ -561,10 +567,6 @@ export interface NexusGenFieldTypeNames {
     tournaments: 'Tournament'
     tournaments_organizer: 'Tournament'
     waiting_crew: 'Crew'
-  }
-  UserConnection: { // field return type name
-    edges: 'UserEdge'
-    pageInfo: 'PageInfo'
   }
   UserEdge: { // field return type name
     cursor: 'String'

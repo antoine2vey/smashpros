@@ -1,5 +1,6 @@
 import { connectionPlugin, inputObjectType, list, nonNull, objectType } from "nexus"
 import { Event, Tournament, User } from 'nexus-prisma'
+import { getCursorForArgs, getCursorForStringArgs } from "../utils/prisma"
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -52,23 +53,60 @@ export const TournamentObjectType = objectType({
       cursorFromNode(node) {
         return connectionPlugin.base64Encode(node.id.toString())
       },
-      nodes(root, args) {
-        //@ts-ignore
-        const { participants } = root
+      extendConnection(t) {
+        t.int('totalCount', {
+          async resolve(root, args, ctx) {
+            return ctx.prisma.user.count({
+              where: {
+                tournaments: {
+                  // @ts-ignore
+                  some: { id: root.id }
+                }
+              }
+            })
+          }
+        })
+      },
+      nodes(root, {characters, ...args}, ctx) {
+        const tournamentId = root.id
+        const cursor = getCursorForStringArgs('id', args)
 
-        // If no args, send root participants
-        if (!args.characters) {
-          return participants
+        function getCharacterQuery(characters: string[] | undefined) {
+          if (!characters || characters.length === 0) {
+            return undefined
+          }
+
+          return {
+            some: {
+              OR: characters.map(id => ({ id }))
+            }
+          }
         }
-
-        // Else, apply filter on every player, find them for characters
-        return participants
-          // Find all players by character
-          .filter(player => (
-            player.characters.some(character => (
-              args.characters.includes(character.id)
-            ))
-          ))
+        
+        return ctx.prisma.user.findMany({
+          ...cursor,
+          where: {
+            AND: [
+              {
+                characters: getCharacterQuery(characters)
+              },
+              {
+                tournaments: {
+                  some: { id: tournamentId }
+                }
+              },
+              {
+                allow_searchability: true
+              }
+            ]
+          },
+          include: {
+            characters: true
+          },
+          orderBy: {
+            tag: 'asc'
+          }
+        })
       }
     })
   }
