@@ -207,12 +207,19 @@ export interface NexusGenObjects {
     pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   User: { // root type
+    allow_notifications: boolean; // Boolean!
+    allow_searchability: boolean; // Boolean!
+    created_at: NexusGenScalars['DateTime']; // DateTime!
     email: string; // String!
     id: string; // ID!
     in_tournament: boolean; // Boolean!
     profile_picture?: string | null; // String
     smashgg_player_id?: number | null; // Int
+    smashgg_slug?: string | null; // String
     tag: string; // String!
+    twitch_username?: string | null; // String
+    twitter_username?: string | null; // String
+    updated_at: NexusGenScalars['DateTime']; // DateTime!
   }
   UserEdge: { // root type
     cursor: string; // String!
@@ -324,6 +331,7 @@ export interface NexusGenFieldTypes {
     suggestedName: NexusGenRootTypes['SuggestedName'] | null; // SuggestedName
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
+    user: NexusGenRootTypes['User'] | null; // User
     usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
   }
   RefreshPayload: { // field return type
@@ -383,17 +391,25 @@ export interface NexusGenFieldTypes {
     totalCount: number | null; // Int
   }
   User: { // field return type
+    allow_notifications: boolean; // Boolean!
+    allow_searchability: boolean; // Boolean!
     characters: NexusGenRootTypes['Character'][]; // [Character!]!
+    created_at: NexusGenScalars['DateTime']; // DateTime!
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     email: string; // String!
+    favorited_tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     id: string; // ID!
     in_tournament: boolean; // Boolean!
     profile_picture: string | null; // String
     roles: NexusGenRootTypes['Role'][]; // [Role!]!
     smashgg_player_id: number | null; // Int
+    smashgg_slug: string | null; // String
     tag: string; // String!
     tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     tournaments_organizer: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
+    twitch_username: string | null; // String
+    twitter_username: string | null; // String
+    updated_at: NexusGenScalars['DateTime']; // DateTime!
     waiting_crew: NexusGenRootTypes['Crew'] | null; // Crew
   }
   UserEdge: { // field return type
@@ -496,6 +512,7 @@ export interface NexusGenFieldTypeNames {
     suggestedName: 'SuggestedName'
     tournament: 'Tournament'
     tournaments: 'TournamentConnection'
+    user: 'User'
     usersByCharacter: 'User'
   }
   RefreshPayload: { // field return type name
@@ -555,17 +572,25 @@ export interface NexusGenFieldTypeNames {
     totalCount: 'Int'
   }
   User: { // field return type name
+    allow_notifications: 'Boolean'
+    allow_searchability: 'Boolean'
     characters: 'Character'
+    created_at: 'DateTime'
     crew: 'Crew'
     email: 'String'
+    favorited_tournaments: 'Tournament'
     id: 'ID'
     in_tournament: 'Boolean'
     profile_picture: 'String'
     roles: 'Role'
     smashgg_player_id: 'Int'
+    smashgg_slug: 'String'
     tag: 'String'
     tournaments: 'Tournament'
     tournaments_organizer: 'Tournament'
+    twitch_username: 'String'
+    twitter_username: 'String'
+    updated_at: 'DateTime'
     waiting_crew: 'Crew'
   }
   UserEdge: { // field return type name
@@ -662,6 +687,9 @@ export interface NexusGenArgTypes {
       before?: string | null; // String
       first?: number | null; // Int
       last?: number | null; // Int
+    }
+    user: { // args
+      id?: string | null; // ID
     }
     usersByCharacter: { // args
       id: string; // ID!

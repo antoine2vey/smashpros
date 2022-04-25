@@ -32,6 +32,14 @@ export const UserObjectType = objectType({
     t.field(User.waiting_crew)
     t.field(User.in_tournament)
     t.field(User.smashgg_player_id)
+    t.field(User.twitch_username)
+    t.field(User.twitter_username)
+    t.field(User.smashgg_slug)
+    t.field(User.allow_notifications)
+    t.field(User.allow_searchability)
+    t.field(User.favorited_tournaments)
+    t.field(User.updated_at)
+    t.field(User.created_at)
   }
 })
 

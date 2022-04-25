@@ -46,6 +46,37 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
   })
 }
 
+export const user: QueryArg<"user"> =async (_, { id: userId }, ctx, info) => {
+  const id = userId || ctx.user.id
+
+  return prisma.user.findUnique({
+    where: {
+      id
+    },
+    select: {
+      id: true,
+      profile_picture: true,
+      lat: true,
+      lng: true,
+      in_tournament: true,
+      crew: true,
+      characters: true,
+      email: true,
+      tag: true,
+      twitch_username: true,
+      twitter_username: true,
+      smashgg_slug: true,
+      allow_notifications: true,
+      allow_searchability: true,
+      waiting_crew: true,
+      favorited_tournaments: true,
+      tournaments: true,
+      updated_at: true,
+      created_at: true
+    }
+  })
+}
+
 export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
   let uri: string;
   const { user } = ctx

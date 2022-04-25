@@ -184,6 +184,7 @@ type Query {
     """Returns the last n elements from the list."""
     last: Int
   ): TournamentConnection
+  user(id: ID): User
   usersByCharacter(id: ID!): [User!]
 }
 
@@ -301,17 +302,25 @@ input TournamentQuery {
 scalar Upload
 
 type User {
+  allow_notifications: Boolean!
+  allow_searchability: Boolean!
   characters: [Character!]!
+  created_at: DateTime!
   crew: Crew
   email: String!
+  favorited_tournaments: [Tournament!]!
   id: ID!
   in_tournament: Boolean!
   profile_picture: String
   roles: [Role!]!
   smashgg_player_id: Int
+  smashgg_slug: String
   tag: String!
   tournaments: [Tournament!]!
   tournaments_organizer: [Tournament!]!
+  twitch_username: String
+  twitter_username: String
+  updated_at: DateTime!
   waiting_crew: Crew
 }
 

@@ -1,7 +1,7 @@
 import { connectionPlugin, idArg, list, nonNull, objectType, stringArg } from "nexus";
 import { Context } from "../context";
 import { isAuthenticated, authorizations } from "../authorizations";
-import { crew, crews, characters, tournaments, tournament, usersByCharacter, suggestedName, matches } from "../resolvers";
+import { user, crew, crews, characters, tournaments, tournament, usersByCharacter, suggestedName, matches } from "../resolvers";
 import { SuggestedName } from ".";
 
 export const Query = objectType({
@@ -57,6 +57,17 @@ export const Query = objectType({
     })
 
     // User
+    t.field('user', {
+      type: 'User',
+      authorize: authorizations(isAuthenticated),
+      args: {
+        id: idArg()
+      },
+      resolve(...args) {
+        return user(...args)
+      }
+    })
+
     t.field('usersByCharacter', {
       type: list(nonNull('User')),
       authorize: authorizations(isAuthenticated),
