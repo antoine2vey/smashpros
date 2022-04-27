@@ -6,6 +6,7 @@ import { pubsub } from "../redis"
 import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
 import { getCursorForArgs } from "../utils/prisma"
 import smashGGClient from "../smashGGClient"
+import { connectionPlugin } from "nexus"
 
 export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) => {
   const cursor = getCursorForArgs('tournament_id', args)
@@ -24,9 +25,14 @@ export const tournaments: QueryArg<"tournaments"> = async (_, args, ctx, info) =
         }
       }
     },
-    orderBy: {
-      start_at: 'asc'
-    }
+    orderBy: [
+      {
+        start_at: 'asc'
+      },
+      {
+        name: 'asc'
+      }
+    ],
   })
 }
 
