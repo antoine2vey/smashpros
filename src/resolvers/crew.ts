@@ -8,14 +8,16 @@ import { MutationArg, QueryArg } from "../typings/interfaces";
 import { sizes, uploadFile } from "../utils/storage";
 import { randomUUID } from "crypto";
 
-export const crew: QueryArg<"crew"> = async (_, args, { user, prisma }, info) => {
-  if (!user.crew_id) {
+export const crew: QueryArg<"crew"> = async (_, { id }, { user, prisma }, info) => {
+  let crewId = id ?? user.crew_id ?? null
+  
+  if (!crewId) {
     return null
   }
 
   return prisma.crew.findUnique({
     where: {
-      id: user.crew_id
+      id: crewId
     },
     include: {
       members: {
@@ -53,7 +55,12 @@ export const createCrew: MutationArg<"createCrew"> = async (_, { payload }, { us
         name,
         prefix,
         members: {
-          connect: [{ id: user.id }]
+          connect: [{ id: user.id }]
+        },
+        admin: {
+          connect: {
+            id: user.id
+          }
         },
         banner: bannerUri,
         icon: iconUri

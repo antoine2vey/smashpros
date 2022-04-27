@@ -28,6 +28,9 @@ export const Query = objectType({
     t.field('crew', {
       type: 'Crew',
       authorize: authorizations(isAuthenticated),
+      args: {
+        id: idArg()
+      },
       resolve(...args) {
         return crew(...args)
       }

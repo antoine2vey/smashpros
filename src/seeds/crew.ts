@@ -24,7 +24,12 @@ export function loadCrews() {
           name: crew.name,
           prefix: crew.prefix,
           icon: crew.icon,
-          banner: crew.banner
+          banner: crew.banner,
+          admin: {
+            connect: {
+              id: undefined
+            }
+          }
         }
       })
     )

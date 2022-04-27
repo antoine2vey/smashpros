@@ -13,6 +13,7 @@ export const CrewObjectType = objectType({
     t.field(Crew.waiting_members)
     t.field(Crew.banner)
     t.field(Crew.icon)
+    t.field(Crew.admin)
   }
 })
 

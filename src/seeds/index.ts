@@ -10,7 +10,7 @@ loadUsers().then(() => {
     loadRoles(),
     loadCharacters(),
     loadTournaments(),
-    loadCrews()
+    // loadCrews()
   ])
     .then(() => {
       logger.info('Job\'s done')
