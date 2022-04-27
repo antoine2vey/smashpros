@@ -216,9 +216,7 @@ export const refresh: MutationArg<"refresh"> = async (_, { refreshToken }, ctx, 
 }
 
 export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
-  // @todo: use profilepictureuri
-  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId, profilePictureUrl } = payload
-  const { createReadStream, filename, mimetype } = await profilePicture
+  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId } = payload
   const id = randomUUID()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
@@ -236,6 +234,7 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
   }
 
   try {
+    const { createReadStream, filename, mimetype } = await profilePicture
     const salt = await bcrypt.genSalt(saltRounds)
     const [hash, uri, role] = await Promise.all([
       bcrypt.hash(password, salt),
@@ -290,6 +289,6 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
     tag: user.player.gamerTag,
     smashGGPlayerId: user.player.id,
     smashGGUserId: user.id,
-    profilePicture: user.images.length > 0 ? user.images[0].url : null
+    profilePicture: user.images.length > 0 ? user.images[1].url : null
   }
 }

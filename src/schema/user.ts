@@ -49,14 +49,13 @@ export const UserRegisterPayload = inputObjectType({
     t.nonNull.string('email')
     t.nonNull.string('password')
     t.nonNull.string('tag')
-    t.nonNull.upload('profilePicture')
     t.nonNull.list.nonNull.id('characters')
+    t.nonNull.upload('profilePicture')
     t.string('twitterUsername')
     t.string('twitchUsername')
     t.string('smashGGSlug')
     t.int('smashGGPlayerId')
     t.int('smashGGUserId')
-    t.string('profilePictureUrl')
   }
 })
 

@@ -65,7 +65,6 @@ export interface NexusGenInputs {
     email: string; // String!
     password: string; // String!
     profilePicture: NexusGenScalars['Upload']; // Upload!
-    profilePictureUrl?: string | null; // String
     smashGGPlayerId?: number | null; // Int
     smashGGSlug?: string | null; // String
     smashGGUserId?: number | null; // Int
@@ -243,11 +242,11 @@ export interface NexusGenFieldTypes {
     refreshToken: string | null; // String
   }
   Battle: { // field return type
-    adversary: NexusGenRootTypes['User']; // User!
-    adversary_character: NexusGenRootTypes['Character']; // Character!
+    adversary: NexusGenRootTypes['User'] | null; // User
+    adversary_character: NexusGenRootTypes['Character'] | null; // Character
     id: string; // ID!
-    initiator: NexusGenRootTypes['User']; // User!
-    initiator_character: NexusGenRootTypes['Character']; // Character!
+    initiator: NexusGenRootTypes['User'] | null; // User
+    initiator_character: NexusGenRootTypes['Character'] | null; // Character
     winner: NexusGenRootTypes['User'] | null; // User
   }
   Character: { // field return type
@@ -257,6 +256,7 @@ export interface NexusGenFieldTypes {
     users: NexusGenRootTypes['User'][]; // [User!]!
   }
   Crew: { // field return type
+    admin: NexusGenRootTypes['User']; // User!
     banner: string; // String!
     icon: string; // String!
     id: string; // ID!
@@ -275,12 +275,12 @@ export interface NexusGenFieldTypes {
     valid: boolean; // Boolean!
   }
   Match: { // field return type
-    adversary: NexusGenRootTypes['User']; // User!
+    adversary: NexusGenRootTypes['User'] | null; // User
     adversary_wins: number; // Int!
     amount: number | null; // Int
     battles: NexusGenRootTypes['Battle'][]; // [Battle!]!
     id: string; // ID!
-    initiator: NexusGenRootTypes['User']; // User!
+    initiator: NexusGenRootTypes['User'] | null; // User
     intiator_wins: number; // Int!
     is_moneymatch: boolean; // Boolean!
     state: NexusGenEnums['MatchState']; // MatchState!
@@ -438,6 +438,7 @@ export interface NexusGenFieldTypeNames {
     users: 'User'
   }
   Crew: { // field return type name
+    admin: 'User'
     banner: 'String'
     icon: 'String'
     id: 'ID'
@@ -670,6 +671,9 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    crew: { // args
+      id?: string | null; // ID
+    }
     matches: { // args
       after?: string | null; // String
       before?: string | null; // String
