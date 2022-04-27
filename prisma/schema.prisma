@@ -35,6 +35,7 @@ model User {
   notification_token     String?      @unique
   allow_notifications    Boolean      @default(false)
   allow_searchability    Boolean      @default(true)
+  crew_admin             Crew?        @relation("crew_admin")
   crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
   waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
   matches_invited        Match[]      @relation("matches_invited")
@@ -107,6 +108,8 @@ model Crew {
   prefix          String
   icon            String
   banner          String
+  admin_id        String   @unique
+  admin           User     @relation("crew_admin", fields: [admin_id], references: [id])
   members         User[]   @relation("crew_members")
   waiting_members User[]   @relation("crew_waiting_members")
 }
@@ -122,14 +125,14 @@ model Match {
   created_at     DateTime    @default(now())
   total_matches  Int         @default(1)
   state          MatchState  @default(HOLD)
-  initiator_id   String
+  initiator_id   String?
   intiator_wins  Int         @default(0)
-  adversary_id   String
+  adversary_id   String?
   adversary_wins Int         @default(0)
   is_moneymatch  Boolean     @default(false)
   amount         Int?        @default(0)
-  adversary      User        @relation("matches_invited", fields: [adversary_id], references: [id])
-  initiator      User        @relation("matches_initiated", fields: [initiator_id], references: [id])
+  adversary      User?       @relation("matches_invited", fields: [adversary_id], references: [id])
+  initiator      User?        @relation("matches_initiated", fields: [initiator_id], references: [id])
   battles        Battle[]
   tournament     Tournament? @relation("matches_tournament", fields: [tournament_id], references: [id])
   tournament_id  String?
@@ -139,15 +142,15 @@ model Battle {
   id                     String    @id @default(uuid())
   match                  Match     @relation(fields: [match_id], references: [id])
   match_id               String
-  adversary              User      @relation("battle_adversary", fields: [adversary_id], references: [id])
-  adversary_id           String
-  adversary_character    Character @relation("battle_adversary_character", fields: [adversary_character_id], references: [id])
-  adversary_character_id String
+  adversary              User?      @relation("battle_adversary", fields: [adversary_id], references: [id])
+  adversary_id           String?
+  adversary_character    Character? @relation("battle_adversary_character", fields: [adversary_character_id], references: [id])
+  adversary_character_id String?
 
-  initiator              User      @relation("battle_initiator", fields: [initiator_id], references: [id])
-  initiator_id           String
-  initiator_character    Character @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
-  initiator_character_id String
+  initiator              User?      @relation("battle_initiator", fields: [initiator_id], references: [id])
+  initiator_id           String?
+  initiator_character    Character? @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
+  initiator_character_id String?
 
   winner    User?   @relation("battle_winner", fields: [winner_id], references: [id])
   winner_id String?
