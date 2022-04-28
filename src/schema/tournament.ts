@@ -103,9 +103,14 @@ export const TournamentObjectType = objectType({
           include: {
             characters: true
           },
-          orderBy: {
-            tag: 'asc'
-          }
+          orderBy: [
+            {
+              tag: 'asc'
+            },
+            {
+              id: 'asc'
+            }
+          ]
         })
       }
     })
