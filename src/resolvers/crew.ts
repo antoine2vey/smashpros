@@ -129,15 +129,22 @@ export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, 
 }
 
 export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user }, info) => {
-  return prisma.crew.update({
-    where: { id: user.crew_id },
+  if (user.id === id) {
+    throw new UserInputError('Cannot kick yourself from crew')
+  }
+
+  return prisma.user.update({
+    where: {
+      id
+    },
     data: {
-      members: {
-        disconnect: [{ id }]
+      crew: {
+        disconnect: true
       }
     },
     include: {
-      members: true
+      characters: true,
+      crew: true
     }
   })
 }

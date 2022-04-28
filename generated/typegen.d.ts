@@ -300,7 +300,7 @@ export interface NexusGenFieldTypes {
     createCrew: NexusGenRootTypes['Crew'] | null; // Crew
     favoriteTournament: boolean | null; // Boolean
     joinCrew: NexusGenRootTypes['Crew'] | null; // Crew
-    kickMember: NexusGenRootTypes['Crew'] | null; // Crew
+    kickMember: NexusGenRootTypes['User'] | null; // User
     login: NexusGenRootTypes['AuthPayload'] | null; // AuthPayload
     participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     passwordReset: boolean | null; // Boolean
@@ -482,7 +482,7 @@ export interface NexusGenFieldTypeNames {
     createCrew: 'Crew'
     favoriteTournament: 'Boolean'
     joinCrew: 'Crew'
-    kickMember: 'Crew'
+    kickMember: 'User'
     login: 'AuthPayload'
     participateTournament: 'Tournament'
     passwordReset: 'Boolean'

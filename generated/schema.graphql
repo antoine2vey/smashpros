@@ -110,7 +110,7 @@ type Mutation {
   createCrew(payload: CrewCreationPayload!): Crew
   favoriteTournament(id: ID!, unfavorite: Boolean = false): Boolean
   joinCrew(id: ID!): Crew
-  kickMember(id: ID!): Crew
+  kickMember(id: ID!): User
   login(email: String!, password: String!): AuthPayload
   participateTournament(id: ID!, unparticipate: Boolean): Tournament
   passwordReset(code: String!, confirmPassword: String!, password: String!): Boolean

@@ -45,7 +45,7 @@ export const Mutation = objectType({
     })
 
     t.field('kickMember', {
-      type: 'Crew',
+      type: 'User',
       authorize: authorizations(isAuthenticated, isCrewAdmin),
       args: {
         id: nonNull(idArg())
