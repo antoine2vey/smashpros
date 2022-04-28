@@ -27,6 +27,7 @@ export const crew: QueryArg<"crew"> = async (_, { id }, { user, prisma }, info) 
         }
       },
       waiting_members: true,
+      admin: true
     }
   })
 }
@@ -34,7 +35,9 @@ export const crew: QueryArg<"crew"> = async (_, { id }, { user, prisma }, info) 
 export const crews: QueryArg<"crews"> = (_, args, ctx, info) => {
   return prisma.crew.findMany({
     include: {
-      members: true
+      members: true,
+      waiting_members: true,
+      admin: true
     }
   })
 }
@@ -98,7 +101,8 @@ export const joinCrew: MutationArg<"joinCrew"> = async (_, { id }, { user }, in
     },
     include: {
       members: true,
-      waiting_members: true
+      waiting_members: true,
+      admin: true
     }
   })
 }
@@ -122,13 +126,14 @@ export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, 
       }
     },
     include: {
+      members: true,
       waiting_members: true,
-      members: true
+      admin: true
     }
   })
 }
 
-export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user }, info) => {
+export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user }) => {
   if (user.id === id) {
     throw new UserInputError('Cannot kick yourself from crew')
   }
@@ -145,6 +150,86 @@ export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user },
     include: {
       characters: true,
       crew: true
+    }
+  })
+}
+
+export const leaveCrew: MutationArg<"leaveCrew"> = async (_, __, { user }) => {
+  return prisma.crew.update({
+    where: {
+      id: user.crew_id
+    },
+    data: {
+      members: {
+        disconnect: { id: user.id }
+      }
+    },
+    include: {
+      members: true,
+      waiting_members: true,
+      admin: true
+    }
+  })
+}
+
+export const transferCrewOwnership: MutationArg<"transferCrewOwnership"> = async (_, { to }, { user }) => {
+  const [adminRole, crew] = await Promise.all([
+    getRole(RoleEnum.CREW_ADMIN),
+    prisma.crew.findUnique({ where: { id: user.crew_id }, include: { members: true }})
+  ])
+
+  // Should never happen
+  if (!crew) {
+    throw new UserInputError('You have no crew')
+  }
+
+  if (crew.admin_id !== user.id) {
+    throw new UserInputError('You are trying to update a crew thats not yours')
+  }
+
+  // Crew member must be in crew
+  if (!crew.members.some(member => member.id === to)) {
+    throw new UserInputError('The user you are trying to promote is not part of your crew')
+  }
+
+  // Set admin role to new admin
+  await prisma.user.update({
+    where: {
+      id: to
+    },
+    data: {
+      roles: {
+        connect: {
+          id: adminRole.id
+        }
+      }
+    }
+  })
+
+  return prisma.crew.update({
+    where: {
+      id: user.crew_id
+    },
+    data: {
+      admin: {
+        // Set admin to `to`
+        connect: {
+          id: to
+        },
+        update: {
+          roles: {
+            // Remove old admin role
+            disconnect: {
+              id: adminRole.id
+            }
+          }
+        }
+      }
+    },
+    include: {
+      members: true,
+      waiting_members: true,
+      admin: true
     }
   })
 }

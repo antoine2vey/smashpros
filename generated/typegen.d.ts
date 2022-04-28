@@ -301,6 +301,7 @@ export interface NexusGenFieldTypes {
     favoriteTournament: boolean | null; // Boolean
     joinCrew: NexusGenRootTypes['Crew'] | null; // Crew
     kickMember: NexusGenRootTypes['User'] | null; // User
+    leaveCrew: NexusGenRootTypes['Crew'] | null; // Crew
     login: NexusGenRootTypes['AuthPayload'] | null; // AuthPayload
     participateTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     passwordReset: boolean | null; // Boolean
@@ -308,6 +309,7 @@ export interface NexusGenFieldTypes {
     register: NexusGenRootTypes['User'] | null; // User
     sendMatchInvite: NexusGenRootTypes['Match'] | null; // Match
     synchronizeTournaments: Array<NexusGenRootTypes['Tournament'] | null> | null; // [Tournament]
+    transferCrewOwnership: NexusGenRootTypes['Crew'] | null; // Crew
     updateMatchScore: NexusGenRootTypes['Match'] | null; // Match
     updateMatchState: NexusGenRootTypes['Match'] | null; // Match
     updateMember: NexusGenRootTypes['Crew'] | null; // Crew
@@ -483,6 +485,7 @@ export interface NexusGenFieldTypeNames {
     favoriteTournament: 'Boolean'
     joinCrew: 'Crew'
     kickMember: 'User'
+    leaveCrew: 'Crew'
     login: 'AuthPayload'
     participateTournament: 'Tournament'
     passwordReset: 'Boolean'
@@ -490,6 +493,7 @@ export interface NexusGenFieldTypeNames {
     register: 'User'
     sendMatchInvite: 'Match'
     synchronizeTournaments: 'Tournament'
+    transferCrewOwnership: 'Crew'
     updateMatchScore: 'Match'
     updateMatchState: 'Match'
     updateMember: 'Crew'
@@ -646,6 +650,9 @@ export interface NexusGenArgTypes {
       isMoneymatch?: boolean | null; // Boolean
       to: string; // ID!
       totalMatches: number; // Int!
+    }
+    transferCrewOwnership: { // args
+      to: string; // ID!
     }
     updateMatchScore: { // args
       adversaryCharacter: string; // ID!

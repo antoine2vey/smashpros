@@ -1,7 +1,7 @@
 import { arg, booleanArg, idArg, intArg, list, nonNull, objectType, stringArg } from "nexus";
 import { CrewCreationPayload, MatchStateEnumType } from ".";
 import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
-import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, participateTournament, sendMatchInvite, synchronizeTournaments, updateMatchScore, updateMatchState, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
+import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, leaveCrew, participateTournament, sendMatchInvite, synchronizeTournaments, transferCrewOwnership, updateMatchScore, updateMatchState, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
 import { askPasswordReset, login, passwordReset, refresh, register, updateProfile } from "../resolvers/user";
 import { CrewUpdateActionEnum } from "./crew";
 import { UserRegisterPayload, UserUpdatePayload } from "./user";
@@ -21,6 +21,17 @@ export const Mutation = objectType({
       }
     })
 
+    t.field('transferCrewOwnership', {
+      type: 'Crew',
+      authorize: authorizations(isAuthenticated, isCrewAdmin),
+      args: {
+        to: nonNull(idArg())
+      },
+      resolve(...args) {
+        return transferCrewOwnership(...args)
+      }
+    })
+
     t.field('joinCrew', {
       type: 'Crew',
       authorize: authorizations(isAuthenticated),
@@ -29,6 +40,14 @@ export const Mutation = objectType({
       },
       resolve(...args) {
         return joinCrew(...args) 
+      }
+    })
+
+    t.field('leaveCrew', {
+      type: 'Crew',
+      authorize: authorizations(isAuthenticated),
+      resolve(...args) {
+        return leaveCrew(...args) 
       }
     })
 

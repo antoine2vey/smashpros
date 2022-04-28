@@ -111,6 +111,7 @@ type Mutation {
   favoriteTournament(id: ID!, unfavorite: Boolean = false): Boolean
   joinCrew(id: ID!): Crew
   kickMember(id: ID!): User
+  leaveCrew: Crew
   login(email: String!, password: String!): AuthPayload
   participateTournament(id: ID!, unparticipate: Boolean): Tournament
   passwordReset(code: String!, confirmPassword: String!, password: String!): Boolean
@@ -118,6 +119,7 @@ type Mutation {
   register(payload: UserRegisterPayload!): User
   sendMatchInvite(amount: Int, isMoneymatch: Boolean, to: ID!, totalMatches: Int!): Match
   synchronizeTournaments: [Tournament]
+  transferCrewOwnership(to: ID!): Crew
   updateMatchScore(adversaryCharacter: ID!, id: ID!, initiatorCharacter: ID!): Match
   updateMatchState(id: ID!, state: MatchState!): Match
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
