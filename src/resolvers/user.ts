@@ -13,6 +13,8 @@ import smashGGClient from "../smashGGClient";
 import { gql } from "graphql-request";
 import { randomUUID } from "crypto";
 import { cache, cacheKeys } from "../redis"
+import { compile, ResetTemplate, sendMail } from "../smtp";
+import logger from "../utils/logger";
 
 const query = gql`
   query profile($slug: String!) {
@@ -108,7 +110,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
   })
 }
 
-export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { email }, ctx, info) => {
+export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { email }, { req }, info) => {
   const { error } = emailSchema.validate(email)
   const code = randomUUID()
   const now = new Date()
@@ -119,8 +121,8 @@ export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { ema
   }
 
   try {
-    await prisma.user.update({
-      where: {
+    const user = await prisma.user.update({
+      where: {  
         email
       },
       data: {
@@ -128,9 +130,18 @@ export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { ema
         reset_token_expiration: expiration
       }
     })
-  
-    return `We sent you an email (code: ${code})`
+
+    // Build template with data
+    const template = await compile<ResetTemplate>('reset', {
+      tag: user.tag,
+      url: `${req.protocol}://${req.headers.host}/reset?token=${code}`
+    })
+
+    // // Send mail
+    await sendMail(user.email, 'Password reset', template)
   } catch (error) {
+    logger.error(error)
+  } finally {
     return `We sent you an email`
   }
 }

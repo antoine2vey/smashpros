@@ -9,6 +9,8 @@ import { findUserByToken } from './utils/user';
 import { config, schema } from './config';
 import { graphqlUploadExpress } from 'graphql-upload';
 import { ensureBucketExists } from './utils/storage';
+import { engine } from 'express-handlebars';
+import path from 'path';
 
 const server = new ApolloServer(config);
 
@@ -36,10 +38,22 @@ server.start().then(async () => {
   app.use(graphqlUploadExpress())
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
+  // app.use(express.static('public'))
+
+  app.engine('handlebars', engine());
+  app.set('view engine', 'handlebars');
+  app.set('views', path.join(__dirname, 'views'));
+
+  app.get('/reset', (req, res) => {
+    const token = req.query.token
+
+    res.render('reset', {
+      token
+    })
+  })
 
   server.applyMiddleware({
-    app,
-    path: '/'
+    app
   })
   
   httpServer.listen({ port: 4000 }, () => {

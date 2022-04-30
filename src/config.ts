@@ -31,7 +31,8 @@ export const config = {
     const user = await findUserByToken(req.headers.authorization)
     return {
       user,
-      prisma
+      prisma,
+      req
     }
   },
 }

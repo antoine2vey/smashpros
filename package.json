@@ -3,7 +3,9 @@
     "@google-cloud/storage": "^5.15.5",
     "@graphql-tools/schema": "^7.1.5",
     "@prisma/client": "^3.11.0",
+    "@types/fs-extra": "^9.0.13",
     "@types/ioredis": "^4.26.6",
+    "@types/nodemailer": "^6.4.4",
     "apollo-server": "^2.19.0",
     "apollo-server-express": "2.9.13",
     "apollo-server-integration-testing": "^3.0.0",
@@ -13,13 +15,16 @@
     "chalk": "^4.1.0",
     "date-fns": "^2.16.1",
     "dotenv": "^10.0.0",
+    "express-handlebars": "^6.0.5",
     "firebase-admin": "^10.0.0",
+    "fs-extra": "^10.1.0",
     "graphql": "^15.7.0",
     "graphql-redis-subscriptions": "^2.4.0",
     "graphql-request": "^3.6.1",
     "graphql-resolvers": "^0.4.2",
     "graphql-type-json": "^0.3.2",
     "graphql-upload": "^12.0.0",
+    "handlebars": "^4.7.7",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
@@ -27,6 +32,7 @@
     "nexus-prisma": "^0.34.0",
     "node-cron": "^2.0.3",
     "node-fetch": "^2.6.1",
+    "nodemailer": "^6.7.4",
     "sharp": "^0.29.3",
     "subscriptions-transport-ws": "^0.9.19",
     "ts-jest": "^27.0.4",
@@ -61,6 +67,7 @@
     "seed": "ts-node src/seeds",
     "test:migrate": "dotenv -e .env.test -- npx prisma migrate dev --preview-feature",
     "test:seed": "dotenv -e .env.test yarn seed:characters && dotenv -e .env.test yarn seed:roles",
-    "test": "dotenv -e .env.test jest -i"
+    "test": "dotenv -e .env.test jest -i",
+    "postinstall": "prisma generate"
   }
 }
