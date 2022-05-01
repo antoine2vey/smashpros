@@ -276,7 +276,7 @@ export const Mutation = objectType({
       args: {
         id: nonNull(idArg()),
         initiatorCharacter: nonNull(idArg()),
-        adversaryCharacter: nonNull(idArg())
+        opponentCharacter: nonNull(idArg())
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {

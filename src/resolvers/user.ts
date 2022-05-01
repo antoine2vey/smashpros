@@ -197,7 +197,7 @@ export const passwordReset: MutationArg<'passwordReset'> = async (
   }
 
   if (!user || isExpired) {
-    throw new AuthenticationError('Not authorized')
+    throw new AuthenticationError('Link expired, please try again')
   }
 
   const saltRounds = 10
