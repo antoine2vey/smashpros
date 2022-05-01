@@ -5,6 +5,6 @@ export * from './isTO'
 
 export function authorizations(...functions) {
   return (...args) => {
-    return functions.every(fn => fn(...args))
+    return functions.every((fn) => fn(...args))
   }
 }

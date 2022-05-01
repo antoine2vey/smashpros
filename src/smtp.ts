@@ -9,7 +9,7 @@ export type ResetTemplate = {
 }
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.mailgun.org",
+  host: 'smtp.mailgun.org',
   port: 587,
   secure: false,
   auth: {
@@ -19,7 +19,11 @@ const transporter = nodemailer.createTransport({
 })
 
 export async function compile<T>(template: string, data: T): Promise<string> {
-  const templatePath = path.join(__dirname, 'templates', `${template}.handlebars`)
+  const templatePath = path.join(
+    __dirname,
+    'templates',
+    `${template}.handlebars`
+  )
   const templateBuffer = await fs.readFile(templatePath)
   const templateString = templateBuffer.toString('utf-8')
   const html = hbs.compile(templateString)

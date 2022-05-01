@@ -1,20 +1,25 @@
-import { prisma } from "../prisma";
+import { prisma } from '../prisma'
 import bcrypt from 'bcrypt'
-import { AuthenticationError, UserInputError } from "apollo-server";
+import { AuthenticationError, UserInputError } from 'apollo-server'
 import jwt from 'jsonwebtoken'
-import { sizes, uploadFile } from "../utils/storage";
-import { mapIdsToPrisma } from "../utils/prisma";
-import { addMinutes, isAfter } from "date-fns";
-import { getRole } from "../utils/roles";
-import { RoleEnum } from "@prisma/client";
-import { forgotPasswordSchema, emailSchema, registerSchema, smashGGSlug } from "../validations/user";
-import { MutationArg, QueryArg, SmashGG } from "../typings/interfaces"
-import smashGGClient from "../smashGGClient";
-import { gql } from "graphql-request";
-import { randomUUID } from "crypto";
-import { cache, cacheKeys } from "../redis"
-import { compile, ResetTemplate, sendMail } from "../smtp";
-import logger from "../utils/logger";
+import { sizes, uploadFile } from '../utils/storage'
+import { mapIdsToPrisma } from '../utils/prisma'
+import { addMinutes, isAfter } from 'date-fns'
+import { getRole } from '../utils/roles'
+import { RoleEnum } from '@prisma/client'
+import {
+  forgotPasswordSchema,
+  emailSchema,
+  registerSchema,
+  smashGGSlug
+} from '../validations/user'
+import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
+import smashGGClient from '../smashGGClient'
+import { gql } from 'graphql-request'
+import { randomUUID } from 'crypto'
+import { cache, cacheKeys } from '../redis'
+import { compile, ResetTemplate, sendMail } from '../smtp'
+import logger from '../utils/logger'
 
 const query = gql`
   query profile($slug: String!) {
@@ -31,7 +36,12 @@ const query = gql`
   }
 `
 
-export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, info) => {
+export const usersByCharacter: QueryArg<'usersByCharacter'> = (
+  _,
+  { id },
+  ctx,
+  info
+) => {
   return prisma.user.findMany({
     include: {
       characters: true
@@ -48,7 +58,7 @@ export const usersByCharacter: QueryArg<"usersByCharacter"> = (_, { id }, ctx, i
   })
 }
 
-export const user: QueryArg<"user"> =async (_, { id: userId }, ctx, info) => {
+export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
   const id = userId || ctx.user.id
 
   return prisma.user.findUnique({
@@ -79,15 +89,31 @@ export const user: QueryArg<"user"> =async (_, { id: userId }, ctx, info) => {
   })
 }
 
-export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }, ctx, info) => {
-  let uri: string;
+export const updateProfile: MutationArg<'updateProfile'> = async (
+  _,
+  { payload },
+  ctx,
+  info
+) => {
+  let uri: string
   const { user } = ctx
-  const { email, tag, profilePicture, characters, twitterUsername, twitchUsername } = payload
-  
+  const {
+    email,
+    tag,
+    profilePicture,
+    characters,
+    twitterUsername,
+    twitchUsername
+  } = payload
+
   // If we have a profile picture, update it
   if (profilePicture) {
     const { createReadStream, filename, mimetype } = await profilePicture
-    uri = await uploadFile(createReadStream, `${randomUUID()}-${filename}`, sizes.profile)
+    uri = await uploadFile(
+      createReadStream,
+      `${randomUUID()}-${filename}`,
+      sizes.profile
+    )
   }
 
   return prisma.user.update({
@@ -100,7 +126,7 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
     data: {
       email,
       tag,
-      ...(profilePicture && {profile_picture: uri}),
+      ...(profilePicture && { profile_picture: uri }),
       ...(twitterUsername && { twitter_username: twitterUsername }),
       ...(twitchUsername && { twitch_username: twitchUsername }),
       characters: {
@@ -110,7 +136,12 @@ export const updateProfile: MutationArg<"updateProfile"> = async (_, { payload }
   })
 }
 
-export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { email }, { req }, info) => {
+export const askPasswordReset: MutationArg<'askPasswordReset'> = async (
+  _,
+  { email },
+  { req },
+  info
+) => {
   const { error } = emailSchema.validate(email)
   const code = randomUUID()
   const now = new Date()
@@ -122,7 +153,7 @@ export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { ema
 
   try {
     const user = await prisma.user.update({
-      where: {  
+      where: {
         email
       },
       data: {
@@ -146,9 +177,18 @@ export const askPasswordReset: MutationArg<"askPasswordReset"> = async (_, { ema
   }
 }
 
-export const passwordReset: MutationArg<"passwordReset"> = async (_, { code, password, confirmPassword }, ctx, info) => {
-  const { error } = forgotPasswordSchema.validate({ code, password, confirmPassword })
-  const user = await prisma.user.findFirst({ where: { reset_token: code }})
+export const passwordReset: MutationArg<'passwordReset'> = async (
+  _,
+  { code, password, confirmPassword },
+  ctx,
+  info
+) => {
+  const { error } = forgotPasswordSchema.validate({
+    code,
+    password,
+    confirmPassword
+  })
+  const user = await prisma.user.findFirst({ where: { reset_token: code } })
   const now = new Date()
   const isExpired = user ? isAfter(now, user.reset_token_expiration) : false
 
@@ -178,9 +218,17 @@ export const passwordReset: MutationArg<"passwordReset"> = async (_, { code, pas
   return true
 }
 
-export const login: MutationArg<"login"> = async (_, { email, password }, ctx, info) => {
-  const user = await prisma.user.findUnique({ where: { email }, include: { roles: true }})
-  
+export const login: MutationArg<'login'> = async (
+  _,
+  { email, password },
+  ctx,
+  info
+) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { roles: true }
+  })
+
   if (user) {
     const match = await bcrypt.compare(password, user.password)
 
@@ -189,9 +237,17 @@ export const login: MutationArg<"login"> = async (_, { email, password }, ctx, i
     }
 
     const userId = user.id
-    const userRoles = user.roles.map(role => role.name)
-    const accessToken = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' })
-    const refreshToken = jwt.sign({ userId, userRoles }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '1y' })
+    const userRoles = user.roles.map((role) => role.name)
+    const accessToken = jwt.sign(
+      { userId, userRoles },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1800s' }
+    )
+    const refreshToken = jwt.sign(
+      { userId, userRoles },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '1y' }
+    )
 
     await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
 
@@ -204,16 +260,28 @@ export const login: MutationArg<"login"> = async (_, { email, password }, ctx, i
   }
 }
 
-export const refresh: MutationArg<"refresh"> = async (_, { refreshToken }, ctx, info) => {
+export const refresh: MutationArg<'refresh'> = async (
+  _,
+  { refreshToken },
+  ctx,
+  info
+) => {
   const exists = await cache.hexists(cacheKeys.refreshTokens, refreshToken)
 
   if (exists) {
     const token = await cache.hget(cacheKeys.refreshTokens, refreshToken)
     // @ts-ignore
     const { userId } = jwt.decode(token)
-    const user = await prisma.user.findUnique({ where: { id: userId }, include: { roles: true }})
-    const userRoles = user.roles.map(role => role.name)
-    const accessToken = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1800s' })
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { roles: true }
+    })
+    const userRoles = user.roles.map((role) => role.name)
+    const accessToken = jwt.sign(
+      { userId, userRoles },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1800s' }
+    )
 
     await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
 
@@ -226,14 +294,30 @@ export const refresh: MutationArg<"refresh"> = async (_, { refreshToken }, ctx, 
   }
 }
 
-export const register: MutationArg<"register"> = async (_, { payload }, ctx, info) => {
-  const { password, email, tag, profilePicture, characters, smashGGPlayerId, smashGGSlug, smashGGUserId } = payload
+export const register: MutationArg<'register'> = async (
+  _,
+  { payload },
+  ctx,
+  info
+) => {
+  const {
+    password,
+    email,
+    tag,
+    profilePicture,
+    characters,
+    smashGGPlayerId,
+    smashGGSlug,
+    smashGGUserId
+  } = payload
   const id = randomUUID()
   const saltRounds = 10
   const { error } = registerSchema.validate(payload)
 
   if (smashGGSlug) {
-    const exists = await prisma.user.findUnique({ where: { smashgg_slug: smashGGSlug }})
+    const exists = await prisma.user.findUnique({
+      where: { smashgg_slug: smashGGSlug }
+    })
 
     if (exists) {
       throw new UserInputError('SmashGG Id is already used')
@@ -278,9 +362,14 @@ export const register: MutationArg<"register"> = async (_, { payload }, ctx, inf
   }
 }
 
-export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx, info) => {
+export const suggestedName: QueryArg<'suggestedName'> = async (
+  _,
+  { slug },
+  ctx,
+  info
+) => {
   const { error } = smashGGSlug.validate(slug)
-  const exists = await prisma.user.findUnique({ where: { smashgg_slug: slug }})
+  const exists = await prisma.user.findUnique({ where: { smashgg_slug: slug } })
 
   if (!!exists) {
     throw new UserInputError('SmashGG Id already used')
@@ -290,7 +379,10 @@ export const suggestedName: QueryArg<"suggestedName"> = async (_, { slug }, ctx,
     throw new UserInputError(error.message)
   }
 
-  const { user } = await smashGGClient.request<{ user: SmashGG.User }, { slug: string }>(query, { slug })
+  const { user } = await smashGGClient.request<
+    { user: SmashGG.User },
+    { slug: string }
+  >(query, { slug })
 
   if (!user) {
     throw new UserInputError('SmashGG Id does not exists')

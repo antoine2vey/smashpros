@@ -1,26 +1,24 @@
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash'
 import { createLogger, format, transports } from 'winston'
 const { combine, json, colorize, printf, timestamp } = format
 
-const devLogFormat = () => printf(({ level, message, timestamp, durationMs, ...meta }) => {
-  let str = `${timestamp} - ${level}: ${message}`;
+const devLogFormat = () =>
+  printf(({ level, message, timestamp, durationMs, ...meta }) => {
+    let str = `${timestamp} - ${level}: ${message}`
 
-  if (!isEmpty(meta)) {
-    str += ` \n${JSON.stringify(meta, undefined, 2)}`
-  }
+    if (!isEmpty(meta)) {
+      str += ` \n${JSON.stringify(meta, undefined, 2)}`
+    }
 
-  if (durationMs) {
-    str += ` [${durationMs}ms]`
-  }
+    if (durationMs) {
+      str += ` [${durationMs}ms]`
+    }
 
-  return str
-});
+    return str
+  })
 
 const logger = createLogger({
-  format: combine(
-    timestamp(),
-    json()
-  ),
+  format: combine(timestamp(), json()),
   transports: [
     //
     // - Write all logs with level `error` and below to `error.log`
@@ -40,7 +38,7 @@ if (process.env.NODE_ENV !== 'production') {
   logger.add(
     new transports.Console({
       format: combine(
-        timestamp({ format: 'HH:mm:ss.SSS' }),
+        timestamp({ format: 'HH:mm:ss.SSS' }),
         colorize(),
         devLogFormat()
       )

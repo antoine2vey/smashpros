@@ -1,6 +1,6 @@
-import { nonNull, subscriptionType } from "nexus";
-import { pubsub } from "../redis";
-import { PubSub } from "../typings/enums";
+import { nonNull, subscriptionType } from 'nexus'
+import { pubsub } from '../redis'
+import { PubSub } from '../typings/enums'
 
 export const Subscription = subscriptionType({
   definition(t) {

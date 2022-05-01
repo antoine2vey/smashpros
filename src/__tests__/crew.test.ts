@@ -1,25 +1,31 @@
-import { Crew, User } from "@prisma/client"
-import { ApolloServer, gql } from "apollo-server-express"
-import { config } from "../config"
-import { prisma } from "../prisma"
-import { CrewActions } from "../typings/enums"
-import { createTestClient } from "./utils/apolloServerTesting"
-import closeAllConnections from "./utils/closeConnections"
-import { createUser, getToken, getUser, removeToken, setToken } from "./utils/user"
+import { Crew, User } from '@prisma/client'
+import { ApolloServer, gql } from 'apollo-server-express'
+import { config } from '../config'
+import { prisma } from '../prisma'
+import { CrewActions } from '../typings/enums'
+import { createTestClient } from './utils/apolloServerTesting'
+import closeAllConnections from './utils/closeConnections'
+import {
+  createUser,
+  getToken,
+  getUser,
+  removeToken,
+  setToken
+} from './utils/user'
 
 const apolloServer = new ApolloServer(config)
 const { query, mutate, setOptions } = createTestClient({ apolloServer })
 
 beforeAll(async () => {
   return prisma.$transaction([
-    createUser("crew_admin", "crew_admin@smashpros.io"),
-    createUser("user1", "user1@smashpros.io"),
-    createUser("user2", "user2@smashpros.io")
+    createUser('crew_admin', 'crew_admin@smashpros.io'),
+    createUser('user1', 'user1@smashpros.io'),
+    createUser('user2', 'user2@smashpros.io')
   ])
 })
 
 describe('GraphQL crew endpoints', () => {
-  describe('Fetch user\'s crew', () => {
+  describe("Fetch user's crew", () => {
     it('should be a protected resource', async () => {
       const QUERY = gql`
         {
@@ -28,19 +34,19 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await query(QUERY)
-  
+
+      const { data, errors } = await query(QUERY)
+
       expect(errors[0].message).toEqual('Not authenticated')
       expect(data).toEqual({
         crew: null
       })
     })
-  
+
     it('should return null if user has no crew', async () => {
       const token = await getToken('crew_admin@smashpros.io')
       setToken(setOptions, token)
-  
+
       const QUERY = gql`
         {
           crew {
@@ -48,9 +54,9 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await query(QUERY)
-  
+
+      const { data, errors } = await query(QUERY)
+
       expect(errors).toBeUndefined()
       expect(data).toEqual({
         crew: null
@@ -67,10 +73,10 @@ describe('GraphQL crew endpoints', () => {
       const token = await getToken('crew_admin@smashpros.io')
       setToken(setOptions, token)
     })
-    
+
     it('should be a protected resource', async () => {
       removeToken(setOptions)
-      
+
       const QUERY = gql`
         mutation createCrew($name: String!, $prefix: String!) {
           createCrew(name: $name, prefix: $prefix) {
@@ -85,11 +91,13 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await mutate<{ createCrew: (Crew & { members: User[] }) }>(QUERY, {
+
+      const { data, errors } = await mutate<{
+        createCrew: Crew & { members: User[] }
+      }>(QUERY, {
         variables: {
-          name: "Test crew",
-          prefix: "CREW"
+          name: 'Test crew',
+          prefix: 'CREW'
         }
       })
 
@@ -113,14 +121,16 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await mutate<{ createCrew: (Crew & { members: User[] }) }>(QUERY, {
+
+      const { data, errors } = await mutate<{
+        createCrew: Crew & { members: User[] }
+      }>(QUERY, {
         variables: {
-          name: "Test crew",
-          prefix: "CREW"
+          name: 'Test crew',
+          prefix: 'CREW'
         }
       })
-  
+
       expect(errors).toBeUndefined()
       expect(data.createCrew.name).toEqual('Test crew')
       expect(data.createCrew.prefix).toEqual('CREW')
@@ -144,15 +154,17 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await mutate<{ createCrew: (Crew & { members: User[] }) }>(QUERY, {
+
+      const { data, errors } = await mutate<{
+        createCrew: Crew & { members: User[] }
+      }>(QUERY, {
         variables: {
-          name: "Another test crew",
-          prefix: "TESTCREW"
+          name: 'Another test crew',
+          prefix: 'TESTCREW'
         }
       })
 
-      expect(errors[0].message).toEqual("Already a crew admin")
+      expect(errors[0].message).toEqual('Already a crew admin')
       expect(data).toEqual({ createCrew: null })
     })
 
@@ -223,10 +235,12 @@ describe('GraphQL crew endpoints', () => {
           }
         }
       `
-      const { data, errors } = await mutate<{ joinCrew: (Crew & {
-        members: User[],
-        waiting_members: User[]
-      }) }>(QUERY, {
+      const { data, errors } = await mutate<{
+        joinCrew: Crew & {
+          members: User[]
+          waiting_members: User[]
+        }
+      }>(QUERY, {
         variables: {
           id: crewAdmin.crew_id
         }
@@ -256,10 +270,12 @@ describe('GraphQL crew endpoints', () => {
         }
       `
 
-      const { data, errors } = await mutate<{ joinCrew: (Crew & {
-        members: User[],
-        waiting_members: User[]
-      }) }>(QUERY, {
+      const { data, errors } = await mutate<{
+        joinCrew: Crew & {
+          members: User[]
+          waiting_members: User[]
+        }
+      }>(QUERY, {
         variables: {
           id: crewAdmin.crew_id
         }

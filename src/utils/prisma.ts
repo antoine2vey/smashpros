@@ -1,27 +1,22 @@
-import { Prisma } from "@prisma/client";
-import { connectionPlugin } from "nexus";
+import { Prisma } from '@prisma/client'
+import { connectionPlugin } from 'nexus'
 
 type PaginationArgs = {
-  after?: string;
-  before?: string;
-  first?: number;
-  last?: number;
+  after?: string
+  before?: string
+  first?: number
+  last?: number
 }
 
 export function mapIdsToPrisma(ids: string[]) {
-  return ids.map(id => ({ id }))
+  return ids.map((id) => ({ id }))
 }
 
 export function getCursorForArgs(
   field: string,
-  {
-    after,
-    before,
-    first,
-    last
-  }: PaginationArgs
+  { after, before, first, last }: PaginationArgs
 ) {
-  let cursor: {[x: string]: number}
+  let cursor: { [x: string]: number }
   const hasCursor = !!after || !!before
   const skip = hasCursor ? 1 : 0
   const take = first
@@ -45,14 +40,9 @@ export function getCursorForArgs(
 
 export function getCursorForStringArgs(
   field: string,
-  {
-    after,
-    before,
-    first,
-    last
-  }: PaginationArgs
+  { after, before, first, last }: PaginationArgs
 ) {
-  let cursor: {[x: string]: string}
+  let cursor: { [x: string]: string }
   const hasCursor = !!after || !!before
   const skip = hasCursor ? 1 : 0
   const take = first

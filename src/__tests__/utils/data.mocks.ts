@@ -1,5 +1,5 @@
-import { Character, Crew, Role, User } from "@prisma/client";
-import { UserCreateInput } from "../../typings/interfaces";
+import { Character, Crew, Role, User } from '@prisma/client'
+import { UserCreateInput } from '../../typings/interfaces'
 
 const profilePictureUri = '://profile_picture'
 const iconPictureUri = '://icon'

@@ -1,37 +1,39 @@
-import { prisma } from "../prisma"
+import { prisma } from '../prisma'
 import bcrypt from 'bcrypt'
-import logger from "../utils/logger"
-import { faker } from '@faker-js/faker';
+import logger from '../utils/logger'
+import { faker } from '@faker-js/faker'
 
 const users = [
   {
-    email: "antoine@smashpros.io",
-    password: "antoine",
-    tag: "shaark",
+    email: 'antoine@smashpros.io',
+    password: 'antoine',
+    tag: 'shaark',
     smashgg_player_id: 2143265,
     profile_picture: faker.image.avatar()
   },
   {
-    email: "glutonny@smashpros.io",
-    password: "glutonny",
-    tag: "Glutonny",
+    email: 'glutonny@smashpros.io',
+    password: 'glutonny',
+    tag: 'Glutonny',
     smashgg_player_id: 6122,
     profile_picture: faker.image.avatar()
   },
   {
-    email: "og@smashpros.io",
-    password: "og",
-    tag: "Ogey",
+    email: 'og@smashpros.io',
+    password: 'og',
+    tag: 'Ogey',
     smashgg_player_id: 64991,
     profile_picture: faker.image.avatar()
   },
-  ...Array(100).fill(undefined).map(() => ({
-    email: faker.internet.email(),
-    password: faker.internet.password(10),
-    tag: faker.random.word(),
-    profile_picture: faker.image.avatar(),
-    smashgg_player_id: null
-  }))
+  ...Array(100)
+    .fill(undefined)
+    .map(() => ({
+      email: faker.internet.email(),
+      password: faker.internet.password(10),
+      tag: faker.random.word(),
+      profile_picture: faker.image.avatar(),
+      smashgg_player_id: null
+    }))
 ]
 
 export async function loadUsers() {

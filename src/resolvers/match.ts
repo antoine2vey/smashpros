@@ -1,16 +1,16 @@
-import { Match, MatchState, User } from ".prisma/client"
-import { UserInputError } from "apollo-server-errors"
-import { prisma } from "../prisma"
-import { MutationArg, QueryArg } from "../typings/interfaces"
-import { sendNotification } from "../utils/notifications"
-import { getCursorForArgs } from "../utils/prisma"
+import { Match, MatchState, User } from '.prisma/client'
+import { UserInputError } from 'apollo-server-errors'
+import { prisma } from '../prisma'
+import { MutationArg, QueryArg } from '../typings/interfaces'
+import { sendNotification } from '../utils/notifications'
+import { getCursorForArgs } from '../utils/prisma'
 
 function matchGuard(match: Match, user: User) {
   const isInitiator = match.initiator_id === user.id
   const isAdversary = match.adversary_id === user.id
 
   if (!isInitiator && !isAdversary) {
-    return new UserInputError('Not user\'s match')
+    return new UserInputError("Not user's match")
   }
 
   if (
@@ -25,7 +25,7 @@ function bestOfWinner(totalMatches: number, wins: number) {
   return (totalMatches % wins) + wins === totalMatches
 }
 
-export const matches: QueryArg<"matches"> = async (_, args, { user }, info) => {
+export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
   const cursor = getCursorForArgs('id', args)
   // Find all matches where user is either initiator or adversary
   return prisma.match.findMany({
@@ -47,25 +47,32 @@ export const matches: QueryArg<"matches"> = async (_, args, { user }, info) => {
   })
 }
 
-export const sendMatchInvite: MutationArg<"sendMatchInvite"> = async (_, args, { user }, info) => {
+export const sendMatchInvite: MutationArg<'sendMatchInvite'> = async (
+  _,
+  args,
+  { user },
+  info
+) => {
   const { amount, isMoneymatch, totalMatches, to } = args
 
   // Best of matches are odd numbers: 1, 3, 5, 7, 9 ...
   if (totalMatches % 2 === 0) {
-    throw new UserInputError("Number of total matche has to be odd")
+    throw new UserInputError('Number of total matche has to be odd')
   }
 
   // If it is a moneymatch, you need to actually provide an amount
   if (isMoneymatch && (!amount || amount <= 0)) {
-    throw new UserInputError("Amount has to exist or be superior to zero if it's a moneymatch")
+    throw new UserInputError(
+      "Amount has to exist or be superior to zero if it's a moneymatch"
+    )
   }
 
   const adversary = await prisma.user.findUnique({ where: { id: to } })
   const match = await prisma.match.create({
     data: {
       total_matches: totalMatches,
-      adversary: { connect: { id: adversary.id }},
-      initiator: { connect: { id: user.id }},
+      adversary: { connect: { id: adversary.id } },
+      initiator: { connect: { id: user.id } },
       amount: amount || 0,
       is_moneymatch: isMoneymatch || false
     }
@@ -83,11 +90,16 @@ export const sendMatchInvite: MutationArg<"sendMatchInvite"> = async (_, args, {
       }
     })
   }
-  
+
   return match
 }
 
-export const updateMatchState: MutationArg<"updateMatchState"> = async (_, args, { user }, info) => {
+export const updateMatchState: MutationArg<'updateMatchState'> = async (
+  _,
+  args,
+  { user },
+  info
+) => {
   const { state, id } = args
   const match = await prisma.match.findUnique({ where: { id } })
   const matchGuardError = matchGuard(match, user)
@@ -97,13 +109,10 @@ export const updateMatchState: MutationArg<"updateMatchState"> = async (_, args,
   }
 
   // You can only start or refuse a match manually, others action are either automatic/malicious
-  if (
-    state !== MatchState.STARTED &&
-    state !== MatchState.REFUSED
-  ) {
-    throw new UserInputError("You can only start of refuse a match manually")
+  if (state !== MatchState.STARTED && state !== MatchState.REFUSED) {
+    throw new UserInputError('You can only start of refuse a match manually')
   }
-  
+
   return prisma.match.update({
     where: {
       id
@@ -114,7 +123,12 @@ export const updateMatchState: MutationArg<"updateMatchState"> = async (_, args,
   })
 }
 
-export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args, { user }, info) => {
+export const updateMatchScore: MutationArg<'updateMatchScore'> = async (
+  _,
+  args,
+  { user },
+  info
+) => {
   const { id, adversaryCharacter, initiatorCharacter } = args
   const match = await prisma.match.findUnique({ where: { id } })
   const isInitiator = match.initiator_id === user.id
@@ -128,12 +142,19 @@ export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args,
   if (match.state !== MatchState.STARTED) {
     throw new UserInputError('Match has to start first to update it')
   }
-  
+
   // Determine if any player has reached required number of wins needed
-  const initiatorWin = bestOfWinner(match.total_matches, match.intiator_wins + 1)
-  const adversaryWin = bestOfWinner(match.total_matches, match.adversary_wins + 1)
+  const initiatorWin = bestOfWinner(
+    match.total_matches,
+    match.intiator_wins + 1
+  )
+  const adversaryWin = bestOfWinner(
+    match.total_matches,
+    match.adversary_wins + 1
+  )
   // If so, set the state to finished
-  const computedMatchState = (initiatorWin || adversaryWin) ? MatchState.FINISHED : match.state
+  const computedMatchState =
+    initiatorWin || adversaryWin ? MatchState.FINISHED : match.state
 
   return prisma.match.update({
     where: {
@@ -149,10 +170,10 @@ export const updateMatchScore: MutationArg<"updateMatchScore"> = async (_, args,
       state: computedMatchState,
       battles: {
         create: {
-          adversary: { connect: { id: match.adversary_id }},
-          initiator: { connect: { id: match.initiator_id }},
-          adversary_character: { connect: { id: adversaryCharacter }},
-          initiator_character: { connect: { id: initiatorCharacter }},
+          adversary: { connect: { id: match.adversary_id } },
+          initiator: { connect: { id: match.initiator_id } },
+          adversary_character: { connect: { id: adversaryCharacter } },
+          initiator_character: { connect: { id: initiatorCharacter } },
           winner: {
             connect: {
               id: user.id

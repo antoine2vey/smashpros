@@ -1,23 +1,23 @@
-import { gql } from "graphql-request"
-import _ from "lodash"
-import { prisma } from "../prisma"
-import smashGGClient from "../smashGGClient"
-import { IEvent, ITournament, SmashGG } from "../typings/interfaces"
-import logger from "./logger"
+import { gql } from 'graphql-request'
+import _ from 'lodash'
+import { prisma } from '../prisma'
+import smashGGClient from '../smashGGClient'
+import { IEvent, ITournament, SmashGG } from '../typings/interfaces'
+import logger from './logger'
 
 export function tier(players: number) {
   if (players >= 128) {
     return 'S'
   }
-  
+
   if (players >= 96) {
     return 'A'
   }
-  
+
   if (players >= 64) {
     return 'B'
   }
-  
+
   return 'C'
 }
 
@@ -36,19 +36,21 @@ export function eligibility(name: string) {
   return true
 }
 
-const wait = (seconds: number) => new Promise(resolve => setTimeout(() => resolve(true), seconds * 1000))
+const wait = (seconds: number) =>
+  new Promise((resolve) => setTimeout(() => resolve(true), seconds * 1000))
 
-export async function fetchAllEventParticipant(id: number, page = 1, event: IEvent = null): Promise<IEvent> {
+export async function fetchAllEventParticipant(
+  id: number,
+  page = 1,
+  event: IEvent = null
+): Promise<IEvent> {
   const query = gql`
     query TournamentQuery($id: ID!, $page: Int!) {
       event(id: $id) {
         id
         name
         numEntrants
-        entrants(query: {
-          page: $page,
-          perPage: 250
-        }) {
+        entrants(query: { page: $page, perPage: 250 }) {
           pageInfo {
             page
             totalPages
@@ -64,7 +66,10 @@ export async function fetchAllEventParticipant(id: number, page = 1, event: IEve
       }
     }
   `
-  const data = await smashGGClient.request<SmashGG.Event, SmashGG.EventArgs>(query, { page, id })
+  const data = await smashGGClient.request<SmashGG.Event, SmashGG.EventArgs>(
+    query,
+    { page, id }
+  )
   const { nodes, pageInfo } = data.event.entrants
 
   // Set our accumulator
@@ -74,7 +79,7 @@ export async function fetchAllEventParticipant(id: number, page = 1, event: IEve
       ...data.event.entrants,
       nodes: [
         // If event is null, default to array
-        ...event?.entrants.nodes ?? [],
+        ...(event?.entrants.nodes ?? []),
         ...nodes
       ]
     }
@@ -83,8 +88,10 @@ export async function fetchAllEventParticipant(id: number, page = 1, event: IEve
   logger.info(`event:${event.id} - fetching participants (page: ${page})`)
 
   // If we reached the end or no pages, return event
-  if ((pageInfo.page === pageInfo.totalPages) || pageInfo.totalPages === 0) {
-    logger.info(`event:${event.id} - fetched all participants (${event.entrants.nodes.length})`)
+  if (pageInfo.page === pageInfo.totalPages || pageInfo.totalPages === 0) {
+    logger.info(
+      `event:${event.id} - fetched all participants (${event.entrants.nodes.length})`
+    )
     return event
   } else {
     // Else we recursively fetch all tournaments
@@ -108,18 +115,19 @@ export async function fetchEvents(tournaments: ITournament[]) {
   return events
 }
 
-export async function fetchTournaments(accumulator: ITournament[] = [], page = 1): Promise<ITournament[]> {
+export async function fetchTournaments(
+  accumulator: ITournament[] = [],
+  page = 1
+): Promise<ITournament[]> {
   const query = gql`
     query TournamentQuery($page: Int!) {
-      tournaments(query: {
-        filter: {
-          videogameIds: [1386]
-          upcoming: true
-          countryCode: "FR"
+      tournaments(
+        query: {
+          filter: { videogameIds: [1386], upcoming: true, countryCode: "FR" }
+          sortBy: "startAt asc"
+          page: $page
         }
-        sortBy: "startAt asc"
-        page: $page
-      }) {
+      ) {
         pageInfo {
           totalPages
           page
@@ -150,10 +158,7 @@ export async function fetchTournaments(accumulator: ITournament[] = [], page = 1
           venueAddress
           url(relative: false)
           name
-          events(filter: {
-            videogameId: 1386,
-            type: 1
-          }) {
+          events(filter: { videogameId: 1386, type: 1 }) {
             name
             id
           }
@@ -161,9 +166,12 @@ export async function fetchTournaments(accumulator: ITournament[] = [], page = 1
       }
     }
   `
-  const data = await smashGGClient.request<SmashGG.Tournament, SmashGG.TournamentArgs>(query, { page })
+  const data = await smashGGClient.request<
+    SmashGG.Tournament,
+    SmashGG.TournamentArgs
+  >(query, { page })
   const { nodes, pageInfo } = data.tournaments
-  
+
   // Add it to accumulator
   accumulator.push(...nodes)
   logger.info(`tournaments - fetched (page: ${page})`)
@@ -178,21 +186,33 @@ export async function fetchTournaments(accumulator: ITournament[] = [], page = 1
   }
 }
 
-export async function getAllConnectedUsersForTournament(tournament: ITournament) {
+export async function getAllConnectedUsersForTournament(
+  tournament: ITournament
+) {
   // Map users by their id
-  const participants = tournament.events.map(e => e.entrants.nodes.map(t => {
-    if (t.participants.length === 0) {
-      logger.error(`Error in mapping entrants (event: ${e.id}): ${JSON.stringify(t)}`)
-      return -1
-    } else {
-      return t.participants[0].player.id
-    }
-  })).flat()
+  const participants = tournament.events
+    .map((e) =>
+      e.entrants.nodes.map((t) => {
+        if (t.participants.length === 0) {
+          logger.error(
+            `Error in mapping entrants (event: ${e.id}): ${JSON.stringify(t)}`
+          )
+          return -1
+        } else {
+          return t.participants[0].player.id
+        }
+      })
+    )
+    .flat()
   // Filter out duplicates
   const uniqueParticipants = _.uniq(participants)
   // Make DB calls to get users by their SmashGG player id
-  const findUsersBySmashUserId = uniqueParticipants.map(participant => prisma.user.findUnique({ where: {smashgg_player_id: participant }}))
+  const findUsersBySmashUserId = uniqueParticipants.map((participant) =>
+    prisma.user.findUnique({ where: { smashgg_player_id: participant } })
+  )
   // Execute batch
   const users = await prisma.$transaction(findUsersBySmashUserId)
-  return users.filter(Boolean).map(user => ({ smashgg_player_id: user.smashgg_player_id }))
+  return users
+    .filter(Boolean)
+    .map((user) => ({ smashgg_player_id: user.smashgg_player_id }))
 }

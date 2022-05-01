@@ -1,16 +1,21 @@
-import { RoleEnum } from "@prisma/client";
-import { prisma } from "../prisma";
-import { getRole } from "../utils/roles";
-import { ForbiddenError, UserInputError } from "apollo-server";
-import { updateMemberSchema } from "../validations/crew";
-import { CrewActions } from "../typings/enums";
-import { MutationArg, QueryArg } from "../typings/interfaces";
-import { sizes, uploadFile } from "../utils/storage";
-import { randomUUID } from "crypto";
+import { RoleEnum } from '@prisma/client'
+import { prisma } from '../prisma'
+import { getRole } from '../utils/roles'
+import { ForbiddenError, UserInputError } from 'apollo-server'
+import { updateMemberSchema } from '../validations/crew'
+import { CrewActions } from '../typings/enums'
+import { MutationArg, QueryArg } from '../typings/interfaces'
+import { sizes, uploadFile } from '../utils/storage'
+import { randomUUID } from 'crypto'
 
-export const crew: QueryArg<"crew"> = async (_, { id }, { user, prisma }, info) => {
+export const crew: QueryArg<'crew'> = async (
+  _,
+  { id },
+  { user, prisma },
+  info
+) => {
   let crewId = id ?? user.crew_id ?? null
-  
+
   if (!crewId) {
     return null
   }
@@ -32,7 +37,7 @@ export const crew: QueryArg<"crew"> = async (_, { id }, { user, prisma }, info) 
   })
 }
 
-export const crews: QueryArg<"crews"> = (_, args, ctx, info) => {
+export const crews: QueryArg<'crews'> = (_, args, ctx, info) => {
   return prisma.crew.findMany({
     include: {
       members: true,
@@ -42,14 +47,27 @@ export const crews: QueryArg<"crews"> = (_, args, ctx, info) => {
   })
 }
 
-export const createCrew: MutationArg<"createCrew"> = async (_, { payload }, { user }, info) => {
-  const { name, prefix, banner, icon } = payload 
+export const createCrew: MutationArg<'createCrew'> = async (
+  _,
+  { payload },
+  { user },
+  info
+) => {
+  const { name, prefix, banner, icon } = payload
   const CREW_ADMIN_ROLE = await getRole(RoleEnum.CREW_ADMIN)
   const bannerStream = await banner
   const iconStream = await icon
   const [bannerUri, iconUri] = await Promise.all([
-    uploadFile(bannerStream.createReadStream, `${randomUUID()}-${bannerStream.filename}`, sizes.banner),
-    uploadFile(iconStream.createReadStream, `${randomUUID()}-${iconStream.filename}`, sizes.crew)
+    uploadFile(
+      bannerStream.createReadStream,
+      `${randomUUID()}-${bannerStream.filename}`,
+      sizes.banner
+    ),
+    uploadFile(
+      iconStream.createReadStream,
+      `${randomUUID()}-${iconStream.filename}`,
+      sizes.crew
+    )
   ])
 
   const [crew] = await prisma.$transaction([
@@ -85,7 +103,12 @@ export const createCrew: MutationArg<"createCrew"> = async (_, { payload }, { us
   return crew
 }
 
-export const joinCrew: MutationArg<"joinCrew"> = async (_, { id }, { user }, info) => {
+export const joinCrew: MutationArg<'joinCrew'> = async (
+  _,
+  { id },
+  { user },
+  info
+) => {
   if (user.crew_id) {
     throw new ForbiddenError('You already have a crew')
   }
@@ -107,7 +130,12 @@ export const joinCrew: MutationArg<"joinCrew"> = async (_, { id }, { user }, in
   })
 }
 
-export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, action }, { user }, info) => {
+export const updateWaitingMember: MutationArg<'updateMember'> = async (
+  _,
+  { id, action },
+  { user },
+  info
+) => {
   const { error } = updateMemberSchema.validate(action)
 
   if (error) {
@@ -133,7 +161,11 @@ export const updateWaitingMember: MutationArg<"updateMember"> = async (_, { id, 
   })
 }
 
-export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user }) => {
+export const kickMember: MutationArg<'kickMember'> = async (
+  _,
+  { id },
+  { user }
+) => {
   if (user.id === id) {
     throw new UserInputError('Cannot kick yourself from crew')
   }
@@ -154,7 +186,7 @@ export const kickMember: MutationArg<"kickMember"> = async (_, { id }, { user })
   })
 }
 
-export const leaveCrew: MutationArg<"leaveCrew"> = async (_, __, { user }) => {
+export const leaveCrew: MutationArg<'leaveCrew'> = async (_, __, { user }) => {
   return prisma.crew.update({
     where: {
       id: user.crew_id
@@ -172,10 +204,15 @@ export const leaveCrew: MutationArg<"leaveCrew"> = async (_, __, { user }) => {
   })
 }
 
-export const transferCrewOwnership: MutationArg<"transferCrewOwnership"> = async (_, { to }, { user }) => {
+export const transferCrewOwnership: MutationArg<
+  'transferCrewOwnership'
+> = async (_, { to }, { user }) => {
   const [adminRole, crew] = await Promise.all([
     getRole(RoleEnum.CREW_ADMIN),
-    prisma.crew.findUnique({ where: { id: user.crew_id }, include: { members: true }})
+    prisma.crew.findUnique({
+      where: { id: user.crew_id },
+      include: { members: true }
+    })
   ])
 
   // Should never happen
@@ -188,8 +225,10 @@ export const transferCrewOwnership: MutationArg<"transferCrewOwnership"> = async
   }
 
   // Crew member must be in crew
-  if (!crew.members.some(member => member.id === to)) {
-    throw new UserInputError('The user you are trying to promote is not part of your crew')
+  if (!crew.members.some((member) => member.id === to)) {
+    throw new UserInputError(
+      'The user you are trying to promote is not part of your crew'
+    )
   }
 
   // Set admin role to new admin

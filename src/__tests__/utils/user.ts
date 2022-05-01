@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma";
+import { prisma } from '../../prisma'
 import jwt from 'jsonwebtoken'
 
 export function getUser(email: string) {
@@ -18,8 +18,12 @@ export function getUser(email: string) {
 export async function getToken(email: string) {
   const user = await getUser(email)
   const userId = user.id
-  const userRoles = user.roles.map(role => role.name)
-  const token = jwt.sign({ userId, userRoles }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+  const userRoles = user.roles.map((role) => role.name)
+  const token = jwt.sign(
+    { userId, userRoles },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '1h' }
+  )
 
   return token
 }
@@ -47,8 +51,8 @@ export function createUser(tag: string, email: string) {
     data: {
       email,
       tag,
-      password: "password",
-      profile_picture: "://profile_picture"
+      password: 'password',
+      profile_picture: '://profile_picture'
     }
   })
 }

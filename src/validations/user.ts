@@ -1,6 +1,8 @@
-import Joi from "joi"
+import Joi from 'joi'
 
-export const smashGGSlug = Joi.string().length(8).message('Invalid SmashGG id length')
+export const smashGGSlug = Joi.string()
+  .length(8)
+  .message('Invalid SmashGG id length')
 
 export const registerSchema = Joi.object({
   password: Joi.string().min(4).required(),

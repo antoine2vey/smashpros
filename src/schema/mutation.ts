@@ -1,10 +1,48 @@
-import { arg, booleanArg, idArg, intArg, list, nonNull, objectType, stringArg } from "nexus";
-import { CrewCreationPayload, MatchStateEnumType } from ".";
-import { authorizations, isAuthenticated, isCrewAdmin, isNotCrewAdmin, isTO } from "../authorizations";
-import { checkUserIn, createCrew, favoriteTournament, joinCrew, kickMember, leaveCrew, participateTournament, sendMatchInvite, synchronizeTournaments, transferCrewOwnership, updateMatchScore, updateMatchState, updateWaitingMember, userEnteredTournament, userLeftTournament } from "../resolvers";
-import { askPasswordReset, login, passwordReset, refresh, register, updateProfile } from "../resolvers/user";
-import { CrewUpdateActionEnum } from "./crew";
-import { UserRegisterPayload, UserUpdatePayload } from "./user";
+import {
+  arg,
+  booleanArg,
+  idArg,
+  intArg,
+  list,
+  nonNull,
+  objectType,
+  stringArg
+} from 'nexus'
+import { CrewCreationPayload, MatchStateEnumType } from '.'
+import {
+  authorizations,
+  isAuthenticated,
+  isCrewAdmin,
+  isNotCrewAdmin,
+  isTO
+} from '../authorizations'
+import {
+  checkUserIn,
+  createCrew,
+  favoriteTournament,
+  joinCrew,
+  kickMember,
+  leaveCrew,
+  participateTournament,
+  sendMatchInvite,
+  synchronizeTournaments,
+  transferCrewOwnership,
+  updateMatchScore,
+  updateMatchState,
+  updateWaitingMember,
+  userEnteredTournament,
+  userLeftTournament
+} from '../resolvers'
+import {
+  askPasswordReset,
+  login,
+  passwordReset,
+  refresh,
+  register,
+  updateProfile
+} from '../resolvers/user'
+import { CrewUpdateActionEnum } from './crew'
+import { UserRegisterPayload, UserUpdatePayload } from './user'
 
 export const Mutation = objectType({
   name: 'Mutation',
@@ -39,7 +77,7 @@ export const Mutation = objectType({
         id: nonNull(idArg())
       },
       resolve(...args) {
-        return joinCrew(...args) 
+        return joinCrew(...args)
       }
     })
 
@@ -47,7 +85,7 @@ export const Mutation = objectType({
       type: 'Crew',
       authorize: authorizations(isAuthenticated),
       resolve(...args) {
-        return leaveCrew(...args) 
+        return leaveCrew(...args)
       }
     })
 
@@ -145,7 +183,7 @@ export const Mutation = objectType({
       authorize: authorizations(isAuthenticated),
       args: {
         id: nonNull(idArg()),
-        unfavorite: booleanArg({ default: false })
+        unfavorite: booleanArg({ default: false })
       },
       resolve(...args) {
         return favoriteTournament(...args)
@@ -225,7 +263,7 @@ export const Mutation = objectType({
       type: 'Match',
       args: {
         state: nonNull(MatchStateEnumType),
-        id: nonNull(idArg()),
+        id: nonNull(idArg())
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {

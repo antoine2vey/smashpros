@@ -1,11 +1,11 @@
-import { Character, Role, User } from "@prisma/client";
-import { ReadStream } from "fs";
-import { FieldResolver } from "nexus";
-import { Readable } from "stream";
-import { NexusGenArgTypes } from "../../generated/typegen";
+import { Character, Role, User } from '@prisma/client'
+import { ReadStream } from 'fs'
+import { FieldResolver } from 'nexus'
+import { Readable } from 'stream'
+import { NexusGenArgTypes } from '../../generated/typegen'
 
-export type QueryArg<T extends string> = FieldResolver<"Query", T>
-export type MutationArg<T extends string> = FieldResolver<"Mutation", T>
+export type QueryArg<T extends string> = FieldResolver<'Query', T>
+export type MutationArg<T extends string> = FieldResolver<'Mutation', T>
 
 export interface PageInfo {
   total: number
@@ -21,11 +21,15 @@ export interface IEvent {
   entrants: {
     pageInfo: PageInfo
     nodes: {
-      participants: [{
-        player: {
-          id: number
-        }
-      }] | []
+      participants:
+        | [
+            {
+              player: {
+                id: number
+              }
+            }
+          ]
+        | []
     }[]
   }
 }
@@ -33,10 +37,10 @@ export interface IEvent {
 export interface ITournament {
   id: number
   event_id: number
-  name: string  
+  name: string
   lat: number
   lng: number
-  tournament_id: string    
+  tournament_id: string
   city?: string
   countryCode: string
   createdAt: number
@@ -59,7 +63,7 @@ export interface ITournament {
   url: string
   tier: string
 
-  participants?:( User & {
+  participants?: (User & {
     characters: Character[]
     roles: Role[]
   })[]
@@ -126,7 +130,7 @@ export namespace SmashGG {
     page: number
     id: number
   }
-  
+
   export interface TournamentArgs {
     page: number
   }

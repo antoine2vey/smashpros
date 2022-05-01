@@ -1,5 +1,5 @@
-import { MatchState } from ".prisma/client"
-import { enumType, objectType } from "nexus"
+import { MatchState } from '.prisma/client'
+import { enumType, objectType } from 'nexus'
 import { Battle, Match } from 'nexus-prisma'
 
 export const BattleObjectType = objectType({

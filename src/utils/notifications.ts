@@ -1,7 +1,11 @@
-import { applicationDefault, initializeApp } from "firebase-admin/app";
-import { BaseMessage, getMessaging, TokenMessage } from "firebase-admin/messaging";
-import path from "path";
-import logger from "./logger";
+import { applicationDefault, initializeApp } from 'firebase-admin/app'
+import {
+  BaseMessage,
+  getMessaging,
+  TokenMessage
+} from 'firebase-admin/messaging'
+import path from 'path'
+import logger from './logger'
 
 initializeApp({
   credential: applicationDefault()
@@ -22,7 +26,9 @@ export async function sendNotification(to: string, payload: BaseMessage) {
   return messaging
     .send(message)
     .then(() => {
-      logger.info(`Sent notification to ${to} (${JSON.stringify(message.data)})`)
+      logger.info(
+        `Sent notification to ${to} (${JSON.stringify(message.data)})`
+      )
     })
     .catch((error) => {
       logger.error(`Error sending notification to ${to}: ${error}`)

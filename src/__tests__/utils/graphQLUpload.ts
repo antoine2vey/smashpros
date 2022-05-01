@@ -1,5 +1,5 @@
-import { readFileSync } from "fs"
-import { Readable } from "stream"
+import { readFileSync } from 'fs'
+import { Readable } from 'stream'
 import { Upload } from 'graphql-upload/public'
 
 export default function graphQLUpload(path) {
@@ -9,8 +9,8 @@ export default function graphQLUpload(path) {
   upload.promise = new Promise((resolve) =>
     resolve({
       createReadStream: () => file,
-      filename: "test_profile_picture.jpg",
-      mimetype: "image/jpg"
+      filename: 'test_profile_picture.jpg',
+      mimetype: 'image/jpg'
     })
   )
   upload.file = upload.promise

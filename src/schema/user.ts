@@ -1,6 +1,6 @@
-import { RoleEnum } from "@prisma/client"
-import { enumType, inputObjectType, objectType } from "nexus"
-import { Role, User } from "nexus-prisma"
+import { RoleEnum } from '@prisma/client'
+import { enumType, inputObjectType, objectType } from 'nexus'
+import { Role, User } from 'nexus-prisma'
 
 export const RoleObjectType = objectType({
   name: Role.$name,

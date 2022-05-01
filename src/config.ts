@@ -1,18 +1,18 @@
-import { findUserByToken } from './utils/user';
-import { connectionPlugin, fieldAuthorizePlugin, makeSchema } from 'nexus';
-import path from 'path';
+import { findUserByToken } from './utils/user'
+import { connectionPlugin, fieldAuthorizePlugin, makeSchema } from 'nexus'
+import path from 'path'
 import * as types from './schema'
-import { prisma } from './prisma';
+import { prisma } from './prisma'
 
 export const schema = makeSchema({
   types,
   outputs: {
     schema: path.join(__dirname, '..', 'generated', 'schema.graphql'),
-    typegen: path.join(__dirname, '..', 'generated', 'typegen.d.ts'),
+    typegen: path.join(__dirname, '..', 'generated', 'typegen.d.ts')
   },
   contextType: {
     module: path.resolve(__dirname, 'context.ts'),
-    export: "Context"
+    export: 'Context'
   },
   plugins: [
     connectionPlugin(),
@@ -34,5 +34,5 @@ export const config = {
       prisma,
       req
     }
-  },
+  }
 }

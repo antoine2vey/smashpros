@@ -1,9 +1,9 @@
-import { Role, User } from "@prisma/client"
-import jwt from "jsonwebtoken"
-import { prisma } from "../prisma"
-import { cache } from "../redis"
-import logger from "./logger"
-import redisNamingStrategy from "./redisNamingStrategy"
+import { Role, User } from '@prisma/client'
+import jwt from 'jsonwebtoken'
+import { prisma } from '../prisma'
+import { cache } from '../redis'
+import logger from './logger'
+import redisNamingStrategy from './redisNamingStrategy'
 
 export async function findUserByToken(token: string) {
   if (!token) {
@@ -18,10 +18,10 @@ export async function findUserByToken(token: string) {
   }
 
   // @ts-ignore
-  const { exp, userId } = decoded
+  const { exp, userId } = decoded
   const key = redisNamingStrategy.user(userId)
-  const exists = await cache.exists(key) === 1
-  let populatedUser: User & {roles: Role[]} = null
+  const exists = (await cache.exists(key)) === 1
+  let populatedUser: User & { roles: Role[] } = null
   populatedUser = await prisma.user.findUnique({
     where: {
       id: userId

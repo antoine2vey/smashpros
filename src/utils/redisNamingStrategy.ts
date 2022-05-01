@@ -1,5 +1,5 @@
-import { Redis } from "ioredis";
-import { cache } from "../redis";
+import { Redis } from 'ioredis'
+import { cache } from '../redis'
 
 class RedisNamingStrategy {
   private cache: Redis = cache

@@ -1,6 +1,6 @@
-import { enumType, inputObjectType, objectType } from "nexus";
+import { enumType, inputObjectType, objectType } from 'nexus'
 import { Crew } from 'nexus-prisma'
-import { CrewActions } from "../typings/enums";
+import { CrewActions } from '../typings/enums'
 
 export const CrewObjectType = objectType({
   name: Crew.$name,

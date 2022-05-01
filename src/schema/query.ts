@@ -1,8 +1,25 @@
-import { connectionPlugin, idArg, list, nonNull, objectType, stringArg } from "nexus";
-import { Context } from "../context";
-import { isAuthenticated, authorizations } from "../authorizations";
-import { user, crew, crews, characters, tournaments, tournament, usersByCharacter, suggestedName, matches } from "../resolvers";
-import { SuggestedName } from ".";
+import {
+  connectionPlugin,
+  idArg,
+  list,
+  nonNull,
+  objectType,
+  stringArg
+} from 'nexus'
+import { Context } from '../context'
+import { isAuthenticated, authorizations } from '../authorizations'
+import {
+  user,
+  crew,
+  crews,
+  characters,
+  tournaments,
+  tournament,
+  usersByCharacter,
+  suggestedName,
+  matches
+} from '../resolvers'
+import { SuggestedName } from '.'
 
 export const Query = objectType({
   name: 'Query',

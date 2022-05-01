@@ -1,4 +1,4 @@
-import { objectType } from "nexus"
+import { objectType } from 'nexus'
 import { Character } from 'nexus-prisma'
 
 export const CharacterObjectType = objectType({

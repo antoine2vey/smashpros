@@ -1,23 +1,32 @@
 import { fromUnixTime, isBefore } from 'date-fns'
 import { prisma } from '../prisma'
 import logger from '../utils/logger'
-import { eligibility, fetchEvents, fetchTournaments, getAllConnectedUsersForTournament, tier } from '../utils/tournament'
+import {
+  eligibility,
+  fetchEvents,
+  fetchTournaments,
+  getAllConnectedUsersForTournament,
+  tier
+} from '../utils/tournament'
 
 export async function loadTournaments() {
-  logger.info('fetching tournaments') 
+  logger.info('fetching tournaments')
   const tourneys = await fetchTournaments()
   const events = await fetchEvents(tourneys)
 
   logger.info('mapping events to tournaments')
-  const tournaments = tourneys.map(tournament => ({
+  const tournaments = tourneys.map((tournament) => ({
     ...tournament,
-    events: tournament.events.map(event => events.find(e => e.id === event.id))
+    events: tournament.events.map((event) =>
+      events.find((e) => e.id === event.id)
+    )
   }))
 
-
   // Create all tournaments, upsert if needed
-  const createTournaments = tournaments.map(async tournament => {
-    const foundConnectedUsers = await getAllConnectedUsersForTournament(tournament)
+  const createTournaments = tournaments.map(async (tournament) => {
+    const foundConnectedUsers = await getAllConnectedUsersForTournament(
+      tournament
+    )
 
     const tourney = {
       name: tournament.name,
@@ -26,12 +35,16 @@ export async function loadTournaments() {
       tournament_id: tournament.id,
       city: tournament.city,
       country_code: tournament.countryCode,
-      created_at: tournament.createdAt ? fromUnixTime(tournament.createdAt) : null,
+      created_at: tournament.createdAt
+        ? fromUnixTime(tournament.createdAt)
+        : null,
       currency: tournament.currency,
       num_attendees: tournament.numAttendees,
       end_at: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
-      event_registration_closes_at: tournament.eventRegistrationClosesAt ? fromUnixTime(tournament.eventRegistrationClosesAt) : null,
-      images: tournament.images.map(image => image.url),
+      event_registration_closes_at: tournament.eventRegistrationClosesAt
+        ? fromUnixTime(tournament.eventRegistrationClosesAt)
+        : null,
+      images: tournament.images.map((image) => image.url),
       is_registration_open: tournament.isRegistrationOpen,
       slug: tournament.slug,
       state: tournament.state,
@@ -41,7 +54,7 @@ export async function loadTournaments() {
       url: tournament.url,
       events: {
         createMany: {
-          data: tournament.events.map(event => ({
+          data: tournament.events.map((event) => ({
             event_id: event.id,
             name: event.name,
             num_attendees: event.numEntrants || 0,
@@ -58,7 +71,9 @@ export async function loadTournaments() {
 
     const now = new Date()
     if (isBefore(tourney.end_at, now)) {
-      logger.warn(`Tourney ${tourney.name} is outdated, not upserting. (${tourney.end_at})`)
+      logger.warn(
+        `Tourney ${tourney.name} is outdated, not upserting. (${tourney.end_at})`
+      )
       return null
     }
 

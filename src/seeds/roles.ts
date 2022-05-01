@@ -1,6 +1,6 @@
-import { RoleEnum } from "@prisma/client";
-import { prisma } from "../prisma";
-import logger from "../utils/logger";
+import { RoleEnum } from '@prisma/client'
+import { prisma } from '../prisma'
+import logger from '../utils/logger'
 
 const roles: RoleEnum[] = [
   RoleEnum.ADMIN,
@@ -16,7 +16,7 @@ export function loadRoles() {
   for (let name of roles) {
     const promise = prisma.role.create({ data: { name } })
     batch.push(promise)
-  } 
+  }
 
   return Promise.all(batch)
 }

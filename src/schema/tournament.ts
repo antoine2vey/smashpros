@@ -1,6 +1,12 @@
-import { connectionPlugin, inputObjectType, list, nonNull, objectType } from "nexus"
+import {
+  connectionPlugin,
+  inputObjectType,
+  list,
+  nonNull,
+  objectType
+} from 'nexus'
 import { Event, Tournament, User } from 'nexus-prisma'
-import { getCursorForArgs, getCursorForStringArgs } from "../utils/prisma"
+import { getCursorForArgs, getCursorForStringArgs } from '../utils/prisma'
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -67,7 +73,7 @@ export const TournamentObjectType = objectType({
           }
         })
       },
-      nodes(root, {characters, ...args}, ctx) {
+      nodes(root, { characters, ...args }, ctx) {
         const tournamentId = root.id
         const cursor = getCursorForStringArgs('id', args)
 
@@ -78,11 +84,11 @@ export const TournamentObjectType = objectType({
 
           return {
             some: {
-              OR: characters.map(id => ({ id }))
+              OR: characters.map((id) => ({ id }))
             }
           }
         }
-        
+
         return ctx.prisma.user.findMany({
           ...cursor,
           where: {
@@ -122,5 +128,5 @@ export const TournamentQuery = inputObjectType({
   definition(t) {
     t.id('id')
     t.string('player')
-  },
+  }
 })

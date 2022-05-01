@@ -1,13 +1,13 @@
-import { ApolloServer, gql } from "apollo-server-express"
-import { config } from "../config"
-import path from "path"
-import graphQLUpload from "./utils/graphQLUpload"
-import closeAllConnections from "./utils/closeConnections"
-import { prisma } from "../prisma"
-import { decode } from "jsonwebtoken"
-import { createTestClient } from "./utils/apolloServerTesting"
-import { Character, User } from "@prisma/client"
-import { getToken, removeToken, setToken } from "./utils/user"
+import { ApolloServer, gql } from 'apollo-server-express'
+import { config } from '../config'
+import path from 'path'
+import graphQLUpload from './utils/graphQLUpload'
+import closeAllConnections from './utils/closeConnections'
+import { prisma } from '../prisma'
+import { decode } from 'jsonwebtoken'
+import { createTestClient } from './utils/apolloServerTesting'
+import { Character, User } from '@prisma/client'
+import { getToken, removeToken, setToken } from './utils/user'
 
 const apolloServer = new ApolloServer(config)
 const { query, mutate, setOptions } = createTestClient({ apolloServer })
@@ -22,27 +22,27 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
+
       const filePath = path.join(__dirname, 'utils', 'files', 'pepega.jpg')
       const upload = graphQLUpload(filePath)
-      const { data, errors } = await mutate<{register: User}>(QUERY, {
+      const { data, errors } = await mutate<{ register: User }>(QUERY, {
         variables: {
           payload: {
-            email: "user@smashpros.io",
-            password: "password",
-            tag: "user",
+            email: 'user@smashpros.io',
+            password: 'password',
+            tag: 'user',
             profilePicture: upload,
             characters: []
           }
         }
       })
-  
+
       expect(errors).toBeUndefined()
       expect(data).toBeDefined()
       // We have a real uuid
       expect(data.register.id).toHaveLength(36)
     })
-  
+
     it('should throw if user already exists', async () => {
       const QUERY = gql`
         mutation register($payload: UserRegisterPayload) {
@@ -51,21 +51,21 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
+
       const filePath = path.join(__dirname, 'utils', 'files', 'pepega.jpg')
       const upload = graphQLUpload(filePath)
-      const { data, errors } = await mutate(QUERY, {
+      const { data, errors } = await mutate(QUERY, {
         variables: {
           payload: {
-            email: "user@smashpros.io",
-            password: "password",
-            tag: "user",
+            email: 'user@smashpros.io',
+            password: 'password',
+            tag: 'user',
             profilePicture: upload,
             characters: []
           }
         }
       })
-  
+
       expect(errors.length).toBeGreaterThanOrEqual(1)
       expect(data).toBeNull()
     })
@@ -78,21 +78,21 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
+
       const filePath = path.join(__dirname, 'utils', 'files', 'pepega.jpg')
       const upload = graphQLUpload(filePath)
-      const { data, errors } = await mutate<{register: User}>(QUERY, {
+      const { data, errors } = await mutate<{ register: User }>(QUERY, {
         variables: {
           payload: {
-            email: "malformed_email",
-            password: "password",
-            tag: "user",
+            email: 'malformed_email',
+            password: 'password',
+            tag: 'user',
             profilePicture: upload,
             characters: []
           }
-        } 
+        }
       })
-  
+
       expect(errors.length).toBeGreaterThanOrEqual(1)
       expect(data).toBeNull()
     })
@@ -112,22 +112,24 @@ describe('GraphQL user endpoints', () => {
       const filePath = path.join(__dirname, 'utils', 'files', 'pepega.jpg')
       const upload = graphQLUpload(filePath)
       const [luigi, zss] = await prisma.$transaction([
-        prisma.character.findUnique({ where: { name: 'Luigi' }}),
-        prisma.character.findUnique({ where: { name: 'Zero Suit Samus' }})
+        prisma.character.findUnique({ where: { name: 'Luigi' } }),
+        prisma.character.findUnique({ where: { name: 'Zero Suit Samus' } })
       ])
 
-      const { data, errors } = await mutate<{register: (User & { characters: Character[]})}>(QUERY, {
+      const { data, errors } = await mutate<{
+        register: User & { characters: Character[] }
+      }>(QUERY, {
         variables: {
           payload: {
-            email: "characters@smashpros.io",
-            password: "password",
-            tag: "characters",
+            email: 'characters@smashpros.io',
+            password: 'password',
+            tag: 'characters',
             profilePicture: upload,
             characters: [luigi.id, zss.id]
           }
-        } 
+        }
       })
-  
+
       expect(errors).toBeUndefined()
       expect(data).toBeDefined()
       // We have a real uuid
@@ -147,12 +149,15 @@ describe('GraphQL user endpoints', () => {
         }
       `
 
-      const { data, errors } = await mutate<{login: { token: string }}>(QUERY, {
-        variables: {
-          email: "user@smashpros.io",
-          password: "password"
+      const { data, errors } = await mutate<{ login: { token: string } }>(
+        QUERY,
+        {
+          variables: {
+            email: 'user@smashpros.io',
+            password: 'password'
+          }
         }
-      })
+      )
 
       expect(errors).toBeUndefined()
       expect(data.login.token).toBeTruthy()
@@ -172,12 +177,15 @@ describe('GraphQL user endpoints', () => {
         }
       `
 
-      const { data, errors } = await mutate<{login: { token: string }}>(QUERY, {
-        variables: {
-          email: "invalid@smashpros.io",
-          password: "password"
+      const { data, errors } = await mutate<{ login: { token: string } }>(
+        QUERY,
+        {
+          variables: {
+            email: 'invalid@smashpros.io',
+            password: 'password'
+          }
         }
-      })
+      )
 
       expect(errors[0].message).toBe('Bad credentials')
       expect(data).toBeNull()
@@ -189,9 +197,9 @@ describe('GraphQL user endpoints', () => {
       const QUERY = gql`
         mutation updateProfile($payload: UserUpdatePayload!) {
           updateProfile(payload: $payload) {
-            email,
-            tag,
-            profilePicture,
+            email
+            tag
+            profilePicture
             characters
           }
         }
@@ -208,7 +216,9 @@ describe('GraphQL user endpoints', () => {
     it('should be a protected resource', async () => {
       removeToken(setOptions)
 
-      const luigi = await prisma.character.findUnique({ where: { name: 'Luigi' }})
+      const luigi = await prisma.character.findUnique({
+        where: { name: 'Luigi' }
+      })
       const QUERY = gql`
         query usersByCharacter($id: ID!) {
           usersByCharacter(characterId: $id) {
@@ -216,19 +226,24 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await query<{usersByCharacter: User[]}>(QUERY, {
-        variables: {
-          id: luigi.id
+
+      const { data, errors } = await query<{ usersByCharacter: User[] }>(
+        QUERY,
+        {
+          variables: {
+            id: luigi.id
+          }
         }
-      })
+      )
 
       expect(errors).toBeDefined()
       expect(data.usersByCharacter).toEqual(null)
     })
 
     it('should find all users by a character', async () => {
-      const luigi = await prisma.character.findUnique({ where: { name: 'Luigi' }})
+      const luigi = await prisma.character.findUnique({
+        where: { name: 'Luigi' }
+      })
       const QUERY = gql`
         query usersByCharacter($id: ID!) {
           usersByCharacter(characterId: $id) {
@@ -236,19 +251,24 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await query<{usersByCharacter: User[]}>(QUERY, {
-        variables: {
-          id: luigi.id
+
+      const { data, errors } = await query<{ usersByCharacter: User[] }>(
+        QUERY,
+        {
+          variables: {
+            id: luigi.id
+          }
         }
-      })
+      )
 
       expect(errors).toBeUndefined()
       expect(data.usersByCharacter).toHaveLength(1)
     })
 
     it('should find all users by a character but no users', async () => {
-      const peach = await prisma.character.findUnique({ where: { name: 'Peach' }})
+      const peach = await prisma.character.findUnique({
+        where: { name: 'Peach' }
+      })
       const QUERY = gql`
         query usersByCharacter($id: ID!) {
           usersByCharacter(characterId: $id) {
@@ -256,12 +276,15 @@ describe('GraphQL user endpoints', () => {
           }
         }
       `
-  
-      const { data, errors } = await query<{usersByCharacter: User[]}>(QUERY, {
-        variables: {
-          id: peach.id
+
+      const { data, errors } = await query<{ usersByCharacter: User[] }>(
+        QUERY,
+        {
+          variables: {
+            id: peach.id
+          }
         }
-      })
+      )
 
       expect(errors).toBeUndefined()
       expect(data.usersByCharacter).toHaveLength(0)
