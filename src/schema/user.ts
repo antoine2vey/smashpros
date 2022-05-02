@@ -1,4 +1,5 @@
 import { RoleEnum } from '@prisma/client'
+import { isAfter } from 'date-fns'
 import { enumType, inputObjectType, objectType } from 'nexus'
 import { Role, User } from 'nexus-prisma'
 
@@ -40,6 +41,21 @@ export const UserObjectType = objectType({
     t.field(User.favorited_tournaments)
     t.field(User.updated_at)
     t.field(User.created_at)
+
+    t.field('nextTournament', {
+      type: 'Tournament',
+      resolve(root) {
+        // Remove all tournaments that are outdated
+        // @ts-ignore
+        const tournaments = root.tournaments.filter(tournament => isAfter(tournament.end_at, new Date()))
+
+        if (tournaments.length === 0) {
+          return null
+        }
+
+        return tournaments[0]
+      }
+    })
   }
 })
 

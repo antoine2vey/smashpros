@@ -411,6 +411,7 @@ export interface NexusGenFieldTypes {
     favorited_tournaments: NexusGenRootTypes['Tournament'][]; // [Tournament!]!
     id: string; // ID!
     in_tournament: boolean; // Boolean!
+    nextTournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     profile_picture: string | null; // String
     roles: NexusGenRootTypes['Role'][]; // [Role!]!
     smashgg_player_id: number | null; // Int
@@ -599,6 +600,7 @@ export interface NexusGenFieldTypeNames {
     favorited_tournaments: 'Tournament'
     id: 'ID'
     in_tournament: 'Boolean'
+    nextTournament: 'Tournament'
     profile_picture: 'String'
     roles: 'Role'
     smashgg_player_id: 'Int'

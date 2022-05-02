@@ -15,9 +15,15 @@ export const tournaments: QueryArg<'tournaments'> = async (
   info
 ) => {
   const cursor = getCursorForArgs('tournament_id', args)
+  const now = new Date()
 
   return prisma.tournament.findMany({
     ...cursor,
+    where: {
+      end_at: {
+        gte: now
+      }
+    },
     include: {
       participants: {
         where: {

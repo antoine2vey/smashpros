@@ -327,6 +327,7 @@ type User {
   favorited_tournaments: [Tournament!]!
   id: ID!
   in_tournament: Boolean!
+  nextTournament: Tournament
   profile_picture: String
   roles: [Role!]!
   smashgg_player_id: Int

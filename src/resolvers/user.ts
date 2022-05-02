@@ -74,8 +74,6 @@ export const users: QueryArg<'users'> = (
   })
 }
 
-// wolf "characters": ["15b667ac-8588-4da2-8157-bc0921df4bfb"]
-
 export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
   const id = userId || ctx.user.id
 
