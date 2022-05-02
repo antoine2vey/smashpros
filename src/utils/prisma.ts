@@ -63,3 +63,38 @@ export function getCursorForStringArgs(
     cursor
   }
 }
+
+export function getCharacterQuery(characters: string[] | undefined) {
+  if (!characters || characters.length === 0) {
+    return undefined
+  }
+
+  return {
+    some: {
+      OR: characters.map((id) => ({ id }))
+    }
+  }
+}
+
+export function getTournamentQuery(tournament: string | undefined) {
+  if (!tournament) {
+    return undefined
+  }
+
+  return {
+    some: {
+      id: tournament
+    }
+  }
+}
+
+export function getTagQuery(tag: string | undefined): Prisma.StringFilter {
+  if (!tag) {
+    return undefined
+  }
+
+  return {
+    contains: tag,
+    mode: 'insensitive'
+  }
+}

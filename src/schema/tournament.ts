@@ -6,7 +6,7 @@ import {
   objectType
 } from 'nexus'
 import { Event, Tournament, User } from 'nexus-prisma'
-import { getCursorForArgs, getCursorForStringArgs } from '../utils/prisma'
+import { getCharacterQuery, getCursorForArgs, getCursorForStringArgs, getTournamentQuery } from '../utils/prisma'
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -74,20 +74,7 @@ export const TournamentObjectType = objectType({
         })
       },
       nodes(root, { characters, ...args }, ctx) {
-        const tournamentId = root.id
         const cursor = getCursorForStringArgs('id', args)
-
-        function getCharacterQuery(characters: string[] | undefined) {
-          if (!characters || characters.length === 0) {
-            return undefined
-          }
-
-          return {
-            some: {
-              OR: characters.map((id) => ({ id }))
-            }
-          }
-        }
 
         return ctx.prisma.user.findMany({
           ...cursor,
@@ -97,9 +84,7 @@ export const TournamentObjectType = objectType({
                 characters: getCharacterQuery(characters)
               },
               {
-                tournaments: {
-                  some: { id: tournamentId }
-                }
+                tournaments: getTournamentQuery(root.id)
               },
               {
                 allow_searchability: true

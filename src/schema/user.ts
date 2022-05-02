@@ -75,6 +75,15 @@ export const UserUpdatePayload = inputObjectType({
   }
 })
 
+export const UserFilter = inputObjectType({
+  name: 'UserFilter',
+  definition(t) {
+    t.list.nonNull.id('characters')
+    t.id('tournament')
+    t.string('tag')
+  }
+})
+
 export const RegisterPayload = inputObjectType({
   name: 'RegisterPayload',
   definition(t) {

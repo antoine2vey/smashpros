@@ -60,6 +60,11 @@ export interface NexusGenInputs {
     id?: string | null; // ID
     player?: string | null; // String
   }
+  UserFilter: { // input type
+    characters?: string[] | null; // [ID!]
+    tag?: string | null; // String
+    tournament?: string | null; // ID
+  }
   UserRegisterPayload: { // input type
     characters: string[]; // [ID!]!
     email: string; // String!
@@ -220,6 +225,10 @@ export interface NexusGenObjects {
     twitter_username?: string | null; // String
     updated_at: NexusGenScalars['DateTime']; // DateTime!
   }
+  UserConnection: { // root type
+    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
+  }
   UserEdge: { // root type
     cursor: string; // String!
     node?: NexusGenRootTypes['User'] | null; // User
@@ -334,7 +343,7 @@ export interface NexusGenFieldTypes {
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
     user: NexusGenRootTypes['User'] | null; // User
-    usersByCharacter: NexusGenRootTypes['User'][] | null; // [User!]
+    users: NexusGenRootTypes['UserConnection'] | null; // UserConnection
   }
   RefreshPayload: { // field return type
     accessToken: string | null; // String
@@ -413,6 +422,10 @@ export interface NexusGenFieldTypes {
     twitter_username: string | null; // String
     updated_at: NexusGenScalars['DateTime']; // DateTime!
     waiting_crew: NexusGenRootTypes['Crew'] | null; // Crew
+  }
+  UserConnection: { // field return type
+    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null; // [UserEdge]
+    pageInfo: NexusGenRootTypes['PageInfo']; // PageInfo!
   }
   UserEdge: { // field return type
     cursor: string; // String!
@@ -518,7 +531,7 @@ export interface NexusGenFieldTypeNames {
     tournament: 'Tournament'
     tournaments: 'TournamentConnection'
     user: 'User'
-    usersByCharacter: 'User'
+    users: 'UserConnection'
   }
   RefreshPayload: { // field return type name
     accessToken: 'String'
@@ -597,6 +610,10 @@ export interface NexusGenFieldTypeNames {
     twitter_username: 'String'
     updated_at: 'DateTime'
     waiting_crew: 'Crew'
+  }
+  UserConnection: { // field return type name
+    edges: 'UserEdge'
+    pageInfo: 'PageInfo'
   }
   UserEdge: { // field return type name
     cursor: 'String'
@@ -702,8 +719,12 @@ export interface NexusGenArgTypes {
     user: { // args
       id?: string | null; // ID
     }
-    usersByCharacter: { // args
-      id: string; // ID!
+    users: { // args
+      after?: string | null; // String
+      before?: string | null; // String
+      filters: NexusGenInputs['UserFilter']; // UserFilter!
+      first?: number | null; // Int
+      last?: number | null; // Int
     }
   }
   Tournament: {

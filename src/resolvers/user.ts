@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt'
 import { AuthenticationError, UserInputError } from 'apollo-server'
 import jwt from 'jsonwebtoken'
 import { sizes, uploadFile } from '../utils/storage'
-import { mapIdsToPrisma } from '../utils/prisma'
+import { getCharacterQuery, getCursorForArgs, getCursorForStringArgs, getTagQuery, getTournamentQuery, mapIdsToPrisma } from '../utils/prisma'
 import { addMinutes, isAfter } from 'date-fns'
 import { getRole } from '../utils/roles'
 import { RoleEnum } from '@prisma/client'
@@ -36,27 +36,45 @@ const query = gql`
   }
 `
 
-export const usersByCharacter: QueryArg<'usersByCharacter'> = (
+export const users: QueryArg<'users'> = (
   _,
-  { id },
+  { filters, ...args },
   ctx,
   info
 ) => {
+  const cursor = getCursorForStringArgs('id', args)
+  const { characters, tag, tournament } = filters
+  
   return prisma.user.findMany({
+    ...cursor,
     include: {
       characters: true
     },
     where: {
-      characters: {
-        some: {
-          id: {
-            equals: id
-          }
+      AND: [
+        {
+          tournaments: getTournamentQuery(tournament)
+        },
+        {
+          tag: getTagQuery(tag)
+        },
+        {
+          characters: getCharacterQuery(characters)
         }
+      ]
+    },
+    orderBy: [
+      {
+        tag: 'asc'
+      },
+      {
+        id: 'asc'
       }
-    }
+    ]
   })
 }
+
+// wolf "characters": ["15b667ac-8588-4da2-8157-bc0921df4bfb"]
 
 export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
   const id = userId || ctx.user.id

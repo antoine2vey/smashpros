@@ -188,7 +188,20 @@ type Query {
     last: Int
   ): TournamentConnection
   user(id: ID): User
-  usersByCharacter(id: ID!): [User!]
+  users(
+    """Returns the elements in the list that come after the specified cursor"""
+    after: String
+
+    """Returns the elements in the list that come before the specified cursor"""
+    before: String
+    filters: UserFilter!
+
+    """Returns the first n elements from the list."""
+    first: Int
+
+    """Returns the last n elements from the list."""
+    last: Int
+  ): UserConnection
 }
 
 type RefreshPayload {
@@ -327,12 +340,30 @@ type User {
   waiting_crew: Crew
 }
 
+type UserConnection {
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
+  """
+  edges: [UserEdge]
+
+  """
+  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
+  """
+  pageInfo: PageInfo!
+}
+
 type UserEdge {
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Cursor"""
   cursor: String!
 
   """https://facebook.github.io/relay/graphql/connections.htm#sec-Node"""
   node: User
+}
+
+input UserFilter {
+  characters: [ID!]
+  tag: String
+  tournament: ID
 }
 
 input UserRegisterPayload {

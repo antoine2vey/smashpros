@@ -15,11 +15,12 @@ import {
   characters,
   tournaments,
   tournament,
-  usersByCharacter,
+  users,
   suggestedName,
   matches
 } from '../resolvers'
 import { SuggestedName } from '.'
+import { UserFilter } from './user'
 
 export const Query = objectType({
   name: 'Query',
@@ -88,14 +89,17 @@ export const Query = objectType({
       }
     })
 
-    t.field('usersByCharacter', {
-      type: list(nonNull('User')),
+    t.connectionField('users', {
+      type: 'User',
       authorize: authorizations(isAuthenticated),
-      args: {
-        id: nonNull(idArg())
+      additionalArgs: {
+        filters: nonNull(UserFilter)
       },
-      resolve(...args) {
-        return usersByCharacter(...args)
+      cursorFromNode(node) {
+        return connectionPlugin.base64Encode(node.id)
+      },
+      nodes(...args) {
+        return users(...args)
       }
     })
 
