@@ -25,6 +25,18 @@ function bestOfWinner(totalMatches: number, wins: number) {
   return (totalMatches % wins) + wins === totalMatches
 }
 
+export const match: QueryArg<'match'> = async (_, { id }, { user }) => {
+  return prisma.match.findUnique({
+    where: {
+      id
+    },
+    include: {
+      opponent: true,
+      initiator: true
+    }
+  })
+}
+
 export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
   const cursor = getCursorForArgs('id', args)
   // Find all matches where user is either initiator or opponent
@@ -43,6 +55,10 @@ export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
           }
         }
       ]
+    },
+    include: {
+      opponent: true,
+      initiator: true
     }
   })
 }
@@ -146,7 +162,7 @@ export const updateMatchScore: MutationArg<'updateMatchScore'> = async (
   // Determine if any player has reached required number of wins needed
   const initiatorWin = bestOfWinner(
     match.total_matches,
-    match.intiator_wins + 1
+    match.initiator_wins + 1
   )
   const opponentWin = bestOfWinner(
     match.total_matches,
@@ -161,7 +177,7 @@ export const updateMatchScore: MutationArg<'updateMatchScore'> = async (
       id
     },
     data: {
-      intiator_wins: {
+      initiator_wins: {
         increment: isInitiator ? 1 : 0
       },
       opponent_wins: {

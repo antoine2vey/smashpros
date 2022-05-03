@@ -25,7 +25,7 @@ export const MatchObjectType = objectType({
     t.field(Match.amount)
     t.field(Match.total_matches)
     t.field(Match.is_moneymatch)
-    t.field(Match.intiator_wins)
+    t.field(Match.initiator_wins)
     t.field(Match.opponent_wins)
     t.field(Match.state)
     t.field(Match.battles)

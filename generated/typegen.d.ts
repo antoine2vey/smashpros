@@ -139,7 +139,7 @@ export interface NexusGenObjects {
   Match: { // root type
     amount?: number | null; // Int
     id: string; // ID!
-    intiator_wins: number; // Int!
+    initiator_wins: number; // Int!
     is_moneymatch: boolean; // Boolean!
     opponent_wins: number; // Int!
     state: NexusGenEnums['MatchState']; // MatchState!
@@ -288,7 +288,7 @@ export interface NexusGenFieldTypes {
     battles: NexusGenRootTypes['Battle'][]; // [Battle!]!
     id: string; // ID!
     initiator: NexusGenRootTypes['User'] | null; // User
-    intiator_wins: number; // Int!
+    initiator_wins: number; // Int!
     is_moneymatch: boolean; // Boolean!
     opponent: NexusGenRootTypes['User'] | null; // User
     opponent_wins: number; // Int!
@@ -333,11 +333,10 @@ export interface NexusGenFieldTypes {
     startCursor: string | null; // String
   }
   Query: { // field return type
-    battles: NexusGenRootTypes['Battle'][] | null; // [Battle!]
     characters: Array<NexusGenRootTypes['Character'] | null> | null; // [Character]
     crew: NexusGenRootTypes['Crew'] | null; // Crew
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
-    events: NexusGenRootTypes['Event'][] | null; // [Event!]
+    match: NexusGenRootTypes['Match'] | null; // Match
     matches: NexusGenRootTypes['MatchConnection'] | null; // MatchConnection
     suggestedName: NexusGenRootTypes['SuggestedName'] | null; // SuggestedName
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
@@ -477,7 +476,7 @@ export interface NexusGenFieldTypeNames {
     battles: 'Battle'
     id: 'ID'
     initiator: 'User'
-    intiator_wins: 'Int'
+    initiator_wins: 'Int'
     is_moneymatch: 'Boolean'
     opponent: 'User'
     opponent_wins: 'Int'
@@ -522,11 +521,10 @@ export interface NexusGenFieldTypeNames {
     startCursor: 'String'
   }
   Query: { // field return type name
-    battles: 'Battle'
     characters: 'Character'
     crew: 'Crew'
     crews: 'Crew'
-    events: 'Event'
+    match: 'Match'
     matches: 'MatchConnection'
     suggestedName: 'SuggestedName'
     tournament: 'Tournament'
@@ -699,6 +697,9 @@ export interface NexusGenArgTypes {
   Query: {
     crew: { // args
       id?: string | null; // ID
+    }
+    match: { // args
+      id: string; // ID!
     }
     matches: { // args
       after?: string | null; // String

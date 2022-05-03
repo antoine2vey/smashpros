@@ -69,7 +69,7 @@ type Match {
   battles: [Battle!]!
   id: ID!
   initiator: User
-  intiator_wins: Int!
+  initiator_wins: Int!
   is_moneymatch: Boolean!
   opponent: User
   opponent_wins: Int!
@@ -154,11 +154,10 @@ type PageInfo {
 }
 
 type Query {
-  battles: [Battle!]
   characters: [Character]
   crew(id: ID): Crew
   crews: [Crew]
-  events: [Event!]
+  match(id: ID!): Match
   matches(
     """Returns the elements in the list that come after the specified cursor"""
     after: String

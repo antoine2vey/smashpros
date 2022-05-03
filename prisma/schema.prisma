@@ -121,21 +121,21 @@ model Role {
 }
 
 model Match {
-  id            String      @id @default(uuid())
-  total_matches Int         @default(1)
-  amount        Int?        @default(0)
-  initiator_id  String?
-  intiator_wins Int         @default(0)
-  is_moneymatch Boolean     @default(false)
-  state         MatchState  @default(HOLD)
-  tournament_id String?
-  created_at    DateTime    @default(now())
-  opponent_id   String?
-  opponent_wins Int         @default(0)
-  initiator     User?       @relation("matches_initiated", fields: [initiator_id], references: [id])
-  opponent      User?       @relation("matches_invited", fields: [opponent_id], references: [id])
-  tournament    Tournament? @relation("matches_tournament", fields: [tournament_id], references: [id])
-  battles       Battle[]
+  id             String      @id @default(uuid())
+  total_matches  Int         @default(1)
+  amount         Int?        @default(0)
+  initiator_id   String?
+  initiator_wins Int         @default(0)
+  is_moneymatch  Boolean     @default(false)
+  state          MatchState  @default(HOLD)
+  tournament_id  String?
+  created_at     DateTime    @default(now())
+  opponent_id    String?
+  opponent_wins  Int         @default(0)
+  initiator      User?       @relation("matches_initiated", fields: [initiator_id], references: [id])
+  opponent       User?       @relation("matches_invited", fields: [opponent_id], references: [id])
+  tournament     Tournament? @relation("matches_tournament", fields: [tournament_id], references: [id])
+  battles        Battle[]
 }
 
 model Battle {

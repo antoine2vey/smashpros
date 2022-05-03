@@ -17,7 +17,8 @@ import {
   tournament,
   users,
   suggestedName,
-  matches
+  matches,
+  match
 } from '../resolvers'
 import { SuggestedName } from '.'
 import { UserFilter } from './user'
@@ -113,6 +114,17 @@ export const Query = objectType({
       }
     })
 
+    // Single match
+    t.field('match', {
+      type: 'Match',
+      args: {
+        id: nonNull(idArg())
+      },
+      resolve(...args) {
+        return match(...args)
+      }
+    })
+
     // Matches
     t.connectionField('matches', {
       type: 'Match',
@@ -126,13 +138,13 @@ export const Query = objectType({
     })
 
     // Battles
-    t.field('battles', {
-      type: list(nonNull('Battle'))
-    })
+    // t.field('battles', {
+    //   type: list(nonNull('Battle'))
+    // })
 
-    // Battles
-    t.field('events', {
-      type: list(nonNull('Event'))
-    })
+    // Events
+    // t.field('events', {
+    //   type: list(nonNull('Event'))
+    // })
   }
 })
