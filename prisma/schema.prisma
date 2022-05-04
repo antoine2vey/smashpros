@@ -157,6 +157,7 @@ model Battle {
 enum MatchState {
   HOLD
   STARTED
+  CHARACTER_CHOICE
   REFUSED
   FINISHED
 }

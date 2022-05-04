@@ -93,7 +93,7 @@ export interface NexusGenInputs {
 
 export interface NexusGenEnums {
   CrewUpdateActionEnum: "ACCEPT" | "DENY"
-  MatchState: "FINISHED" | "HOLD" | "REFUSED" | "STARTED"
+  MatchState: "CHARACTER_CHOICE" | "FINISHED" | "HOLD" | "REFUSED" | "STARTED"
   RoleEnum: "ADMIN" | "CREW_ADMIN" | "TOURNAMENT_ORGANIZER" | "USER"
 }
 
@@ -352,7 +352,14 @@ export interface NexusGenFieldTypes {
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
   }
   Subscription: { // field return type
+    battleInitiatorPick: NexusGenRootTypes['Battle'] | null; // Battle
+    battleOpponentPick: NexusGenRootTypes['Battle'] | null; // Battle
+    battleStageBan: NexusGenRootTypes['Battle'] | null; // Battle
+    battleStagePick: NexusGenRootTypes['Battle'] | null; // Battle
+    matchUpdateState: NexusGenRootTypes['Match'] | null; // Match
     userEnteredTournament: NexusGenRootTypes['User']; // User!
+    userJoinMatch: NexusGenRootTypes['User'] | null; // User
+    userLeftMatch: NexusGenRootTypes['User'] | null; // User
     userLeftTournament: NexusGenRootTypes['User']; // User!
   }
   SuggestedName: { // field return type
@@ -540,7 +547,14 @@ export interface NexusGenFieldTypeNames {
     name: 'RoleEnum'
   }
   Subscription: { // field return type name
+    battleInitiatorPick: 'Battle'
+    battleOpponentPick: 'Battle'
+    battleStageBan: 'Battle'
+    battleStagePick: 'Battle'
+    matchUpdateState: 'Match'
     userEnteredTournament: 'User'
+    userJoinMatch: 'User'
+    userLeftMatch: 'User'
     userLeftTournament: 'User'
   }
   SuggestedName: { // field return type name
@@ -728,6 +742,34 @@ export interface NexusGenArgTypes {
       filters: NexusGenInputs['UserFilter']; // UserFilter!
       first?: number | null; // Int
       last?: number | null; // Int
+    }
+  }
+  Subscription: {
+    battleInitiatorPick: { // args
+      characterId: string; // ID!
+      id: string; // ID!
+    }
+    battleOpponentPick: { // args
+      characterId: string; // ID!
+      id: string; // ID!
+    }
+    battleStageBan: { // args
+      id: string; // ID!
+      stageId: string; // ID!
+    }
+    battleStagePick: { // args
+      id: string; // ID!
+      stageId: string; // ID!
+    }
+    matchUpdateState: { // args
+      id: string; // ID!
+      state: NexusGenEnums['MatchState']; // MatchState!
+    }
+    userJoinMatch: { // args
+      id: string; // ID!
+    }
+    userLeftMatch: { // args
+      id: string; // ID!
     }
   }
   Tournament: {

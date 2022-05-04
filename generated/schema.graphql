@@ -98,6 +98,7 @@ type MatchEdge {
 }
 
 enum MatchState {
+  CHARACTER_CHOICE
   FINISHED
   HOLD
   REFUSED
@@ -224,7 +225,14 @@ enum RoleEnum {
 }
 
 type Subscription {
+  battleInitiatorPick(characterId: ID!, id: ID!): Battle
+  battleOpponentPick(characterId: ID!, id: ID!): Battle
+  battleStageBan(id: ID!, stageId: ID!): Battle
+  battleStagePick(id: ID!, stageId: ID!): Battle
+  matchUpdateState(id: ID!, state: MatchState!): Match
   userEnteredTournament: User!
+  userJoinMatch(id: ID!): User
+  userLeftMatch(id: ID!): User
   userLeftTournament: User!
 }
 

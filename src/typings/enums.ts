@@ -9,7 +9,18 @@ export namespace CrewActions {
 
 export namespace PubSub {
   export enum Actions {
+    // Tournaments
     USER_ENTERED_TOURNAMENT = 'USER_ENTERED_TOURNAMENT',
-    USER_LEFT_TOURNAMENT = 'USER_LEFT_TOURNAMENT'
+    USER_LEFT_TOURNAMENT = 'USER_LEFT_TOURNAMENT',
+
+    // Match
+    MATCH_JOIN = 'MATCH_JOIN',
+    MATCH_LEFT = 'MATCH_LEFT',
+    MATCH_UPDATE_STATE = 'MATCH_UPDATE_STATE',
+    MATCH_OPPONENT_PICK = 'MATCH_OPPONENT_PICK',
+    MATCH_INITIATOR_PICK = 'MATCH_INITIATOR_PICK',
+    // In case I implement stage ban/pick later on
+    MATCH_STAGE_PICK = 'MATCH_STAGE_PICK',
+    MATCH_STAGE_BAN = 'MATCH_STAGE_BAN'
   }
 }
