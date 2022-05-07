@@ -78,6 +78,6 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "**/*.{ts,handlebars,prisma,graphql}": "prettier --write"
+    "**/*.{ts,handlebars,graphql}": "prettier --write"
   }
 }
