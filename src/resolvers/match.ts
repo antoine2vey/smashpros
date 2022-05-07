@@ -169,24 +169,28 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
   const match = battle.match
   const isInitiator = user.id === battle.initiator_id
   const matchGuardError = matchGuard(battle.match, user)
+  // If we have a winner (2 votes are the same), return his id, else undefined
   const winner = getBattleWinner(battle, vote, isInitiator)
 
   if (matchGuardError) {
     throw matchGuardError
   }
 
+  // Cannot pass character AND vote
   if (character && vote) {
     throw new UserInputError(
       'You can either pass vote or character, but not both'
     )
   }
 
+  // If battle has a winner, throw error
   if (battle.winner_id) {
     throw new UserInputError(
       'You cannot update this battle since it has a winner'
     )
   }
 
+  // If both user voted for a winner, evaluate if they won the match
   const initiatorWin = bestOfWinner(
     match.total_matches,
     match.initiator_wins + (winner === battle.initiator_id ? 1 : 0)
@@ -196,6 +200,15 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
     match.opponent_wins + (winner === battle.opponent_id ? 1 : 0)
   )
 
+  /**
+   * If users voted for their characters, return MatchState.PLAYING
+   * Else
+   *  If one of the two users won match, return MatchState.FINISHED
+   *  Else
+   *    If we have a battle winner, return MatchState.CHARACTER_CHOICE,
+   *    Else return the default match state
+   * @returns MatchState
+   */
   const computedMatchState = () => {
     if (character) {
       if (isInitiator && battle.opponent_character_id) {
@@ -242,10 +255,12 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
         : undefined
     },
     include: {
+      // Include match only if someone won it
       match: matchState === MatchState.FINISHED
     }
   })
 
+  // If we have a winnner, we send an update with match + a new battle
   if (winner && matchState !== MatchState.FINISHED) {
     const updatedMatch = await prisma.match.update({
       where: {
@@ -264,6 +279,7 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
     pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, { match: updatedMatch })
   }
 
+  // If an user has won the match, send the updated match to end
   if (matchState === MatchState.FINISHED) {
     pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, {
       match: updatedBattle.match
@@ -271,6 +287,5 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
   }
 
   pubsub.publish(PubSub.Actions.BATTLE_UPDATE_STATE, { battle: updatedBattle })
-
   return updatedBattle
 }
