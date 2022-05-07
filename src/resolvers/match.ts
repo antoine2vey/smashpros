@@ -1,9 +1,16 @@
-import { Match, MatchState, User } from '.prisma/client'
+import { Match, MatchState, User } from '@prisma/client'
 import { UserInputError } from 'apollo-server-errors'
 import { prisma } from '../prisma'
+import { pubsub } from '../redis'
+import { PubSub } from '../typings/enums'
 import { MutationArg, QueryArg } from '../typings/interfaces'
 import { sendNotification } from '../utils/notifications'
-import { getCursorForArgs } from '../utils/prisma'
+import {
+  getBattleCharacterQuery,
+  getBattleWinner,
+  getCursorForArgs,
+  getVoteQuery
+} from '../utils/prisma'
 
 function matchGuard(match: Match, user: User) {
   const isInitiator = match.initiator_id === user.id
@@ -29,10 +36,6 @@ export const match: QueryArg<'match'> = async (_, { id }, { user }) => {
   return prisma.match.findUnique({
     where: {
       id
-    },
-    include: {
-      opponent: true,
-      initiator: true
     }
   })
 }
@@ -55,10 +58,6 @@ export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
           }
         }
       ]
-    },
-    include: {
-      opponent: true,
-      initiator: true
     }
   })
 }
@@ -69,7 +68,7 @@ export const sendMatchInvite: MutationArg<'sendMatchInvite'> = async (
   { user },
   info
 ) => {
-  const { amount, isMoneymatch, totalMatches, to } = args
+  const { amount, isMoneymatch, totalMatches, to, tournament } = args
 
   // Best of matches are odd numbers: 1, 3, 5, 7, 9 ...
   if (totalMatches % 2 === 0) {
@@ -90,6 +89,7 @@ export const sendMatchInvite: MutationArg<'sendMatchInvite'> = async (
       opponent: { connect: { id: opponent.id } },
       initiator: { connect: { id: user.id } },
       amount: amount || 0,
+      tournament: tournament ? { connect: { id: tournament } } : undefined,
       is_moneymatch: isMoneymatch || false
     }
   })
@@ -110,13 +110,12 @@ export const sendMatchInvite: MutationArg<'sendMatchInvite'> = async (
   return match
 }
 
-export const updateMatchState: MutationArg<'updateMatchState'> = async (
+export const updateMatch: MutationArg<'updateMatch'> = async (
   _,
-  args,
+  { state, id },
   { user },
   info
 ) => {
-  const { state, id } = args
   const match = await prisma.match.findUnique({ where: { id } })
   const matchGuardError = matchGuard(match, user)
 
@@ -124,12 +123,28 @@ export const updateMatchState: MutationArg<'updateMatchState'> = async (
     throw matchGuardError
   }
 
-  // You can only start or refuse a match manually, others action are either automatic/malicious
-  if (state !== MatchState.STARTED && state !== MatchState.REFUSED) {
-    throw new UserInputError('You can only start of refuse a match manually')
+  // If we choose a character, that means we have to create another battle
+  if (state === MatchState.CHARACTER_CHOICE) {
+    const update = await prisma.match.update({
+      where: {
+        id
+      },
+      data: {
+        state,
+        battles: {
+          create: {
+            opponent: { connect: { id: match.opponent_id } },
+            initiator: { connect: { id: match.initiator_id } }
+          }
+        }
+      }
+    })
+
+    pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, { match: update })
+    return update
   }
 
-  return prisma.match.update({
+  const update = await prisma.match.update({
     where: {
       id
     },
@@ -137,66 +152,125 @@ export const updateMatchState: MutationArg<'updateMatchState'> = async (
       state
     }
   })
+
+  pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, { match: update })
+  return update
 }
 
-export const updateMatchScore: MutationArg<'updateMatchScore'> = async (
+export const updateBattle: MutationArg<'updateBattle'> = async (
   _,
-  args,
-  { user },
-  info
+  { id, character, vote },
+  { user }
 ) => {
-  const { id, opponentCharacter, initiatorCharacter } = args
-  const match = await prisma.match.findUnique({ where: { id } })
-  const isInitiator = match.initiator_id === user.id
-  const isOpponent = match.opponent_id === user.id
-  const matchGuardError = matchGuard(match, user)
+  const battle = await prisma.battle.findUnique({
+    where: { id },
+    include: { match: true }
+  })
+  const match = battle.match
+  const isInitiator = user.id === battle.initiator_id
+  const matchGuardError = matchGuard(battle.match, user)
+  const winner = getBattleWinner(battle, vote, isInitiator)
 
   if (matchGuardError) {
     throw matchGuardError
   }
 
-  if (match.state !== MatchState.STARTED) {
-    throw new UserInputError('Match has to start first to update it')
+  if (character && vote) {
+    throw new UserInputError(
+      'You can either pass vote or character, but not both'
+    )
   }
 
-  // Determine if any player has reached required number of wins needed
+  if (battle.winner_id) {
+    throw new UserInputError(
+      'You cannot update this battle since it has a winner'
+    )
+  }
+
   const initiatorWin = bestOfWinner(
     match.total_matches,
-    match.initiator_wins + 1
+    match.initiator_wins + (winner === battle.initiator_id ? 1 : 0)
   )
   const opponentWin = bestOfWinner(
     match.total_matches,
-    match.opponent_wins + 1
+    match.opponent_wins + (winner === battle.opponent_id ? 1 : 0)
   )
-  // If so, set the state to finished
-  const computedMatchState =
-    initiatorWin || opponentWin ? MatchState.FINISHED : match.state
 
-  return prisma.match.update({
+  const computedMatchState = () => {
+    if (character) {
+      if (isInitiator && battle.opponent_character_id) {
+        return MatchState.PLAYING
+      }
+
+      if (!isInitiator && battle.initiator_character_id) {
+        return MatchState.PLAYING
+      }
+    }
+
+    return initiatorWin || opponentWin
+      ? MatchState.FINISHED
+      : winner
+      ? MatchState.CHARACTER_CHOICE
+      : match.state
+  }
+
+  const matchState = computedMatchState()
+  const updatedBattle = await prisma.battle.update({
     where: {
       id
     },
     data: {
-      initiator_wins: {
-        increment: isInitiator ? 1 : 0
-      },
-      opponent_wins: {
-        increment: isOpponent ? 1 : 0
-      },
-      state: computedMatchState,
-      battles: {
-        create: {
-          opponent: { connect: { id: match.opponent_id } },
-          initiator: { connect: { id: match.initiator_id } },
-          opponent_character: { connect: { id: opponentCharacter } },
-          initiator_character: { connect: { id: initiatorCharacter } },
-          winner: {
-            connect: {
-              id: user.id
+      ...getBattleCharacterQuery(character, isInitiator),
+      ...getVoteQuery(vote, isInitiator),
+      winner: winner ? { connect: { id: winner } } : undefined,
+      match: winner
+        ? {
+            update: {
+              state: matchState,
+              initiator_wins: {
+                increment: winner === battle.initiator_id ? 1 : 0
+              },
+              opponent_wins: {
+                increment: winner === battle.opponent_id ? 1 : 0
+              },
+              winner:
+                matchState === MatchState.FINISHED
+                  ? { connect: { id: winner } }
+                  : undefined
             }
+          }
+        : undefined
+    },
+    include: {
+      match: matchState === MatchState.FINISHED
+    }
+  })
+
+  if (winner && matchState !== MatchState.FINISHED) {
+    const updatedMatch = await prisma.match.update({
+      where: {
+        id: match.id
+      },
+      data: {
+        battles: {
+          create: {
+            opponent: { connect: { id: match.opponent_id } },
+            initiator: { connect: { id: match.initiator_id } }
           }
         }
       }
-    }
-  })
+    })
+
+    pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, { match: updatedMatch })
+  }
+
+  if (matchState === MatchState.FINISHED) {
+    pubsub.publish(PubSub.Actions.MATCH_UPDATE_STATE, {
+      match: updatedBattle.match
+    })
+  }
+
+  pubsub.publish(PubSub.Actions.BATTLE_UPDATE_STATE, { battle: updatedBattle })
+
+  return updatedBattle
 }

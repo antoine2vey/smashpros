@@ -6,7 +6,13 @@ import {
   objectType
 } from 'nexus'
 import { Event, Tournament, User } from 'nexus-prisma'
-import { getCharacterQuery, getCursorForArgs, getCursorForStringArgs, getTournamentQuery } from '../utils/prisma'
+import { prisma } from '../prisma'
+import {
+  getCharacterQuery,
+  getCursorForArgs,
+  getCursorForStringArgs,
+  getTournamentQuery
+} from '../utils/prisma'
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -62,7 +68,7 @@ export const TournamentObjectType = objectType({
       extendConnection(t) {
         t.int('totalCount', {
           async resolve(root, args, ctx) {
-            return ctx.prisma.user.count({
+            return prisma.user.count({
               where: {
                 tournaments: {
                   // @ts-ignore
@@ -73,10 +79,10 @@ export const TournamentObjectType = objectType({
           }
         })
       },
-      nodes(root, { characters, ...args }, ctx) {
+      nodes(root, { characters, ...args }) {
         const cursor = getCursorForStringArgs('id', args)
 
-        return ctx.prisma.user.findMany({
+        return prisma.user.findMany({
           ...cursor,
           where: {
             AND: [

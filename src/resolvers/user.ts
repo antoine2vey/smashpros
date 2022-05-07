@@ -3,7 +3,14 @@ import bcrypt from 'bcrypt'
 import { AuthenticationError, UserInputError } from 'apollo-server'
 import jwt from 'jsonwebtoken'
 import { sizes, uploadFile } from '../utils/storage'
-import { getCharacterQuery, getCursorForArgs, getCursorForStringArgs, getTagQuery, getTournamentQuery, mapIdsToPrisma } from '../utils/prisma'
+import {
+  getCharacterQuery,
+  getCursorForArgs,
+  getCursorForStringArgs,
+  getTagQuery,
+  getTournamentQuery,
+  mapIdsToPrisma
+} from '../utils/prisma'
 import { addMinutes, isAfter } from 'date-fns'
 import { getRole } from '../utils/roles'
 import { RoleEnum } from '@prisma/client'
@@ -17,9 +24,10 @@ import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
 import smashGGClient from '../smashGGClient'
 import { gql } from 'graphql-request'
 import { randomUUID } from 'crypto'
-import { cache, cacheKeys } from '../redis'
+import { cache, cacheKeys, pubsub } from '../redis'
 import { compile, ResetTemplate, sendMail } from '../smtp'
 import logger from '../utils/logger'
+import { PubSub } from '../typings/enums'
 
 const query = gql`
   query profile($slug: String!) {
@@ -44,7 +52,7 @@ export const users: QueryArg<'users'> = (
 ) => {
   const cursor = getCursorForStringArgs('id', args)
   const { characters, tag, tournament } = filters
-  
+
   return prisma.user.findMany({
     ...cursor,
     include: {
@@ -76,6 +84,8 @@ export const users: QueryArg<'users'> = (
 
 export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
   const id = userId || ctx.user.id
+
+  pubsub.publish(PubSub.Actions.MATCH_JOIN, { user: ctx.user })
 
   return prisma.user.findUnique({
     where: {
@@ -410,4 +420,28 @@ export const suggestedName: QueryArg<'suggestedName'> = async (
     smashGGUserId: user.id,
     profilePicture: user.images.length > 0 ? user.images[1].url : null
   }
+}
+
+export const setOnline: QueryArg<'setOnline'> = async (
+  _,
+  { online },
+  { user },
+  info
+) => {
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: user.id
+    },
+    data: {
+      in_match: online
+    }
+  })
+
+  if (online) {
+    pubsub.publish(PubSub.Actions.MATCH_JOIN, { user: updatedUser })
+  } else {
+    pubsub.publish(PubSub.Actions.MATCH_LEFT, { user: updatedUser })
+  }
+
+  return updatedUser
 }

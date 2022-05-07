@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Battle, Prisma } from '@prisma/client'
 import { connectionPlugin } from 'nexus'
 
 type PaginationArgs = {
@@ -97,4 +97,70 @@ export function getTagQuery(tag: string | undefined): Prisma.StringFilter {
     contains: tag,
     mode: 'insensitive'
   }
+}
+
+export function getBattleCharacterQuery(
+  character: string | undefined,
+  isInitiator: boolean
+) {
+  if (!character) {
+    return undefined
+  }
+
+  return {
+    initiator_character: isInitiator
+      ? { connect: { id: character } }
+      : undefined,
+    opponent_character: !isInitiator
+      ? { connect: { id: character } }
+      : undefined
+  }
+}
+
+export function getVoteQuery(vote: string | undefined, isInitiator: boolean) {
+  if (!vote) {
+    return undefined
+  }
+
+  return {
+    opponent_vote: !isInitiator
+      ? {
+          connect: {
+            id: vote
+          }
+        }
+      : undefined,
+    initiator_vote: isInitiator
+      ? {
+          connect: {
+            id: vote
+          }
+        }
+      : undefined
+  }
+}
+
+export function getBattleWinner(
+  battle: Battle,
+  vote: string | undefined,
+  isInitiator: boolean
+) {
+  if (!vote) {
+    return undefined
+  }
+
+  /**
+   * If initiator:
+   *  - Check that vote is the same as opponent
+   * If opponent:
+   *  - Check that vote is the same as initiator
+   */
+  if (
+    vote === (isInitiator ? battle.opponent_vote_id : battle.initiator_vote_id)
+  ) {
+    return vote
+  }
+
+  // Users didn't came to an agreement, don't update winner yet
+  return undefined
 }

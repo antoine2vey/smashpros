@@ -35,14 +35,18 @@ model User {
   allow_searchability    Boolean      @default(true)
   smashgg_player_id      Int?         @unique
   smashgg_user_id        Int?         @unique
+  in_match               Boolean      @default(false)
   crew                   Crew?        @relation("crew_members", fields: [crew_id], references: [id])
   waiting_crew           Crew?        @relation("crew_waiting_members", fields: [waiting_crew_id], references: [id])
   initiator_battle       Battle[]     @relation("battle_initiator")
+  battle_initiator_votes Battle[]     @relation("battle_initiator_vote")
   opponent_battle        Battle[]     @relation("battle_opponent")
+  battle_opponent_votes  Battle[]     @relation("battle_opponent_vote")
   won_battles            Battle[]     @relation("battle_winner")
   crew_admin             Crew?        @relation("crew_admin")
   matches_initiated      Match[]      @relation("matches_initiated")
   matches_invited        Match[]      @relation("matches_invited")
+  won_matches            Match[]      @relation("match_winner")
   characters             Character[]
   roles                  Role[]
   favorited_tournaments  Tournament[] @relation("favorited_tournaments")
@@ -125,16 +129,18 @@ model Match {
   total_matches  Int         @default(1)
   amount         Int?        @default(0)
   initiator_id   String?
-  initiator_wins Int         @default(0)
   is_moneymatch  Boolean     @default(false)
   state          MatchState  @default(HOLD)
   tournament_id  String?
   created_at     DateTime    @default(now())
   opponent_id    String?
   opponent_wins  Int         @default(0)
+  initiator_wins Int         @default(0)
+  winner_id      String?
   initiator      User?       @relation("matches_initiated", fields: [initiator_id], references: [id])
   opponent       User?       @relation("matches_invited", fields: [opponent_id], references: [id])
   tournament     Tournament? @relation("matches_tournament", fields: [tournament_id], references: [id])
+  winner         User?       @relation("match_winner", fields: [winner_id], references: [id])
   battles        Battle[]
 }
 
@@ -146,20 +152,27 @@ model Battle {
   winner_id              String?
   opponent_character_id  String?
   opponent_id            String?
+  created_at             DateTime   @default(now())
+  end_at                 DateTime?
+  initiator_vote_id      String?
+  opponent_vote_id       String?
+  start_at               DateTime?
   initiator_character    Character? @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
   initiator              User?      @relation("battle_initiator", fields: [initiator_id], references: [id])
-  match                  Match      @relation(fields: [match_id], references: [id])
+  initiator_vote         User?      @relation("battle_initiator_vote", fields: [initiator_vote_id], references: [id])
+  match                  Match      @relation(fields: [match_id], references: [id], onDelete: Cascade)
   opponent_character     Character? @relation("battle_opponent_character", fields: [opponent_character_id], references: [id])
   opponent               User?      @relation("battle_opponent", fields: [opponent_id], references: [id])
+  opponent_vote          User?      @relation("battle_opponent_vote", fields: [opponent_vote_id], references: [id])
   winner                 User?      @relation("battle_winner", fields: [winner_id], references: [id])
 }
 
 enum MatchState {
   HOLD
-  STARTED
-  CHARACTER_CHOICE
   REFUSED
   FINISHED
+  CHARACTER_CHOICE
+  PLAYING
 }
 
 enum RoleEnum {

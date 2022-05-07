@@ -27,11 +27,12 @@ import {
   sendMatchInvite,
   synchronizeTournaments,
   transferCrewOwnership,
-  updateMatchScore,
-  updateMatchState,
+  updateMatch,
   updateWaitingMember,
   userEnteredTournament,
-  userLeftTournament
+  userLeftTournament,
+  setOnline,
+  updateBattle
 } from '../resolvers'
 import {
   askPasswordReset,
@@ -155,6 +156,17 @@ export const Mutation = objectType({
       }
     })
 
+    t.field('setOnline', {
+      type: 'User',
+      authorize: authorizations(isAuthenticated),
+      args: {
+        online: nonNull(booleanArg())
+      },
+      resolve(...args) {
+        return setOnline(...args)
+      }
+    })
+
     t.field('askPasswordReset', {
       type: 'String',
       args: {
@@ -251,6 +263,7 @@ export const Mutation = objectType({
         to: nonNull(idArg()),
         totalMatches: nonNull(intArg()),
         isMoneymatch: booleanArg(),
+        tournament: idArg(),
         amount: intArg()
       },
       authorize: authorizations(isAuthenticated),
@@ -259,7 +272,7 @@ export const Mutation = objectType({
       }
     })
 
-    t.field('updateMatchState', {
+    t.field('updateMatch', {
       type: 'Match',
       args: {
         state: nonNull(MatchStateEnumType),
@@ -267,20 +280,20 @@ export const Mutation = objectType({
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {
-        return updateMatchState(...args)
+        return updateMatch(...args)
       }
     })
 
-    t.field('updateMatchScore', {
-      type: 'Match',
+    t.field('updateBattle', {
+      type: 'Battle',
       args: {
         id: nonNull(idArg()),
-        initiatorCharacter: nonNull(idArg()),
-        opponentCharacter: nonNull(idArg())
+        character: idArg(),
+        vote: idArg()
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {
-        return updateMatchScore(...args)
+        return updateBattle(...args)
       }
     })
   }

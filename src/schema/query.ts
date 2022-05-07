@@ -117,6 +117,7 @@ export const Query = objectType({
     // Single match
     t.field('match', {
       type: 'Match',
+      authorize: authorizations(isAuthenticated),
       args: {
         id: nonNull(idArg())
       },
@@ -136,6 +137,13 @@ export const Query = objectType({
         return matches(...args)
       }
     })
+    // t.field('matches', {
+    //   type: list('Match'),
+    //   authorize: authorizations(isAuthenticated),
+    //   resolve(...args) {
+    //     return matches(...args)
+    //   }
+    // })
 
     // Battles
     // t.field('battles', {

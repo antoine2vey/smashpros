@@ -1,5 +1,4 @@
 import { gql } from 'graphql-request'
-import { Prisma } from '@prisma/client'
 import { PubSub } from '../typings/enums'
 import { prisma } from '../prisma'
 import { pubsub } from '../redis'

@@ -32,6 +32,7 @@ export const UserObjectType = objectType({
     t.field(User.email)
     t.field(User.waiting_crew)
     t.field(User.in_tournament)
+    t.field(User.in_match)
     t.field(User.smashgg_player_id)
     t.field(User.twitch_username)
     t.field(User.twitter_username)
@@ -47,7 +48,9 @@ export const UserObjectType = objectType({
       resolve(root) {
         // Remove all tournaments that are outdated
         // @ts-ignore
-        const tournaments = root.tournaments.filter(tournament => isAfter(tournament.end_at, new Date()))
+        const tournaments = root.tournaments.filter((tournament) =>
+          isAfter(tournament.end_at, new Date())
+        )
 
         if (tournaments.length === 0) {
           return null
