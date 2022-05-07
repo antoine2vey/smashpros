@@ -237,11 +237,6 @@ export interface NexusGenObjects {
     cursor: string // String!
     node?: NexusGenRootTypes['Tournament'] | null // Tournament
   }
-  TournamentParticipants_Connection: {
-    // root type
-    edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null // [UserEdge]
-    pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
-  }
   User: {
     // root type
     allow_notifications: boolean // Boolean!
@@ -439,10 +434,11 @@ export interface NexusGenFieldTypes {
     lng: number | null // Float
     name: string // String!
     num_attendees: number | null // Int
-    participants: NexusGenRootTypes['TournamentParticipants_Connection'] | null // TournamentParticipants_Connection
+    participants: NexusGenRootTypes['UserConnection'] | null // UserConnection
     slug: string // String!
     start_at: NexusGenScalars['DateTime'] | null // DateTime
     state: number // Int!
+    totalParticipants: number // Int!
     tournament_id: number // Int!
     venue_address: string | null // String
     venue_name: string | null // String
@@ -456,12 +452,6 @@ export interface NexusGenFieldTypes {
     // field return type
     cursor: string // String!
     node: NexusGenRootTypes['Tournament'] | null // Tournament
-  }
-  TournamentParticipants_Connection: {
-    // field return type
-    edges: Array<NexusGenRootTypes['UserEdge'] | null> | null // [UserEdge]
-    pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
-    totalCount: number | null // Int
   }
   User: {
     // field return type
@@ -658,10 +648,11 @@ export interface NexusGenFieldTypeNames {
     lng: 'Float'
     name: 'String'
     num_attendees: 'Int'
-    participants: 'TournamentParticipants_Connection'
+    participants: 'UserConnection'
     slug: 'String'
     start_at: 'DateTime'
     state: 'Int'
+    totalParticipants: 'Int'
     tournament_id: 'Int'
     venue_address: 'String'
     venue_name: 'String'
@@ -675,12 +666,6 @@ export interface NexusGenFieldTypeNames {
     // field return type name
     cursor: 'String'
     node: 'Tournament'
-  }
-  TournamentParticipants_Connection: {
-    // field return type name
-    edges: 'UserEdge'
-    pageInfo: 'PageInfo'
-    totalCount: 'Int'
   }
   User: {
     // field return type name

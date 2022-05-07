@@ -325,10 +325,11 @@ type Tournament {
     Returns the last n elements from the list.
     """
     last: Int
-  ): TournamentParticipants_Connection
+  ): UserConnection
   slug: String!
   start_at: DateTime
   state: Int!
+  totalParticipants: Int!
   tournament_id: Int!
   venue_address: String
   venue_name: String
@@ -356,19 +357,6 @@ type TournamentEdge {
   https://facebook.github.io/relay/graphql/connections.htm#sec-Node
   """
   node: Tournament
-}
-
-type TournamentParticipants_Connection {
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-Edge-Types
-  """
-  edges: [UserEdge]
-
-  """
-  https://facebook.github.io/relay/graphql/connections.htm#sec-undefined.PageInfo
-  """
-  pageInfo: PageInfo!
-  totalCount: Int
 }
 
 input TournamentQuery {

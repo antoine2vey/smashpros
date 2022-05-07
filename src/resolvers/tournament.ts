@@ -33,6 +33,11 @@ export const tournaments: QueryArg<'tournaments'> = async (
         where: {
           allow_searchability: true
         }
+      },
+      _count: {
+        select: {
+          participants: true
+        }
       }
     },
     orderBy: [
@@ -63,6 +68,11 @@ export const tournament: QueryArg<'tournament'> = async (
         },
         include: {
           characters: true
+        }
+      },
+      _count: {
+        select: {
+          participants: true
         }
       }
     }

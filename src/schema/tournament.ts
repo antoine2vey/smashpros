@@ -65,20 +65,6 @@ export const TournamentObjectType = objectType({
       cursorFromNode(node) {
         return connectionPlugin.base64Encode(node.id.toString())
       },
-      extendConnection(t) {
-        t.int('totalCount', {
-          async resolve(root, args, ctx) {
-            return prisma.user.count({
-              where: {
-                tournaments: {
-                  // @ts-ignore
-                  some: { id: root.id }
-                }
-              }
-            })
-          }
-        })
-      },
       nodes(root, { characters, ...args }) {
         const cursor = getCursorForStringArgs('id', args)
 
@@ -98,6 +84,7 @@ export const TournamentObjectType = objectType({
             ]
           },
           include: {
+            _count: true,
             characters: true
           },
           orderBy: [
@@ -109,6 +96,15 @@ export const TournamentObjectType = objectType({
             }
           ]
         })
+      }
+    })
+
+    t.field('totalParticipants', {
+      type: nonNull('Int'),
+      resolve(root) {
+        console.log(root)
+        // @ts-ignore
+        return root._count.participants
       }
     })
   }
