@@ -102,7 +102,6 @@ export const TournamentObjectType = objectType({
     t.field('totalParticipants', {
       type: nonNull('Int'),
       resolve(root) {
-        console.log(root)
         // @ts-ignore
         return root._count.participants
       }
