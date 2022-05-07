@@ -7,7 +7,8 @@ const options = {
 }
 
 const cacheKeys = {
-  refreshTokens: 'token:refresh'
+  refreshTokens: 'token:refresh',
+  user: (id: string) => `user-${id}`
 }
 
 const cache = new Redis(options)

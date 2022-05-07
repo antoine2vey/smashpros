@@ -275,6 +275,9 @@ export const login: MutationArg<'login'> = async (
       { expiresIn: '1y' }
     )
 
+    // Set user in cache for access_token duration
+    await cache.setex(cacheKeys.user(user.id), 1800, JSON.stringify(user))
+    logger.info(`Set user ${cacheKeys.user(user.id)} in cache after login`)
     await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
 
     return {
@@ -309,6 +312,9 @@ export const refresh: MutationArg<'refresh'> = async (
       { expiresIn: '1800s' }
     )
 
+    // Set user in cache for access_token duration
+    await cache.setex(cacheKeys.user(user.id), 1800, JSON.stringify(user))
+    logger.info(`Set user ${cacheKeys.user(user.id)} in cache after refresh`)
     await cache.hset(cacheKeys.refreshTokens, refreshToken, accessToken)
 
     return {
