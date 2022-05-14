@@ -3,9 +3,9 @@ import { PubSub } from '../typings/enums'
 import { prisma } from '../prisma'
 import { pubsub } from '../redis'
 import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
-import { getCursorForArgs } from '../utils/prisma'
 import smashGGClient from '../smashGGClient'
-import { connectionPlugin } from 'nexus'
+import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
+import { Prisma } from '@prisma/client'
 
 export const tournaments: QueryArg<'tournaments'> = async (
   _,
@@ -13,15 +13,21 @@ export const tournaments: QueryArg<'tournaments'> = async (
   ctx,
   info
 ) => {
-  const cursor = getCursorForArgs('tournament_id', args)
   const now = new Date()
-
-  return prisma.tournament.findMany({
-    ...cursor,
+  const baseArgs: Prisma.TournamentFindManyArgs = {
     where: {
-      end_at: {
-        gte: now
-      }
+      AND: [
+        {
+          end_at: {
+            gte: now
+          }
+        },
+        {
+          start_at: {
+            gte: now
+          }
+        }
+      ]
     },
     include: {
       participants: {
@@ -33,11 +39,6 @@ export const tournaments: QueryArg<'tournaments'> = async (
         where: {
           allow_searchability: true
         }
-      },
-      _count: {
-        select: {
-          participants: true
-        }
       }
     },
     orderBy: [
@@ -48,7 +49,17 @@ export const tournaments: QueryArg<'tournaments'> = async (
         name: 'asc'
       }
     ]
-  })
+  }
+
+  return findManyCursorConnection(
+    (args) =>
+      prisma.tournament.findMany({
+        ...args,
+        ...baseArgs
+      }),
+    () => prisma.tournament.count({ where: baseArgs.where }),
+    args
+  )
 }
 
 export const tournament: QueryArg<'tournament'> = async (
@@ -68,11 +79,6 @@ export const tournament: QueryArg<'tournament'> = async (
         },
         include: {
           characters: true
-        }
-      },
-      _count: {
-        select: {
-          participants: true
         }
       }
     }

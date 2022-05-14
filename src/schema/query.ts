@@ -1,12 +1,4 @@
-import {
-  connectionPlugin,
-  idArg,
-  list,
-  nonNull,
-  objectType,
-  stringArg
-} from 'nexus'
-import { Context } from '../context'
+import { idArg, list, nonNull, objectType, stringArg } from 'nexus'
 import { isAuthenticated, authorizations } from '../authorizations'
 import {
   user,
@@ -22,6 +14,7 @@ import {
 } from '../resolvers'
 import { SuggestedName } from '.'
 import { UserFilter } from './user'
+import { relayArgs } from './relay'
 
 export const Query = objectType({
   name: 'Query',
@@ -29,7 +22,6 @@ export const Query = objectType({
     // Characters
     t.field('characters', {
       type: list('Character'),
-      // authorize: authorizations(isAuthenticated),
       resolve(...args) {
         return characters(...args)
       }
@@ -56,13 +48,11 @@ export const Query = objectType({
     })
 
     // Tournament
-    t.connectionField('tournaments', {
-      type: 'Tournament',
+    t.field('tournaments', {
+      type: 'TournamentConnection',
       authorize: authorizations(isAuthenticated),
-      cursorFromNode(node, args, ctx, info) {
-        return connectionPlugin.base64Encode(node.tournament_id.toString())
-      },
-      nodes(...args) {
+      args: relayArgs,
+      resolve(...args) {
         return tournaments(...args)
       }
     })
@@ -90,16 +80,14 @@ export const Query = objectType({
       }
     })
 
-    t.connectionField('users', {
-      type: 'User',
+    t.field('users', {
+      type: 'UserConnection',
       authorize: authorizations(isAuthenticated),
-      additionalArgs: {
+      args: {
+        ...relayArgs,
         filters: nonNull(UserFilter)
       },
-      cursorFromNode(node) {
-        return connectionPlugin.base64Encode(node.id)
-      },
-      nodes(...args) {
+      resolve(...args) {
         return users(...args)
       }
     })
@@ -127,32 +115,13 @@ export const Query = objectType({
     })
 
     // Matches
-    t.connectionField('matches', {
-      type: 'Match',
+    t.field('matches', {
+      type: 'MatchConnection',
       authorize: authorizations(isAuthenticated),
-      cursorFromNode(node, args, ctx, info) {
-        return connectionPlugin.base64Encode(node.id)
-      },
-      nodes(...args) {
+      args: relayArgs,
+      resolve(...args) {
         return matches(...args)
       }
     })
-    // t.field('matches', {
-    //   type: list('Match'),
-    //   authorize: authorizations(isAuthenticated),
-    //   resolve(...args) {
-    //     return matches(...args)
-    //   }
-    // })
-
-    // Battles
-    // t.field('battles', {
-    //   type: list(nonNull('Battle'))
-    // })
-
-    // Events
-    // t.field('events', {
-    //   type: list(nonNull('Event'))
-    // })
   }
 })

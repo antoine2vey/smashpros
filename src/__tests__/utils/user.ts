@@ -7,9 +7,6 @@ export function getUser(email: string) {
       email
     },
     include: {
-      characters: true,
-      crew: true,
-      waiting_crew: true,
       roles: true
     }
   })

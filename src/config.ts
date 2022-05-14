@@ -1,5 +1,5 @@
 import { findUserByToken } from './utils/user'
-import { connectionPlugin, fieldAuthorizePlugin, makeSchema } from 'nexus'
+import { fieldAuthorizePlugin, makeSchema } from 'nexus'
 import path from 'path'
 import * as types from './schema'
 import { prisma } from './prisma'
@@ -15,7 +15,6 @@ export const schema = makeSchema({
     export: 'Context'
   },
   plugins: [
-    connectionPlugin(),
     fieldAuthorizePlugin({
       formatError({ error }) {
         return error

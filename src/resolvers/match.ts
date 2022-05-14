@@ -1,4 +1,5 @@
-import { Match, MatchState, User } from '@prisma/client'
+import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
+import { Match, MatchState, Prisma, User } from '@prisma/client'
 import { UserInputError } from 'apollo-server-errors'
 import { prisma } from '../prisma'
 import { pubsub } from '../redis'
@@ -8,7 +9,6 @@ import { sendNotification } from '../utils/notifications'
 import {
   getBattleCharacterQuery,
   getBattleWinner,
-  getCursorForArgs,
   getVoteQuery
 } from '../utils/prisma'
 
@@ -41,10 +41,7 @@ export const match: QueryArg<'match'> = async (_, { id }, { user }) => {
 }
 
 export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
-  const cursor = getCursorForArgs('id', args)
-  // Find all matches where user is either initiator or opponent
-  return prisma.match.findMany({
-    ...cursor,
+  const baseArgs: Prisma.MatchFindManyArgs = {
     where: {
       OR: [
         {
@@ -59,7 +56,17 @@ export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
         }
       ]
     }
-  })
+  }
+  // Find all matches where user is either initiator or opponent
+  return findManyCursorConnection(
+    (args) =>
+      prisma.match.findMany({
+        ...args,
+        ...baseArgs
+      }),
+    () => prisma.match.count({ where: baseArgs.where }),
+    args
+  )
 }
 
 export const sendMatchInvite: MutationArg<'sendMatchInvite'> = async (

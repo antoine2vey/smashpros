@@ -1,3 +1,5 @@
+import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
+import { Prisma } from '@prisma/client'
 import {
   connectionPlugin,
   inputObjectType,
@@ -13,6 +15,7 @@ import {
   getCursorForStringArgs,
   getTournamentQuery
 } from '../utils/prisma'
+import { defineConnection, defineEdge, relayArgs } from './relay'
 
 export const EventObjectType = objectType({
   name: Event.$name,
@@ -56,20 +59,15 @@ export const TournamentObjectType = objectType({
     t.field(Tournament.favorited_by)
     t.field(Tournament.events)
 
-    t.connectionField(Tournament.participants.name, {
-      type: User.$name,
+    t.field(Tournament.participants.name, {
+      type: 'UserConnection',
       description: Tournament.participants.description,
-      additionalArgs: {
+      args: {
+        ...relayArgs,
         characters: list(nonNull('ID'))
       },
-      cursorFromNode(node) {
-        return connectionPlugin.base64Encode(node.id.toString())
-      },
-      nodes(root, { characters, ...args }) {
-        const cursor = getCursorForStringArgs('id', args)
-
-        return prisma.user.findMany({
-          ...cursor,
+      resolve(root, { characters, ...args }) {
+        const baseArgs: Prisma.UserFindManyArgs = {
           where: {
             AND: [
               {
@@ -84,7 +82,6 @@ export const TournamentObjectType = objectType({
             ]
           },
           include: {
-            _count: true,
             characters: true
           },
           orderBy: [
@@ -95,15 +92,17 @@ export const TournamentObjectType = objectType({
               id: 'asc'
             }
           ]
-        })
-      }
-    })
+        }
 
-    t.field('totalParticipants', {
-      type: nonNull('Int'),
-      resolve(root) {
-        // @ts-ignore
-        return root._count.participants
+        return findManyCursorConnection(
+          (args) =>
+            prisma.user.findMany({
+              ...args,
+              ...baseArgs
+            }),
+          () => prisma.user.count({ where: baseArgs.where }),
+          args
+        )
       }
     })
   }
@@ -116,3 +115,12 @@ export const TournamentQuery = inputObjectType({
     t.string('player')
   }
 })
+
+export const TournamentEdge = defineEdge<'Tournament'>(
+  'Tournament',
+  TournamentObjectType
+)
+export const TournamentConnection = defineConnection(
+  'Tournament',
+  'TournamentEdge'
+)

@@ -2,6 +2,7 @@ import { RoleEnum } from '@prisma/client'
 import { isAfter } from 'date-fns'
 import { enumType, inputObjectType, objectType } from 'nexus'
 import { Role, User } from 'nexus-prisma'
+import { defineConnection, defineEdge } from './relay'
 
 export const RoleObjectType = objectType({
   name: Role.$name,
@@ -134,3 +135,6 @@ export const SuggestedName = objectType({
     t.string('profilePicture')
   }
 })
+
+export const UserEdge = defineEdge<'User'>('User', UserObjectType)
+export const UserConnection = defineConnection('User', 'UserEdge')

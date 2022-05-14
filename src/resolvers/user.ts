@@ -5,15 +5,13 @@ import jwt from 'jsonwebtoken'
 import { sizes, uploadFile } from '../utils/storage'
 import {
   getCharacterQuery,
-  getCursorForArgs,
-  getCursorForStringArgs,
   getTagQuery,
   getTournamentQuery,
   mapIdsToPrisma
 } from '../utils/prisma'
 import { addMinutes, isAfter } from 'date-fns'
 import { getRole } from '../utils/roles'
-import { RoleEnum } from '@prisma/client'
+import { Prisma, RoleEnum } from '@prisma/client'
 import {
   forgotPasswordSchema,
   emailSchema,
@@ -28,6 +26,7 @@ import { cache, cacheKeys, pubsub } from '../redis'
 import { compile, ResetTemplate, sendMail } from '../smtp'
 import logger from '../utils/logger'
 import { PubSub } from '../typings/enums'
+import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
 
 const query = gql`
   query profile($slug: String!) {
@@ -50,11 +49,8 @@ export const users: QueryArg<'users'> = (
   ctx,
   info
 ) => {
-  const cursor = getCursorForStringArgs('id', args)
   const { characters, tag, tournament } = filters
-
-  return prisma.user.findMany({
-    ...cursor,
+  const baseArgs: Prisma.UserFindManyArgs = {
     include: {
       characters: true
     },
@@ -79,13 +75,21 @@ export const users: QueryArg<'users'> = (
         id: 'asc'
       }
     ]
-  })
+  }
+
+  return findManyCursorConnection(
+    (args) =>
+      prisma.user.findMany({
+        ...args,
+        ...baseArgs
+      }),
+    () => prisma.user.count({ where: baseArgs.where }),
+    args
+  )
 }
 
 export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
   const id = userId || ctx.user.id
-
-  pubsub.publish(PubSub.Actions.MATCH_JOIN, { user: ctx.user })
 
   return prisma.user.findUnique({
     where: {
@@ -109,6 +113,7 @@ export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
       waiting_crew: true,
       favorited_tournaments: true,
       tournaments: true,
+      in_match: true,
       updated_at: true,
       created_at: true
     }

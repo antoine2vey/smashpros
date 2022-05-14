@@ -23,28 +23,12 @@ export const crew: QueryArg<'crew'> = async (
   return prisma.crew.findUnique({
     where: {
       id: crewId
-    },
-    include: {
-      members: {
-        include: {
-          characters: true,
-          roles: true
-        }
-      },
-      waiting_members: true,
-      admin: true
     }
   })
 }
 
 export const crews: QueryArg<'crews'> = (_, args, ctx, info) => {
-  return prisma.crew.findMany({
-    include: {
-      members: true,
-      waiting_members: true,
-      admin: true
-    }
-  })
+  return prisma.crew.findMany()
 }
 
 export const createCrew: MutationArg<'createCrew'> = async (

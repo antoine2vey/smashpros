@@ -387,6 +387,13 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
+"@devoxa/prisma-relay-cursor-connection@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@devoxa/prisma-relay-cursor-connection/-/prisma-relay-cursor-connection-2.2.1.tgz#40f65accff3d044a11c014fd03b17a12bca8fd81"
+  integrity sha512-WGtHPHDHaUJ4/ESmz+UL5T1FFZNYbgSBCTol488aInoDBttBmeNKHh5l66PzL9Z0GNwDUrfakWnAZs0DEA0XHw==
+  dependencies:
+    graphql-fields "^2.0.3"
+
 "@exodus/schemasafe@^1.0.0-rc.2":
   version "1.0.0-rc.6"
   resolved "https://registry.yarnpkg.com/@exodus/schemasafe/-/schemasafe-1.0.0-rc.6.tgz#7985f681564cff4ffaebb5896eb4be20af3aae7a"
@@ -4100,6 +4107,11 @@ graphql-extensions@^0.15.0:
     "@apollographql/apollo-tools" "^0.5.0"
     apollo-server-env "^3.1.0"
     apollo-server-types "^0.9.0"
+
+graphql-fields@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/graphql-fields/-/graphql-fields-2.0.3.tgz#5e68dff7afbb202be4f4f40623e983b22c96ab8f"
+  integrity sha512-x3VE5lUcR4XCOxPIqaO4CE+bTK8u6gVouOdpQX9+EKHr+scqtK5Pp/l8nIGqIpN1TUlkKE6jDCCycm/WtLRAwA==
 
 graphql-redis-subscriptions@^2.4.0:
   version "2.4.2"

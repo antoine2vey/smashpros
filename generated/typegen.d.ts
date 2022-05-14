@@ -4,8 +4,8 @@
  */
 
 import type { Context } from './../src/context'
-import type { core, connectionPluginCore } from 'nexus'
 import type { FieldAuthorizeResolver } from 'nexus/dist/plugins/fieldAuthorizePlugin'
+import type { core } from 'nexus'
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
     /**
@@ -40,15 +40,6 @@ declare global {
       fieldName: FieldName,
       ...opts: core.ScalarOutSpread<TypeName, FieldName>
     ): void // "Upload";
-    /**
-     * Adds a Relay-style connection to the type, with numerous options for configuration
-     *
-     * @see https://nexusjs.org/docs/plugins/connection
-     */
-    connectionField<FieldName extends string>(
-      fieldName: FieldName,
-      config: connectionPluginCore.ConnectionFieldConfig<TypeName, FieldName>
-    ): void
   }
 }
 
@@ -133,6 +124,7 @@ export interface NexusGenObjects {
   Battle: {
     // root type
     id: string // ID!
+    winner_id?: string | null // String
   }
   Character: {
     // root type
@@ -166,11 +158,13 @@ export interface NexusGenObjects {
     opponent_wins: number // Int!
     state: NexusGenEnums['MatchState'] // MatchState!
     total_matches: number // Int!
+    winner_id?: string | null // String
   }
   MatchConnection: {
     // root type
     edges?: Array<NexusGenRootTypes['MatchEdge'] | null> | null // [MatchEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   MatchEdge: {
     // root type
@@ -231,6 +225,7 @@ export interface NexusGenObjects {
     // root type
     edges?: Array<NexusGenRootTypes['TournamentEdge'] | null> | null // [TournamentEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   TournamentEdge: {
     // root type
@@ -258,6 +253,7 @@ export interface NexusGenObjects {
     // root type
     edges?: Array<NexusGenRootTypes['UserEdge'] | null> | null // [UserEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   UserEdge: {
     // root type
@@ -292,6 +288,7 @@ export interface NexusGenFieldTypes {
     opponent_character: NexusGenRootTypes['Character'] | null // Character
     opponent_vote: NexusGenRootTypes['User'] | null // User
     winner: NexusGenRootTypes['User'] | null // User
+    winner_id: string | null // String
   }
   Character: {
     // field return type
@@ -334,11 +331,13 @@ export interface NexusGenFieldTypes {
     state: NexusGenEnums['MatchState'] // MatchState!
     total_matches: number // Int!
     winner: NexusGenRootTypes['User'] | null // User
+    winner_id: string | null // String
   }
   MatchConnection: {
     // field return type
     edges: Array<NexusGenRootTypes['MatchEdge'] | null> | null // [MatchEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   MatchEdge: {
     // field return type
@@ -438,7 +437,6 @@ export interface NexusGenFieldTypes {
     slug: string // String!
     start_at: NexusGenScalars['DateTime'] | null // DateTime
     state: number // Int!
-    totalParticipants: number // Int!
     tournament_id: number // Int!
     venue_address: string | null // String
     venue_name: string | null // String
@@ -447,6 +445,7 @@ export interface NexusGenFieldTypes {
     // field return type
     edges: Array<NexusGenRootTypes['TournamentEdge'] | null> | null // [TournamentEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   TournamentEdge: {
     // field return type
@@ -482,6 +481,7 @@ export interface NexusGenFieldTypes {
     // field return type
     edges: Array<NexusGenRootTypes['UserEdge'] | null> | null // [UserEdge]
     pageInfo: NexusGenRootTypes['PageInfo'] // PageInfo!
+    totalCount: number // Int!
   }
   UserEdge: {
     // field return type
@@ -506,6 +506,7 @@ export interface NexusGenFieldTypeNames {
     opponent_character: 'Character'
     opponent_vote: 'User'
     winner: 'User'
+    winner_id: 'String'
   }
   Character: {
     // field return type name
@@ -548,11 +549,13 @@ export interface NexusGenFieldTypeNames {
     state: 'MatchState'
     total_matches: 'Int'
     winner: 'User'
+    winner_id: 'String'
   }
   MatchConnection: {
     // field return type name
     edges: 'MatchEdge'
     pageInfo: 'PageInfo'
+    totalCount: 'Int'
   }
   MatchEdge: {
     // field return type name
@@ -652,7 +655,6 @@ export interface NexusGenFieldTypeNames {
     slug: 'String'
     start_at: 'DateTime'
     state: 'Int'
-    totalParticipants: 'Int'
     tournament_id: 'Int'
     venue_address: 'String'
     venue_name: 'String'
@@ -661,6 +663,7 @@ export interface NexusGenFieldTypeNames {
     // field return type name
     edges: 'TournamentEdge'
     pageInfo: 'PageInfo'
+    totalCount: 'Int'
   }
   TournamentEdge: {
     // field return type name
@@ -696,6 +699,7 @@ export interface NexusGenFieldTypeNames {
     // field return type name
     edges: 'UserEdge'
     pageInfo: 'PageInfo'
+    totalCount: 'Int'
   }
   UserEdge: {
     // field return type name
