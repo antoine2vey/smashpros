@@ -96,10 +96,16 @@ export const TournamentObjectType = objectType({
 
         return findManyCursorConnection(
           (args) =>
-            prisma.user.findMany({
-              ...args,
-              ...baseArgs
-            }),
+            prisma.tournament
+              .findUnique({
+                where: {
+                  id: root.id
+                }
+              })
+              .participants({
+                ...args,
+                ...baseArgs
+              }),
           () => prisma.user.count({ where: baseArgs.where }),
           args
         )
