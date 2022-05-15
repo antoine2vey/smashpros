@@ -14,20 +14,15 @@ export const tournaments: QueryArg<'tournaments'> = async (
   info
 ) => {
   const now = new Date()
+  /**
+   * Get all tournaments that are after end_at
+   * else means tournament has ended, don't show it
+   */
   const baseArgs: Prisma.TournamentFindManyArgs = {
     where: {
-      AND: [
-        {
-          end_at: {
-            gte: now
-          }
-        },
-        {
-          start_at: {
-            gte: now
-          }
-        }
-      ]
+      end_at: {
+        gte: now
+      }
     },
     include: {
       participants: {
