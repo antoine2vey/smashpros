@@ -8,7 +8,9 @@ const options = {
 
 const cacheKeys = {
   refreshTokens: 'token:refresh',
-  user: (id: string) => `user-${id}`
+  tournaments: 'geo:tournaments',
+  user: (id: string) => `user-${id}`,
+  tournament: (id: number) => `geo:tournament-${id}`
 }
 
 const cache = new Redis(options)

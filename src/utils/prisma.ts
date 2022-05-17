@@ -1,68 +1,7 @@
 import { Battle, Prisma } from '@prisma/client'
+import { isBefore } from 'date-fns'
 import { connectionPlugin } from 'nexus'
-
-type PaginationArgs = {
-  after?: string
-  before?: string
-  first?: number
-  last?: number
-}
-
-export function mapIdsToPrisma(ids: string[]) {
-  return ids.map((id) => ({ id }))
-}
-
-export function getCursorForArgs(
-  field: string,
-  { after, before, first, last }: PaginationArgs
-) {
-  let cursor: { [x: string]: number }
-  const hasCursor = !!after || !!before
-  const skip = hasCursor ? 1 : 0
-  const take = first
-
-  if (after) {
-    cursor = {
-      [field]: +connectionPlugin.base64Decode(after)
-    }
-  } else if (before) {
-    cursor = {
-      [field]: +connectionPlugin.base64Decode(before)
-    }
-  }
-
-  return {
-    skip,
-    take,
-    cursor
-  }
-}
-
-export function getCursorForStringArgs(
-  field: string,
-  { after, before, first, last }: PaginationArgs
-) {
-  let cursor: { [x: string]: string }
-  const hasCursor = !!after || !!before
-  const skip = hasCursor ? 1 : 0
-  const take = first
-
-  if (after) {
-    cursor = {
-      [field]: connectionPlugin.base64Decode(after)
-    }
-  } else if (before) {
-    cursor = {
-      [field]: connectionPlugin.base64Decode(before)
-    }
-  }
-
-  return {
-    skip,
-    take,
-    cursor
-  }
-}
+import { cache, cacheKeys } from '../redis'
 
 export function getCharacterQuery(characters: string[] | undefined) {
   if (!characters || characters.length === 0) {
@@ -163,4 +102,55 @@ export function getBattleWinner(
 
   // Users didn't came to an agreement, don't update winner yet
   return undefined
+}
+
+export async function getSpatialTournaments(
+  lat: number | null,
+  lng: number | null,
+  radius: number | null
+) {
+  let nearbyTournaments: number[] = undefined
+
+  if (lat && lng) {
+    // Get all tournaments that are close to given lng/lat
+    const results = await cache.georadius(
+      cacheKeys.tournaments,
+      lng,
+      lat,
+      radius,
+      'km'
+    )
+    // Process cache key (tournament_id)
+    nearbyTournaments = results.map((result) => +result.split('-')[1])
+  }
+
+  return nearbyTournaments
+}
+
+export function between(
+  startDate: Date,
+  endDate: Date
+): Prisma.TournamentWhereInput {
+  const now = new Date()
+
+  if (!startDate && !endDate) {
+    return undefined
+  }
+
+  // Cannot pass dates past today
+  if (isBefore(startDate, now)) {
+    return undefined
+  }
+
+  // Cannot pass endDate < startDate
+  if (isBefore(endDate, startDate)) {
+    return undefined
+  }
+
+  return {
+    start_at: {
+      gte: startDate || undefined,
+      lt: endDate || undefined
+    }
+  }
 }

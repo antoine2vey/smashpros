@@ -1,5 +1,6 @@
 import { endOfDay, fromUnixTime, isBefore, startOfDay } from 'date-fns'
 import { prisma } from '../prisma'
+import { cache, cacheKeys } from '../redis'
 import logger from '../utils/logger'
 import {
   eligibility,
@@ -107,6 +108,16 @@ export async function loadTournaments() {
     if (!tournament.hasOfflineEvents) {
       logger.warn(`Tourney ${tourney.name} is online, not upserting.`)
       return null
+    }
+
+    // Compute latitude longitude in redis for geospatial queries later
+    if (tournament.lat && tournament.lng) {
+      cache.geoadd(
+        cacheKeys.tournaments,
+        tournament.lng,
+        tournament.lat,
+        cacheKeys.tournament(tournament.id)
+      )
     }
 
     return prisma.tournament.upsert({

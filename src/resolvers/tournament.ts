@@ -1,28 +1,44 @@
 import { gql } from 'graphql-request'
 import { PubSub } from '../typings/enums'
 import { prisma } from '../prisma'
-import { pubsub } from '../redis'
+import { cache, cacheKeys, pubsub } from '../redis'
 import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
 import smashGGClient from '../smashGGClient'
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
 import { Prisma } from '@prisma/client'
+import { between, getSpatialTournaments } from '../utils/prisma'
 
 export const tournaments: QueryArg<'tournaments'> = async (
   _,
-  args,
+  { filters, ...args },
   ctx,
   info
 ) => {
-  const now = new Date()
+  let nearbyTournaments: number[] = undefined
+  let dateBoundaries: Prisma.TournamentWhereInput = undefined
+
+  if (filters) {
+    const { lat, lng, radius, endDate, startDate } = filters
+
+    dateBoundaries = between(startDate, endDate)
+    nearbyTournaments = await getSpatialTournaments(lat, lng, radius)
+  }
+
   /**
    * Get all tournaments that are after end_at
    * else means tournament has ended, don't show it
    */
   const baseArgs: Prisma.TournamentFindManyArgs = {
     where: {
-      end_at: {
-        gte: now
-      }
+      tournament_id: { in: nearbyTournaments },
+      AND: [
+        dateBoundaries,
+        {
+          end_at: {
+            gte: new Date()
+          }
+        }
+      ]
     },
     include: {
       participants: {

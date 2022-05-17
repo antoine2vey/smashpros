@@ -46,7 +46,7 @@ const query = gql`
 export const users: QueryArg<'users'> = (
   _,
   { filters, ...args },
-  ctx,
+  { user },
   info
 ) => {
   const { characters, tag, tournament } = filters
@@ -65,7 +65,10 @@ export const users: QueryArg<'users'> = (
         {
           characters: getCharacterQuery(characters)
         }
-      ]
+      ],
+      NOT: {
+        id: user.id
+      }
     },
     orderBy: [
       {

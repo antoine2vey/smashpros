@@ -8,20 +8,20 @@ declare global {
 
 export const prisma = global.prisma || new PrismaClient()
 
-prisma.$use(async (params, next) => {
-  const before = Date.now()
+// prisma.$use(async (params, next) => {
+//   const before = Date.now()
 
-  const result = await next(params)
+//   const result = await next(params)
 
-  const after = Date.now()
+//   const after = Date.now()
 
-  console.log(
-    `Query ${params.model}.${params.action} (${JSON.stringify(
-      params.args
-    )}) took ${after - before}ms`
-  )
+//   console.log(
+//     `Query ${params.model}.${params.action} (${JSON.stringify(
+//       params.args
+//     )}) took ${after - before}ms`
+//   )
 
-  return result
-})
+//   return result
+// })
 
 if (process.env.NODE_ENV !== 'production') global.prisma = prisma

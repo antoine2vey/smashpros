@@ -9,12 +9,7 @@ import {
 } from 'nexus'
 import { Event, Tournament, User } from 'nexus-prisma'
 import { prisma } from '../prisma'
-import {
-  getCharacterQuery,
-  getCursorForArgs,
-  getCursorForStringArgs,
-  getTournamentQuery
-} from '../utils/prisma'
+import { getCharacterQuery, getTournamentQuery } from '../utils/prisma'
 import { defineConnection, defineEdge, relayArgs } from './relay'
 
 export const EventObjectType = objectType({
@@ -66,7 +61,7 @@ export const TournamentObjectType = objectType({
         ...relayArgs,
         characters: list(nonNull('ID'))
       },
-      resolve(root, { characters, ...args }) {
+      resolve(root, { characters, ...args }, { user }) {
         const baseArgs: Prisma.UserFindManyArgs = {
           where: {
             AND: [
@@ -79,7 +74,10 @@ export const TournamentObjectType = objectType({
               {
                 allow_searchability: true
               }
-            ]
+            ],
+            NOT: {
+              id: user.id
+            }
           },
           include: {
             characters: true
@@ -119,6 +117,17 @@ export const TournamentQuery = inputObjectType({
   definition(t) {
     t.id('id')
     t.string('player')
+  }
+})
+
+export const TournamentsFilter = inputObjectType({
+  name: 'TournamentsFilter',
+  definition(t) {
+    t.float('lat')
+    t.float('lng')
+    t.float('radius')
+    t.date('startDate')
+    t.date('endDate')
   }
 })
 

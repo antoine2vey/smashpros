@@ -9,6 +9,13 @@ import type { core } from 'nexus'
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
     /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      opts?: core.CommonInputFieldConfig<TypeName, FieldName>
+    ): void // "DateTime";
+    /**
      * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
     json<FieldName extends string>(
@@ -26,6 +33,13 @@ declare global {
 }
 declare global {
   interface NexusGenCustomOutputMethods<TypeName extends string> {
+    /**
+     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
+     */
+    date<FieldName extends string>(
+      fieldName: FieldName,
+      ...opts: core.ScalarOutSpread<TypeName, FieldName>
+    ): void // "DateTime";
     /**
      * The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
      */
@@ -63,6 +77,14 @@ export interface NexusGenInputs {
     // input type
     id?: string | null // ID
     player?: string | null // String
+  }
+  TournamentsFilter: {
+    // input type
+    endDate?: NexusGenScalars['DateTime'] | null // DateTime
+    lat?: number | null // Float
+    lng?: number | null // Float
+    radius?: number | null // Float
+    startDate?: NexusGenScalars['DateTime'] | null // DateTime
   }
   UserFilter: {
     // input type
@@ -833,6 +855,7 @@ export interface NexusGenArgTypes {
       // args
       after?: string | null // String
       before?: string | null // String
+      filters?: NexusGenInputs['TournamentsFilter'] | null // TournamentsFilter
       first?: number | null // Int
       last?: number | null // Int
     }

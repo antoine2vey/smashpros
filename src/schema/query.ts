@@ -1,4 +1,4 @@
-import { idArg, list, nonNull, objectType, stringArg } from 'nexus'
+import { idArg, list, nonNull, nullable, objectType, stringArg } from 'nexus'
 import { isAuthenticated, authorizations } from '../authorizations'
 import {
   user,
@@ -15,6 +15,7 @@ import {
 import { SuggestedName } from '.'
 import { UserFilter } from './user'
 import { relayArgs } from './relay'
+import { TournamentsFilter } from './tournament'
 
 export const Query = objectType({
   name: 'Query',
@@ -51,7 +52,10 @@ export const Query = objectType({
     t.field('tournaments', {
       type: 'TournamentConnection',
       authorize: authorizations(isAuthenticated),
-      args: relayArgs,
+      args: {
+        ...relayArgs,
+        filters: nullable(TournamentsFilter)
+      },
       resolve(...args) {
         return tournaments(...args)
       }
