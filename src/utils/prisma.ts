@@ -113,10 +113,12 @@ export async function getSpatialTournaments(
 
   if (lat && lng) {
     // Get all tournaments that are close to given lng/lat
-    const results = await cache.georadius(
+    const results = await cache.geosearch(
       cacheKeys.tournaments,
+      'FROMLONLAT',
       lng,
       lat,
+      'BYRADIUS',
       radius,
       'km'
     )
