@@ -1,5 +1,5 @@
 import { Battle, Prisma } from '@prisma/client'
-import { isBefore } from 'date-fns'
+import { addDays, isBefore, nextDay } from 'date-fns'
 import { connectionPlugin } from 'nexus'
 import { cache, cacheKeys } from '../redis'
 
@@ -119,7 +119,7 @@ export async function getSpatialTournaments(
       lng,
       lat,
       'BYRADIUS',
-      radius,
+      radius || 50,
       'km'
     )
     // Process cache key (tournament_id)
@@ -144,9 +144,24 @@ export function between(
     return undefined
   }
 
-  // Cannot pass endDate < startDate
+  // Only one date has been passed
+  if (startDate && !endDate) {
+    return {
+      start_at: {
+        gte: startDate || undefined,
+        lt: addDays(startDate, 1)
+      }
+    }
+  }
+
+  // If we have a backward date, simply reverse it
   if (isBefore(endDate, startDate)) {
-    return undefined
+    return {
+      start_at: {
+        gte: endDate || undefined,
+        lt: startDate || undefined
+      }
+    }
   }
 
   return {
