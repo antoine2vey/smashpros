@@ -73,12 +73,15 @@
     "migrate": "prisma migrate dev --preview-feature",
     "introspect": "prisma introspect",
     "studio": "prisma studio",
-    "seed": "ts-node src/seeds",
+    "seed": "prisma db seed",
     "test:migrate": "dotenv -e .env.test -- npx prisma migrate dev --preview-feature",
     "test:seed": "dotenv -e .env.test yarn seed:characters && dotenv -e .env.test yarn seed:roles",
     "test": "dotenv -e .env.test jest -i",
     "postinstall": "prisma generate",
     "prepare": "husky install"
+  },
+  "prisma": {
+    "seed": "ts-node src/seeds"
   },
   "lint-staged": {
     "**/*.{ts,handlebars,graphql}": "prettier --write"
