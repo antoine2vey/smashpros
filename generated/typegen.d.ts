@@ -61,10 +61,8 @@ export interface NexusGenInputs {
   }
   TournamentsFilter: { // input type
     endDate?: NexusGenScalars['DateTime'] | null; // DateTime
-    lat?: number | null; // Float
-    lng?: number | null; // Float
-    radius?: number | null; // Float
     startDate?: NexusGenScalars['DateTime'] | null; // DateTime
+    zone?: string | null; // ID
   }
   UserFilter: { // input type
     characters?: string[] | null; // [ID!]

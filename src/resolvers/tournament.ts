@@ -6,7 +6,8 @@ import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
 import smashGGClient from '../smashGGClient'
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
 import { Prisma } from '@prisma/client'
-import { between, getSpatialTournaments } from '../utils/prisma'
+import { between, tournamentsByZone } from '../utils/prisma'
+import { Tournament, Zone } from '../mongo'
 
 export const tournaments: QueryArg<'tournaments'> = async (
   _,
@@ -18,10 +19,10 @@ export const tournaments: QueryArg<'tournaments'> = async (
   let dateBoundaries: Prisma.TournamentWhereInput = undefined
 
   if (filters) {
-    const { lat, lng, radius, endDate, startDate } = filters
+    const { zone, endDate, startDate } = filters
 
     dateBoundaries = between(startDate, endDate)
-    nearbyTournaments = await getSpatialTournaments(lat, lng, radius)
+    nearbyTournaments = await tournamentsByZone(zone)
   }
 
   /**

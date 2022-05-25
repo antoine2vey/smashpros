@@ -1,6 +1,7 @@
 import { Battle, Prisma } from '@prisma/client'
 import { addDays, isBefore, nextDay } from 'date-fns'
 import { connectionPlugin } from 'nexus'
+import { Tournament, Zone } from '../mongo'
 import { cache, cacheKeys } from '../redis'
 
 export function getCharacterQuery(characters: string[] | undefined) {
@@ -104,26 +105,21 @@ export function getBattleWinner(
   return undefined
 }
 
-export async function getSpatialTournaments(
-  lat: number | null,
-  lng: number | null,
-  radius: number | null
-) {
+export async function tournamentsByZone(zone: string | null) {
   let nearbyTournaments: number[] = undefined
 
-  if (lat && lng) {
-    // Get all tournaments that are close to given lng/lat
-    const results = await cache.geosearch(
-      cacheKeys.tournaments,
-      'FROMLONLAT',
-      lng,
-      lat,
-      'BYRADIUS',
-      radius || 50,
-      'km'
-    )
-    // Process cache key (tournament_id)
-    nearbyTournaments = results.map((result) => +result.split('-')[1])
+  if (zone) {
+    const foundZone = await Zone.findById(zone)
+
+    if (foundZone) {
+      const tournaments = await Tournament.find({})
+        .where('location')
+        .within(foundZone.location)
+
+      if (tournaments.length) {
+        nearbyTournaments = tournaments.map((tournament) => tournament.ref)
+      }
+    }
   }
 
   return nearbyTournaments

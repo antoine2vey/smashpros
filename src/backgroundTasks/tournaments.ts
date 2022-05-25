@@ -1,4 +1,5 @@
 import { endOfDay, fromUnixTime, isBefore, startOfDay } from 'date-fns'
+import { Tournament } from '../mongo'
 import { prisma } from '../prisma'
 import { cache, cacheKeys } from '../redis'
 import logger from '../utils/logger'
@@ -110,14 +111,15 @@ export async function loadTournaments() {
       return null
     }
 
-    // Compute latitude longitude in redis for geospatial queries later
+    // Compute latitude longitude in Mongo for geospatial queries later
     if (tournament.lat && tournament.lng) {
-      cache.geoadd(
-        cacheKeys.tournaments,
-        tournament.lng,
-        tournament.lat,
-        cacheKeys.tournament(tournament.id)
-      )
+      await Tournament.create({
+        ref: tournament.id,
+        location: {
+          type: 'Point',
+          coordinates: [tournament.lng, tournament.lat]
+        }
+      })
     }
 
     return prisma.tournament.upsert({

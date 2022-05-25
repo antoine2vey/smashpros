@@ -123,9 +123,7 @@ export const TournamentQuery = inputObjectType({
 export const TournamentsFilter = inputObjectType({
   name: 'TournamentsFilter',
   definition(t) {
-    t.float('lat')
-    t.float('lng')
-    t.float('radius')
+    t.id('zone')
     t.date('startDate')
     t.date('endDate')
   }

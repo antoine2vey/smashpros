@@ -229,10 +229,8 @@ input TournamentQuery {
 
 input TournamentsFilter {
   endDate: DateTime
-  lat: Float
-  lng: Float
-  radius: Float
   startDate: DateTime
+  zone: ID
 }
 
 """The `Upload` scalar type represents a file upload."""

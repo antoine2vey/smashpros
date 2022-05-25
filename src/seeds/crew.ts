@@ -2,7 +2,7 @@ import faker from '@faker-js/faker'
 import { prisma } from '../prisma'
 import logger from '../utils/logger'
 
-const crews = Array(20)
+const crews = Array(10)
   .fill(undefined)
   .map(() => {
     const team = faker.lorem.word()

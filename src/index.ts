@@ -16,6 +16,7 @@ import { useServer } from 'graphql-ws/lib/use/ws'
 import { prisma } from './prisma'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
 import { Context } from 'graphql-ws'
+import { connectMongo } from './mongo'
 
 const app = express()
 const httpServer = createServer(app)
@@ -75,6 +76,9 @@ const server = new ApolloServer({
 })
 
 server.start().then(async () => {
+  // Connect to mongo database
+  await connectMongo()
+
   app.use(graphqlUploadExpress())
   app.use(express.urlencoded({ extended: true }))
   app.use(express.json())
