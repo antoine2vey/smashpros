@@ -1,5 +1,7 @@
+import { fromUnixTime, isBefore } from 'date-fns'
 import { gql } from 'graphql-request'
 import _ from 'lodash'
+import { Tournament } from '../mongo'
 import { prisma } from '../prisma'
 import smashGGClient from '../smashGGClient'
 import { IEvent, ITournament, SmashGG } from '../typings/interfaces'
@@ -39,7 +41,7 @@ export function eligibility(name: string) {
 const wait = (seconds: number) =>
   new Promise((resolve) => setTimeout(() => resolve(true), seconds * 1000))
 
-export async function fetchAllEventParticipant(
+async function fetchAllEventParticipant(
   id: number,
   page = 1,
   event: IEvent = null
@@ -100,7 +102,7 @@ export async function fetchAllEventParticipant(
   }
 }
 
-export async function fetchEvents(tournaments: ITournament[]) {
+async function fetchEvents(tournaments: ITournament[]) {
   const events: IEvent[] = []
 
   logger.info('fetching events...')
@@ -115,7 +117,7 @@ export async function fetchEvents(tournaments: ITournament[]) {
   return events
 }
 
-export async function fetchTournaments(
+async function fetchTournaments(
   accumulator: ITournament[] = [],
   page = 1
 ): Promise<ITournament[]> {
@@ -186,9 +188,7 @@ export async function fetchTournaments(
   }
 }
 
-export async function getAllConnectedUsersForTournament(
-  tournament: ITournament
-) {
+async function getAllConnectedUsersForTournament(tournament: ITournament) {
   // Map users by their id
   const participants = tournament.events
     .map((e) =>
@@ -206,13 +206,111 @@ export async function getAllConnectedUsersForTournament(
     .flat()
   // Filter out duplicates
   const uniqueParticipants = _.uniq(participants)
-  // Make DB calls to get users by their SmashGG player id
-  const findUsersBySmashUserId = uniqueParticipants.map((participant) =>
-    prisma.user.findUnique({ where: { smashgg_player_id: participant } })
-  )
-  // Execute batch
-  const users = await prisma.$transaction(findUsersBySmashUserId)
-  return users
-    .filter(Boolean)
-    .map((user) => ({ smashgg_player_id: user.smashgg_player_id }))
+  // Get all users by their SmashGG player id
+  const users = await prisma.user.findMany({
+    where: {
+      smashgg_player_id: {
+        in: uniqueParticipants
+      }
+    }
+  })
+
+  return users.map((user) => ({ smashgg_player_id: user.smashgg_player_id }))
+}
+
+export async function loadTournaments() {
+  logger.info('fetching tournaments')
+  const tourneys = await fetchTournaments()
+  const events = await fetchEvents(tourneys)
+
+  logger.info('mapping events to tournaments')
+  const tournaments = tourneys.map((tournament) => ({
+    ...tournament,
+    events: tournament.events.map((event) =>
+      events.find((e) => e.id === event.id)
+    )
+  }))
+
+  // Create all tournaments, upsert if needed
+  const createTournaments = tournaments.map(async (tournament) => {
+    const foundConnectedUsers = await getAllConnectedUsersForTournament(
+      tournament
+    )
+
+    const tourney = {
+      name: tournament.name,
+      lat: tournament.lat,
+      lng: tournament.lng,
+      tournament_id: tournament.id,
+      city: tournament.city,
+      country_code: tournament.countryCode,
+      created_at: tournament.createdAt
+        ? fromUnixTime(tournament.createdAt)
+        : null,
+      currency: tournament.currency,
+      num_attendees: tournament.numAttendees,
+      end_at: tournament.endAt ? fromUnixTime(tournament.endAt) : null,
+      event_registration_closes_at: tournament.eventRegistrationClosesAt
+        ? fromUnixTime(tournament.eventRegistrationClosesAt)
+        : null,
+      images: tournament.images.map((image) => image.url),
+      is_registration_open: tournament.isRegistrationOpen,
+      slug: tournament.slug,
+      state: tournament.state,
+      venue_name: tournament.venueName,
+      venue_address: tournament.venueAddress,
+      start_at: tournament.startAt ? fromUnixTime(tournament.startAt) : null,
+      url: tournament.url,
+      events: {
+        createMany: {
+          data: tournament.events.map((event) => ({
+            event_id: event.id,
+            name: event.name,
+            num_attendees: event.numEntrants || 0,
+            tier: tier(event.numEntrants),
+            valid: eligibility(event.name.toLowerCase())
+          })),
+          skipDuplicates: true
+        }
+      },
+      participants: {
+        connect: foundConnectedUsers
+      }
+    }
+
+    const now = new Date()
+    if (isBefore(tourney.end_at, now)) {
+      logger.warn(
+        `Tourney ${tourney.name} is outdated, not upserting. (${tourney.end_at})`
+      )
+      return null
+    }
+
+    // It's an online tournament, dont put it
+    if (!tournament.hasOfflineEvents) {
+      logger.warn(`Tourney ${tourney.name} is online, not upserting.`)
+      return null
+    }
+
+    // Compute latitude longitude in mongo for geospatial queries later
+    if (tournament.lat && tournament.lng) {
+      await Tournament.create({
+        ref: tournament.id,
+        location: {
+          type: 'Point',
+          coordinates: [tournament.lng, tournament.lat]
+        }
+      })
+    }
+
+    return prisma.tournament.upsert({
+      where: {
+        tournament_id: tournament.id
+      },
+      create: tourney,
+      update: tourney
+    })
+  })
+
+  await Promise.all(createTournaments)
 }

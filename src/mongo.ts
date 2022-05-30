@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, { mongo, ObjectId } from 'mongoose'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -6,7 +6,15 @@ dotenv.config()
 interface Zone {
   name: string
   picture: string
-  location: number[][][]
+  country_code: string
+  polygons: Polygon[]
+}
+
+interface Polygon {
+  type: string
+  coordinates: number[][][]
+  vertices: number
+  zone: Zone
 }
 
 interface Tournament {
@@ -41,13 +49,31 @@ const polygonSchema = new mongoose.Schema({
   coordinates: {
     type: [[[Number]]],
     required: true
+  },
+  vertices: {
+    type: Number,
+    required: true
+  },
+  zone: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Zone',
+    required: true
   }
 })
 
 const zoneSchema = new mongoose.Schema<Zone>({
   name: String,
   picture: String,
-  location: polygonSchema
+  country_code: {
+    required: true,
+    type: String
+  },
+  polygons: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Polygon'
+    }
+  ]
 })
 
 const tournamentSchema = new mongoose.Schema<Tournament>({
@@ -56,6 +82,7 @@ const tournamentSchema = new mongoose.Schema<Tournament>({
 })
 
 export const Zone = mongoose.model<Zone>('Zone', zoneSchema)
+export const Polygon = mongoose.model<Polygon>('Polygon', polygonSchema)
 export const Tournament = mongoose.model<Tournament>(
   'Tournament',
   tournamentSchema

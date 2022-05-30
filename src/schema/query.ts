@@ -16,6 +16,7 @@ import { SuggestedName } from '.'
 import { UserFilter } from './user'
 import { relayArgs } from './relay'
 import { TournamentsFilter } from './tournament'
+import { zones } from '../resolvers/zone'
 
 export const Query = objectType({
   name: 'Query',
@@ -125,6 +126,18 @@ export const Query = objectType({
       args: relayArgs,
       resolve(...args) {
         return matches(...args)
+      }
+    })
+
+    // Zones
+    t.field('zones', {
+      type: list('Zone'),
+      authorize: authorizations(isAuthenticated),
+      args: {
+        countryCode: nonNull(stringArg())
+      },
+      resolve(...args) {
+        return zones(...args)
       }
     })
   }

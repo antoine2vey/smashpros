@@ -239,6 +239,12 @@ export interface NexusGenObjects {
     cursor: string; // String!
     node?: NexusGenRootTypes['User'] | null; // User
   }
+  Zone: { // root type
+    country_code?: string | null; // String
+    id?: string | null; // String
+    name?: string | null; // String
+    picture?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -356,6 +362,7 @@ export interface NexusGenFieldTypes {
     tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
     user: NexusGenRootTypes['User'] | null; // User
     users: NexusGenRootTypes['UserConnection'] | null; // UserConnection
+    zones: Array<NexusGenRootTypes['Zone'] | null> | null; // [Zone]
   }
   RefreshPayload: { // field return type
     accessToken: string | null; // String
@@ -445,6 +452,12 @@ export interface NexusGenFieldTypes {
   UserEdge: { // field return type
     cursor: string; // String!
     node: NexusGenRootTypes['User'] | null; // User
+  }
+  Zone: { // field return type
+    country_code: string | null; // String
+    id: string | null; // String
+    name: string | null; // String
+    picture: string | null; // String
   }
 }
 
@@ -553,6 +566,7 @@ export interface NexusGenFieldTypeNames {
     tournaments: 'TournamentConnection'
     user: 'User'
     users: 'UserConnection'
+    zones: 'Zone'
   }
   RefreshPayload: { // field return type name
     accessToken: 'String'
@@ -642,6 +656,12 @@ export interface NexusGenFieldTypeNames {
   UserEdge: { // field return type name
     cursor: 'String'
     node: 'User'
+  }
+  Zone: { // field return type name
+    country_code: 'String'
+    id: 'String'
+    name: 'String'
+    picture: 'String'
   }
 }
 
@@ -757,6 +777,9 @@ export interface NexusGenArgTypes {
       filters: NexusGenInputs['UserFilter']; // UserFilter!
       first?: number | null; // Int
       last?: number | null; // Int
+    }
+    zones: { // args
+      countryCode: string; // String!
     }
   }
   Subscription: {

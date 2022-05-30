@@ -146,6 +146,7 @@ type Query {
   tournaments(after: String, before: String, filters: TournamentsFilter, first: Int, last: Int): TournamentConnection
   user(id: ID): User
   users(after: String, before: String, filters: UserFilter!, first: Int, last: Int): UserConnection
+  zones(countryCode: String!): [Zone]
 }
 
 type RefreshPayload {
@@ -302,4 +303,11 @@ input UserUpdatePayload {
   tag: String!
   twitchUsername: String
   twitterUsername: String
+}
+
+type Zone {
+  country_code: String
+  id: String
+  name: String
+  picture: String
 }

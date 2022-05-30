@@ -1,8 +1,9 @@
 import { Battle, Prisma } from '@prisma/client'
 import { addDays, isBefore, nextDay } from 'date-fns'
 import { connectionPlugin } from 'nexus'
-import { Tournament, Zone } from '../mongo'
+import { Polygon, Tournament, Zone } from '../mongo'
 import { cache, cacheKeys } from '../redis'
+import logger from './logger'
 
 export function getCharacterQuery(characters: string[] | undefined) {
   if (!characters || characters.length === 0) {
@@ -109,16 +110,36 @@ export async function tournamentsByZone(zone: string | null) {
   let nearbyTournaments: number[] = undefined
 
   if (zone) {
-    const foundZone = await Zone.findById(zone)
+    // Find all polygons in zone
+    try {
+      const polygons = await Polygon.find({ zone }).sort('-vertices')
+      const bulk = []
+      const tournaments: number[] = []
 
-    if (foundZone) {
-      const tournaments = await Tournament.find({})
-        .where('location')
-        .within(foundZone.location)
+      // If we found any polygons
+      if (polygons.length) {
+        // Get all tournaments that are in all polygons
+        for (let polygon of polygons) {
+          const tournaments = Tournament.find({})
+            .where('location')
+            .within(polygon)
+          bulk.push(tournaments)
+        }
 
-      if (tournaments.length) {
-        nearbyTournaments = tournaments.map((tournament) => tournament.ref)
+        // Batch all results
+        const results = await Promise.all(bulk)
+        const foundTournaments = results.flat()
+
+        for (let tournament of foundTournaments) {
+          tournaments.push(tournament.ref)
+        }
+
+        // Return references if we have tournaments, array is empty since we have found nothing
+        return tournaments
       }
+    } catch (error) {
+      logger.error(error.message)
+      return []
     }
   }
 
@@ -146,16 +167,6 @@ export function between(
       start_at: {
         gte: startDate || undefined,
         lt: addDays(startDate, 1)
-      }
-    }
-  }
-
-  // If we have a backward date, simply reverse it
-  if (isBefore(endDate, startDate)) {
-    return {
-      start_at: {
-        gte: endDate || undefined,
-        lt: startDate || undefined
       }
     }
   }
