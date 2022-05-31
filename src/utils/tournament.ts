@@ -294,13 +294,22 @@ export async function loadTournaments() {
 
     // Compute latitude longitude in mongo for geospatial queries later
     if (tournament.lat && tournament.lng) {
-      await Tournament.create({
-        ref: tournament.id,
-        location: {
-          type: 'Point',
-          coordinates: [tournament.lng, tournament.lat]
+      await Tournament.findOneAndUpdate(
+        {
+          ref: tournament.id
+        },
+        {
+          ref: tournament.id,
+          location: {
+            type: 'Point',
+            coordinates: [tournament.lng, tournament.lat]
+          }
+        },
+        {
+          new: true,
+          upsert: true
         }
-      })
+      )
     }
 
     return prisma.tournament.upsert({

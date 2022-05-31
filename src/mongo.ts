@@ -23,9 +23,13 @@ interface Tournament {
 }
 
 export async function connectMongo() {
-  await mongoose.connect(process.env.MONGO_URL, {
+  return mongoose.connect(process.env.MONGO_URL, {
     dbName: process.env.MONGO_DB_NAME
   })
+}
+
+export async function tearMongoConnection() {
+  return mongoose.disconnect()
 }
 
 const pointSchema = new mongoose.Schema({
