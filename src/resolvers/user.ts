@@ -428,11 +428,24 @@ export const suggestedName: QueryArg<'suggestedName'> = async (
     throw new UserInputError('SmashGG Id does not exists')
   }
 
+  function userProfilePicture() {
+    if (user.images.length === 0) {
+      return null
+    }
+
+    // If user has no banner
+    if (user.images.length === 1) {
+      return user.images[0].url
+    }
+
+    return user.images[1].url
+  }
+
   return {
     tag: user.player.gamerTag,
     smashGGPlayerId: user.player.id,
     smashGGUserId: user.id,
-    profilePicture: user.images.length > 0 ? user.images[1].url : null
+    profilePicture: userProfilePicture()
   }
 }
 

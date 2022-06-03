@@ -1,11 +1,7 @@
-import { withFilter } from 'apollo-server'
+import { withFilter } from 'graphql-subscriptions'
 import { idArg, nonNull, subscriptionType } from 'nexus'
-import { prisma } from '../prisma'
 import { pubsub } from '../redis'
 import { PubSub } from '../typings/enums'
-import { MatchStateEnumType } from './match'
-
-const rooms = {}
 
 export const Subscription = subscriptionType({
   definition(t) {

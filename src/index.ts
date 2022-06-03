@@ -10,13 +10,19 @@ import { graphqlUploadExpress } from 'graphql-upload'
 import { ensureBucketExists } from './utils/storage'
 import { engine } from 'express-handlebars'
 import path from 'path'
+import responseCachePlugin from 'apollo-server-plugin-response-cache'
 
 import { Server } from 'ws'
 import { useServer } from 'graphql-ws/lib/use/ws'
 import { prisma } from './prisma'
-import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
+import {
+  ApolloServerPluginCacheControl,
+  ApolloServerPluginDrainHttpServer
+} from 'apollo-server-core'
 import { Context } from 'graphql-ws'
 import { connectMongo } from './mongo'
+import { BaseRedisCache } from 'apollo-server-cache-redis'
+import { cache } from './redis'
 
 const app = express()
 const httpServer = createServer(app)
@@ -34,7 +40,7 @@ const serverCleanup = useServer(
       msg,
       args
     ) => {
-      if (connectionParams.authorization) {
+      if (connectionParams?.authorization) {
         const user = await findUserByToken(connectionParams.authorization)
         return {
           user,
@@ -52,7 +58,7 @@ const serverCleanup = useServer(
 
 const server = new ApolloServer({
   schema,
-  uploads: false,
+  // uploads: false,
   context: async ({ req }) => {
     const user = await findUserByToken(req.headers.authorization)
     return {
@@ -61,7 +67,23 @@ const server = new ApolloServer({
       req
     }
   },
+  cache: new BaseRedisCache({
+    client: cache
+  }),
   plugins: [
+    // For 'PRIVATE' cache hit, identify by user.id
+    responseCachePlugin({
+      sessionId: ({ context }) => {
+        if (context.user) {
+          return context.user.id
+        }
+        return null
+      }
+    }),
+    // Default cache-control is 60 seconds
+    ApolloServerPluginCacheControl({
+      defaultMaxAge: 0
+    }),
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
       async serverWillStart() {
@@ -102,9 +124,6 @@ server.start().then(async () => {
 
   httpServer.listen({ port: 4000 }, () => {
     console.log(`🚀 GraphQL endpoint ready at ${server.graphqlPath}`)
-    console.log(
-      `🚀 GraphQL subscription endpoint ready at ${server.subscriptionsPath}`
-    )
     console.log(
       `Open GQL debugger at https://studio.apollographql.com/sandbox/explorer`
     )

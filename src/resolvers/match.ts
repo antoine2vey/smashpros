@@ -55,6 +55,9 @@ export const matches: QueryArg<'matches'> = async (_, args, { user }, info) => {
           }
         }
       ]
+    },
+    orderBy: {
+      created_at: 'asc'
     }
   }
   // Find all matches where user is either initiator or opponent

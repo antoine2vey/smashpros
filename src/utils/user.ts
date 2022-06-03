@@ -5,7 +5,7 @@ import { cache, cacheKeys } from '../redis'
 import logger from './logger'
 import redisNamingStrategy from './redisNamingStrategy'
 
-export async function findUserByToken(token: string) {
+export async function findUserByToken(token?: string) {
   if (!token) {
     return null
   }
@@ -21,7 +21,7 @@ export async function findUserByToken(token: string) {
   const { exp, userId } = decoded
   const key = cacheKeys.user(userId)
   const exists = await cache.exists(key)
-  let populatedUser: User & { roles: Role[] } = null
+  let populatedUser: (User & { roles: Role[] }) | null = null
 
   /**
    * Scheme:
@@ -37,7 +37,7 @@ export async function findUserByToken(token: string) {
   if (exists) {
     logger.info(`Found user in cache (${key})`)
     const cachedUserString = await cache.get(key)
-    populatedUser = JSON.parse(cachedUserString)
+    populatedUser = JSON.parse(cachedUserString!)
   } else {
     logger.info(`Creating new user entry in cache (${key})`)
     populatedUser = await prisma.user.findUnique({

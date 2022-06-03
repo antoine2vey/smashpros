@@ -5,6 +5,10 @@ import { Polygon, Tournament, Zone } from '../mongo'
 import { cache, cacheKeys } from '../redis'
 import logger from './logger'
 
+export function mapIdsToPrisma(ids: string[]) {
+  return ids.map((id) => ({ id }))
+}
+
 export function getCharacterQuery(characters: string[] | undefined) {
   if (!characters || characters.length === 0) {
     return undefined
