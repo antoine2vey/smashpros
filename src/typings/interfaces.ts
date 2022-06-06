@@ -90,8 +90,21 @@ export interface UserCreateInput {
   characters: string[]
 }
 
-export interface UserUpdateInput extends UserCreateInput {
-  id: string
+export interface UserUpdateInput {
+  tag?: string
+  notificationToken?: string
+  profilePicture?: Promise<{
+    filename: string
+    mimetype: string
+    encoding: string
+    createReadStream: () => Readable
+  }>
+  characters?: string[]
+  smashGGSlug?: string
+  smashGGPlayerId?: number
+  smashGGUserId?: number
+  allowNotifications?: boolean
+  allowSearchability?: boolean
 }
 
 export namespace SmashGG {

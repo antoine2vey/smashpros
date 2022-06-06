@@ -82,16 +82,20 @@ export const UserRegisterPayload = inputObjectType({
 export const UserUpdatePayload = inputObjectType({
   name: 'UserUpdatePayload',
   definition(t) {
-    t.nonNull.string('email')
-    t.nonNull.string('tag')
-    t.nonNull.string('password')
-    t.nonNull.list.nonNull.id('characters')
-    t.string('twitterUsername')
-    t.string('twitchUsername')
+    t.string('tag')
+    t.string('notificationToken')
+    t.upload('profilePicture')
+    t.list.nonNull.id('characters')
     t.string('smashGGSlug')
     t.int('smashGGPlayerId')
     t.int('smashGGUserId')
-    t.upload('profilePicture')
+    t.boolean('allowNotifications')
+    t.boolean('allowSearchability')
+
+    // t.nonNull.string('email')
+    // t.nonNull.string('password')
+    // t.string('twitterUsername')
+    // t.string('twitchUsername')
   }
 })
 

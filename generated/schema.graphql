@@ -293,16 +293,15 @@ input UserRegisterPayload {
 }
 
 input UserUpdatePayload {
-  characters: [ID!]!
-  email: String!
-  password: String!
+  allowNotifications: Boolean
+  allowSearchability: Boolean
+  characters: [ID!]
+  notificationToken: String
   profilePicture: Upload
   smashGGPlayerId: Int
   smashGGSlug: String
   smashGGUserId: Int
-  tag: String!
-  twitchUsername: String
-  twitterUsername: String
+  tag: String
 }
 
 type Zone {

@@ -16,7 +16,8 @@ import {
   forgotPasswordSchema,
   emailSchema,
   registerSchema,
-  smashGGSlug
+  smashGGSlug,
+  updateSchema
 } from '../validations/user'
 import { MutationArg, QueryArg, SmashGG } from '../typings/interfaces'
 import smashGGClient from '../smashGGClient'
@@ -126,23 +127,30 @@ export const user: QueryArg<'user'> = async (_, { id: userId }, ctx, info) => {
 export const updateProfile: MutationArg<'updateProfile'> = async (
   _,
   { payload },
-  ctx,
+  { user },
   info
 ) => {
-  let uri: string
-  const { user } = ctx
+  const { error, value } = updateSchema.validate(payload)
   const {
-    email,
     tag,
+    notificationToken,
     profilePicture,
+    smashGGPlayerId,
+    smashGGSlug,
+    smashGGUserId,
     characters,
-    twitterUsername,
-    twitchUsername
-  } = payload
+    allowNotifications,
+    allowSearchability
+  } = value
+  let uri: string
+
+  if (error) {
+    throw new UserInputError(error.message)
+  }
 
   // If we have a profile picture, update it
   if (profilePicture) {
-    const { createReadStream, filename, mimetype } = await profilePicture
+    const { createReadStream, filename } = await profilePicture
     uri = await uploadFile(
       createReadStream,
       `${randomUUID()}-${filename}`,
@@ -158,14 +166,21 @@ export const updateProfile: MutationArg<'updateProfile'> = async (
       id: user.id
     },
     data: {
-      email,
-      tag,
-      ...(profilePicture && { profile_picture: uri }),
-      ...(twitterUsername && { twitter_username: twitterUsername }),
-      ...(twitchUsername && { twitch_username: twitchUsername }),
-      characters: {
-        connect: mapIdsToPrisma(characters)
-      }
+      tag: tag || undefined,
+      notification_token: notificationToken || undefined,
+      allow_notifications:
+        allowNotifications === undefined ? undefined : allowNotifications,
+      allow_searchability:
+        allowSearchability === undefined ? undefined : allowSearchability,
+      profile_picture: uri || undefined,
+      smashgg_player_id: smashGGPlayerId || undefined,
+      smashgg_slug: smashGGSlug || undefined,
+      smashgg_user_id: smashGGUserId || undefined,
+      characters: characters?.length
+        ? {
+            connect: mapIdsToPrisma(characters)
+          }
+        : undefined
     }
   })
 }

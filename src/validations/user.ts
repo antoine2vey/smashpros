@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import { UserUpdateInput } from '../typings/interfaces'
 
 export const smashGGSlug = Joi.string()
   .length(8)
@@ -24,3 +25,15 @@ export const forgotPasswordSchema = Joi.object({
 })
 
 export const emailSchema = Joi.string().email()
+
+export const updateSchema = Joi.object<UserUpdateInput>({
+  tag: Joi.string(),
+  notificationToken: Joi.string(),
+  profilePicture: Joi.any(),
+  characters: Joi.array().items(Joi.string()),
+  smashGGSlug: smashGGSlug,
+  smashGGUserId: Joi.number(),
+  smashGGPlayerId: Joi.number(),
+  allowNotifications: Joi.bool(),
+  allowSearchability: Joi.bool()
+})

@@ -82,16 +82,15 @@ export interface NexusGenInputs {
     twitterUsername?: string | null; // String
   }
   UserUpdatePayload: { // input type
-    characters: string[]; // [ID!]!
-    email: string; // String!
-    password: string; // String!
+    allowNotifications?: boolean | null; // Boolean
+    allowSearchability?: boolean | null; // Boolean
+    characters?: string[] | null; // [ID!]
+    notificationToken?: string | null; // String
     profilePicture?: NexusGenScalars['Upload'] | null; // Upload
     smashGGPlayerId?: number | null; // Int
     smashGGSlug?: string | null; // String
     smashGGUserId?: number | null; // Int
-    tag: string; // String!
-    twitchUsername?: string | null; // String
-    twitterUsername?: string | null; // String
+    tag?: string | null; // String
   }
 }
 
