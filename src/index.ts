@@ -57,16 +57,7 @@ const serverCleanup = useServer(
 )
 
 const server = new ApolloServer({
-  schema,
-  // uploads: false,
-  context: async ({ req }) => {
-    const user = await findUserByToken(req.headers.authorization)
-    return {
-      user,
-      prisma,
-      req
-    }
-  },
+  ...config,
   cache: new BaseRedisCache({
     client: cache
   }),
@@ -82,7 +73,7 @@ const server = new ApolloServer({
     }),
     // Default cache-control is 60 seconds
     ApolloServerPluginCacheControl({
-      defaultMaxAge: 0
+      defaultMaxAge: 5
     }),
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
@@ -109,6 +100,8 @@ server.start().then(async () => {
   app.engine('handlebars', engine())
   app.set('view engine', 'handlebars')
   app.set('views', path.join(__dirname, 'views'))
+
+  app.disable('x-powered-by')
 
   app.get('/reset', (req, res) => {
     const token = req.query.token

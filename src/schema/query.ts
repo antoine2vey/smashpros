@@ -17,6 +17,7 @@ import { UserFilter } from './user'
 import { relayArgs } from './relay'
 import { TournamentsFilter } from './tournament'
 import { zones } from '../resolvers/zone'
+import { hoursToSeconds } from 'date-fns'
 
 export const Query = objectType({
   name: 'Query',
@@ -24,8 +25,10 @@ export const Query = objectType({
     // Characters
     t.field('characters', {
       type: list('Character'),
-      resolve(...args) {
-        return characters(...args)
+      resolve(root, args, ctx, info) {
+        info.cacheControl.setCacheHint({ maxAge: hoursToSeconds(24) })
+
+        return characters(root, args, ctx, info)
       }
     })
 
@@ -33,8 +36,8 @@ export const Query = objectType({
     t.field('crews', {
       type: list('Crew'),
       authorize: authorizations(isAuthenticated),
-      resolve(...args) {
-        return crews(...args)
+      resolve(root, args, ctx, info) {
+        return crews(root, args, ctx, info)
       }
     })
 
@@ -44,8 +47,8 @@ export const Query = objectType({
       args: {
         id: idArg()
       },
-      resolve(...args) {
-        return crew(...args)
+      resolve(root, args, ctx, info) {
+        return crew(root, args, ctx, info)
       }
     })
 
@@ -57,8 +60,8 @@ export const Query = objectType({
         ...relayArgs,
         filters: nullable(TournamentsFilter)
       },
-      resolve(...args) {
-        return tournaments(...args)
+      resolve(root, args, ctx, info) {
+        return tournaments(root, args, ctx, info)
       }
     })
 
@@ -68,8 +71,8 @@ export const Query = objectType({
       args: {
         id: nonNull(idArg())
       },
-      resolve(...args) {
-        return tournament(...args)
+      resolve(root, args, ctx, info) {
+        return tournament(root, args, ctx, info)
       }
     })
 
@@ -80,8 +83,8 @@ export const Query = objectType({
       args: {
         id: idArg()
       },
-      resolve(...args) {
-        return user(...args)
+      resolve(root, args, ctx, info) {
+        return user(root, args, ctx, info)
       }
     })
 
@@ -92,8 +95,8 @@ export const Query = objectType({
         ...relayArgs,
         filters: nonNull(UserFilter)
       },
-      resolve(...args) {
-        return users(...args)
+      resolve(root, args, ctx, info) {
+        return users(root, args, ctx, info)
       }
     })
 
@@ -102,8 +105,8 @@ export const Query = objectType({
       args: {
         slug: nonNull(stringArg())
       },
-      resolve(...args) {
-        return suggestedName(...args)
+      resolve(root, args, ctx, info) {
+        return suggestedName(root, args, ctx, info)
       }
     })
 
@@ -114,8 +117,8 @@ export const Query = objectType({
       args: {
         id: nonNull(idArg())
       },
-      resolve(...args) {
-        return match(...args)
+      resolve(root, args, ctx, info) {
+        return match(root, args, ctx, info)
       }
     })
 
@@ -124,8 +127,8 @@ export const Query = objectType({
       type: 'MatchConnection',
       authorize: authorizations(isAuthenticated),
       args: relayArgs,
-      resolve(...args) {
-        return matches(...args)
+      resolve(root, args, ctx, info) {
+        return matches(root, args, ctx, info)
       }
     })
 
@@ -136,8 +139,10 @@ export const Query = objectType({
       args: {
         countryCode: nonNull(stringArg())
       },
-      resolve(...args) {
-        return zones(...args)
+      resolve(root, args, ctx, info) {
+        info.cacheControl.setCacheHint({ maxAge: hoursToSeconds(24) })
+
+        return zones(root, args, ctx, info)
       }
     })
   }

@@ -350,5 +350,5 @@ export function loadCharacters() {
     batch.push(promise)
   }
 
-  return Promise.all(batch)
+  return prisma.$transaction(batch)
 }

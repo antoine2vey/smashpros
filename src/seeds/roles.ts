@@ -18,5 +18,5 @@ export function loadRoles() {
     batch.push(promise)
   }
 
-  return Promise.all(batch)
+  return prisma.$transaction(batch)
 }

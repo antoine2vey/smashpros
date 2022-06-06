@@ -61,7 +61,7 @@ export const TournamentObjectType = objectType({
         ...relayArgs,
         characters: list(nonNull('ID'))
       },
-      resolve(root, { characters, ...args }, { user }) {
+      resolve(root, { characters, ...args }, { user }, info) {
         const baseArgs: Prisma.UserFindManyArgs = {
           where: {
             AND: [

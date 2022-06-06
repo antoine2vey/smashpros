@@ -16,7 +16,7 @@ export function getCharacterQuery(characters: string[] | undefined) {
 
   return {
     some: {
-      OR: characters.map((id) => ({ id }))
+      OR: mapIdsToPrisma(characters)
     }
   }
 }
