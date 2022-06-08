@@ -125,6 +125,10 @@ export interface NexusGenObjects {
     name: string; // String!
     picture: string; // String!
   }
+  CharacterStat: { // root type
+    character?: NexusGenRootTypes['Character'] | null; // Character
+    stat?: NexusGenRootTypes['Stat'] | null; // Stat
+  }
   Crew: { // root type
     banner: string; // String!
     icon: string; // String!
@@ -173,6 +177,16 @@ export interface NexusGenObjects {
   Role: { // root type
     id: string; // ID!
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
+  }
+  Stat: { // root type
+    total?: number | null; // Int
+    wins?: number | null; // Int
+  }
+  Stats: { // root type
+    characters?: Array<NexusGenRootTypes['CharacterStat'] | null> | null; // [CharacterStat]
+    matches?: NexusGenRootTypes['Stat'] | null; // Stat
+    sets?: NexusGenRootTypes['Stat'] | null; // Stat
+    users?: Array<NexusGenRootTypes['UserStat'] | null> | null; // [UserStat]
   }
   Subscription: {};
   SuggestedName: { // root type
@@ -238,6 +252,10 @@ export interface NexusGenObjects {
     cursor: string; // String!
     node?: NexusGenRootTypes['User'] | null; // User
   }
+  UserStat: { // root type
+    stat?: NexusGenRootTypes['Stat'] | null; // Stat
+    user?: NexusGenRootTypes['User'] | null; // User
+  }
   Zone: { // root type
     country_code?: string | null; // String
     id?: string | null; // String
@@ -277,6 +295,10 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     picture: string; // String!
     users: NexusGenRootTypes['User'][]; // [User!]!
+  }
+  CharacterStat: { // field return type
+    character: NexusGenRootTypes['Character'] | null; // Character
+    stat: NexusGenRootTypes['Stat'] | null; // Stat
   }
   Crew: { // field return type
     admin: NexusGenRootTypes['User']; // User!
@@ -356,6 +378,7 @@ export interface NexusGenFieldTypes {
     crews: Array<NexusGenRootTypes['Crew'] | null> | null; // [Crew]
     match: NexusGenRootTypes['Match'] | null; // Match
     matches: NexusGenRootTypes['MatchConnection'] | null; // MatchConnection
+    stats: NexusGenRootTypes['Stats'] | null; // Stats
     suggestedName: NexusGenRootTypes['SuggestedName'] | null; // SuggestedName
     tournament: NexusGenRootTypes['Tournament'] | null; // Tournament
     tournaments: NexusGenRootTypes['TournamentConnection'] | null; // TournamentConnection
@@ -369,6 +392,16 @@ export interface NexusGenFieldTypes {
   Role: { // field return type
     id: string; // ID!
     name: NexusGenEnums['RoleEnum']; // RoleEnum!
+  }
+  Stat: { // field return type
+    total: number | null; // Int
+    wins: number | null; // Int
+  }
+  Stats: { // field return type
+    characters: Array<NexusGenRootTypes['CharacterStat'] | null> | null; // [CharacterStat]
+    matches: NexusGenRootTypes['Stat'] | null; // Stat
+    sets: NexusGenRootTypes['Stat'] | null; // Stat
+    users: Array<NexusGenRootTypes['UserStat'] | null> | null; // [UserStat]
   }
   Subscription: { // field return type
     onBattleUpdate: NexusGenRootTypes['Battle'] | null; // Battle
@@ -452,6 +485,10 @@ export interface NexusGenFieldTypes {
     cursor: string; // String!
     node: NexusGenRootTypes['User'] | null; // User
   }
+  UserStat: { // field return type
+    stat: NexusGenRootTypes['Stat'] | null; // Stat
+    user: NexusGenRootTypes['User'] | null; // User
+  }
   Zone: { // field return type
     country_code: string | null; // String
     id: string | null; // String
@@ -481,6 +518,10 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     picture: 'String'
     users: 'User'
+  }
+  CharacterStat: { // field return type name
+    character: 'Character'
+    stat: 'Stat'
   }
   Crew: { // field return type name
     admin: 'User'
@@ -560,6 +601,7 @@ export interface NexusGenFieldTypeNames {
     crews: 'Crew'
     match: 'Match'
     matches: 'MatchConnection'
+    stats: 'Stats'
     suggestedName: 'SuggestedName'
     tournament: 'Tournament'
     tournaments: 'TournamentConnection'
@@ -573,6 +615,16 @@ export interface NexusGenFieldTypeNames {
   Role: { // field return type name
     id: 'ID'
     name: 'RoleEnum'
+  }
+  Stat: { // field return type name
+    total: 'Int'
+    wins: 'Int'
+  }
+  Stats: { // field return type name
+    characters: 'CharacterStat'
+    matches: 'Stat'
+    sets: 'Stat'
+    users: 'UserStat'
   }
   Subscription: { // field return type name
     onBattleUpdate: 'Battle'
@@ -655,6 +707,10 @@ export interface NexusGenFieldTypeNames {
   UserEdge: { // field return type name
     cursor: 'String'
     node: 'User'
+  }
+  UserStat: { // field return type name
+    stat: 'Stat'
+    user: 'User'
   }
   Zone: { // field return type name
     country_code: 'String'

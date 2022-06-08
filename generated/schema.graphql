@@ -26,6 +26,11 @@ type Character {
   users: [User!]!
 }
 
+type CharacterStat {
+  character: Character
+  stat: Stat
+}
+
 type Crew {
   admin: User!
   banner: String!
@@ -141,6 +146,7 @@ type Query {
   crews: [Crew]
   match(id: ID!): Match
   matches(after: String, before: String, first: Int, last: Int): MatchConnection
+  stats: Stats
   suggestedName(slug: String!): SuggestedName
   tournament(id: ID!): Tournament
   tournaments(after: String, before: String, filters: TournamentsFilter, first: Int, last: Int): TournamentConnection
@@ -167,6 +173,18 @@ enum RoleEnum {
   CREW_ADMIN
   TOURNAMENT_ORGANIZER
   USER
+}
+
+type Stat {
+  total: Int
+  wins: Int
+}
+
+type Stats {
+  characters: [CharacterStat]
+  matches: Stat
+  sets: Stat
+  users: [UserStat]
 }
 
 type Subscription {
@@ -290,6 +308,11 @@ input UserRegisterPayload {
   tag: String!
   twitchUsername: String
   twitterUsername: String
+}
+
+type UserStat {
+  stat: Stat
+  user: User
 }
 
 input UserUpdatePayload {

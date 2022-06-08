@@ -18,6 +18,7 @@ import { relayArgs } from './relay'
 import { TournamentsFilter } from './tournament'
 import { zones } from '../resolvers/zone'
 import { hoursToSeconds } from 'date-fns'
+import { stats } from '../resolvers/stats'
 
 export const Query = objectType({
   name: 'Query',
@@ -143,6 +144,15 @@ export const Query = objectType({
         info.cacheControl.setCacheHint({ maxAge: hoursToSeconds(24) })
 
         return zones(root, args, ctx, info)
+      }
+    })
+
+    // Stats
+    t.field('stats', {
+      type: 'Stats',
+      authorize: authorizations(isAuthenticated),
+      async resolve(root, args, ctx, info) {
+        return stats(root, args, ctx, info)
       }
     })
   }
