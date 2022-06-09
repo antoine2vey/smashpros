@@ -12,6 +12,9 @@ export const stats: QueryArg<'stats'> = async (_, args, { user }) => {
 
   const matches = await prisma.match.findMany({
     where: {
+      winner_id: {
+        not: null
+      },
       OR: [
         {
           initiator_id: user.id
