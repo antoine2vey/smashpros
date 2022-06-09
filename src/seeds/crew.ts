@@ -1,4 +1,4 @@
-import faker from '@faker-js/faker'
+import { faker } from '@faker-js/faker'
 import { prisma } from '../prisma'
 import logger from '../utils/logger'
 
