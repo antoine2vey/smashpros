@@ -5,6 +5,7 @@
     "strict": false,
     "lib": ["esnext"],
     "esModuleInterop": true,
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "skipLibCheck": true
   }
 }

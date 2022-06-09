@@ -76,6 +76,7 @@
   },
   "scripts": {
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
+    "build": "tsc -p .",
     "migrate": "prisma migrate dev",
     "introspect": "prisma introspect",
     "studio": "prisma studio",
