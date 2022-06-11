@@ -43,6 +43,7 @@ import {
   updateProfile
 } from '../resolvers/user'
 import { CrewUpdateActionEnum } from './crew'
+import { BattleStateEnumType } from './match'
 import { UserRegisterPayload, UserUpdatePayload } from './user'
 
 export const Mutation = objectType({
@@ -289,7 +290,8 @@ export const Mutation = objectType({
       args: {
         id: nonNull(idArg()),
         character: idArg(),
-        vote: idArg()
+        vote: idArg(),
+        state: BattleStateEnumType
       },
       authorize: authorizations(isAuthenticated),
       resolve(...args) {

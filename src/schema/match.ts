@@ -1,4 +1,4 @@
-import { MatchState } from '@prisma/client'
+import { BattleState, MatchState } from '@prisma/client'
 import { enumType, objectType } from 'nexus'
 import { Battle, Match } from 'nexus-prisma'
 import { defineConnection, defineEdge } from './relay'
@@ -8,6 +8,7 @@ export const BattleObjectType = objectType({
   description: Battle.$description,
   definition: (t) => {
     t.field(Battle.id)
+    t.field(Battle.state)
     t.field(Battle.initiator)
     t.field(Battle.initiator_character)
     t.field(Battle.initiator_vote)
@@ -36,6 +37,11 @@ export const MatchObjectType = objectType({
     t.field(Match.winner)
     t.field(Match.winner_id)
   }
+})
+
+export const BattleStateEnumType = enumType({
+  name: 'BattleState',
+  members: BattleState
 })
 
 export const MatchStateEnumType = enumType({

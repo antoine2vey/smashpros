@@ -145,34 +145,41 @@ model Match {
 }
 
 model Battle {
-  id                     String     @id @default(uuid())
+  id                     String      @id @default(uuid())
   match_id               String
   initiator_id           String?
   initiator_character_id String?
   winner_id              String?
   opponent_character_id  String?
   opponent_id            String?
-  created_at             DateTime   @default(now())
+  created_at             DateTime    @default(now())
   end_at                 DateTime?
   initiator_vote_id      String?
   opponent_vote_id       String?
   start_at               DateTime?
-  initiator_character    Character? @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
-  initiator              User?      @relation("battle_initiator", fields: [initiator_id], references: [id])
-  initiator_vote         User?      @relation("battle_initiator_vote", fields: [initiator_vote_id], references: [id])
-  match                  Match      @relation(fields: [match_id], references: [id], onDelete: Cascade)
-  opponent_character     Character? @relation("battle_opponent_character", fields: [opponent_character_id], references: [id])
-  opponent               User?      @relation("battle_opponent", fields: [opponent_id], references: [id])
-  opponent_vote          User?      @relation("battle_opponent_vote", fields: [opponent_vote_id], references: [id])
-  winner                 User?      @relation("battle_winner", fields: [winner_id], references: [id])
+  initiator_character    Character?  @relation("battle_initiator_character", fields: [initiator_character_id], references: [id])
+  initiator              User?       @relation("battle_initiator", fields: [initiator_id], references: [id])
+  initiator_vote         User?       @relation("battle_initiator_vote", fields: [initiator_vote_id], references: [id])
+  match                  Match       @relation(fields: [match_id], references: [id], onDelete: Cascade)
+  opponent_character     Character?  @relation("battle_opponent_character", fields: [opponent_character_id], references: [id])
+  opponent               User?       @relation("battle_opponent", fields: [opponent_id], references: [id])
+  opponent_vote          User?       @relation("battle_opponent_vote", fields: [opponent_vote_id], references: [id])
+  winner                 User?       @relation("battle_winner", fields: [winner_id], references: [id])
+  state                  BattleState @default(CHARACTER_CHOICE)
 }
 
 enum MatchState {
   HOLD
   REFUSED
+  STARTED
   FINISHED
+}
+
+enum BattleState {
   CHARACTER_CHOICE
+  VOTING
   PLAYING
+  FINISHED
 }
 
 enum RoleEnum {

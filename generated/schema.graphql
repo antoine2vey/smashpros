@@ -15,8 +15,16 @@ type Battle {
   opponent: User
   opponent_character: Character
   opponent_vote: User
+  state: BattleState!
   winner: User
   winner_id: String
+}
+
+enum BattleState {
+  CHARACTER_CHOICE
+  FINISHED
+  PLAYING
+  VOTING
 }
 
 type Character {
@@ -101,11 +109,10 @@ type MatchEdge {
 }
 
 enum MatchState {
-  CHARACTER_CHOICE
   FINISHED
   HOLD
-  PLAYING
   REFUSED
+  STARTED
 }
 
 type Mutation {
@@ -125,7 +132,7 @@ type Mutation {
   setOnline(online: Boolean!): User
   synchronizeTournaments: [Tournament]
   transferCrewOwnership(to: ID!): Crew
-  updateBattle(character: ID, id: ID!, vote: ID): Battle
+  updateBattle(character: ID, id: ID!, state: BattleState, vote: ID): Battle
   updateMatch(id: ID!, state: MatchState!): Match
   updateMember(action: CrewUpdateActionEnum!, id: ID!): Crew
   updateProfile(payload: UserUpdatePayload!): User

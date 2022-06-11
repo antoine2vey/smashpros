@@ -1,6 +1,7 @@
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
-import { Match, MatchState, Prisma, User } from '@prisma/client'
+import { BattleState, Match, MatchState, Prisma, User } from '@prisma/client'
 import { UserInputError } from 'apollo-server-errors'
+import { Battle } from 'nexus-prisma/index'
 import { prisma } from '../prisma'
 import { pubsub } from '../redis'
 import { PubSub } from '../typings/enums'
@@ -25,6 +26,34 @@ function matchGuard(match: Match, user: User) {
     match.state === MatchState.FINISHED
   ) {
     return new UserInputError('This match is not updateable anymore')
+  }
+}
+
+function battleGuard(battle: Battle, character: string, vote: string) {
+  // Battle is over, can't update
+  if (battle.state === BattleState.FINISHED) {
+    return new UserInputError('Battle not updateable anymore')
+  }
+
+  // If user chooses character but battle isn't in appropriated state
+  if (battle.state !== BattleState.CHARACTER_CHOICE && character) {
+    return new UserInputError(
+      `You cannot choose your character yet (current state is ${battle.state})`
+    )
+  }
+
+  // If user votes but battle isn't in appropriated state
+  if (battle.state !== BattleState.VOTING && vote) {
+    return new UserInputError(
+      `You cannot vote yet (current state is ${battle.state})`
+    )
+  }
+
+  // If battle has a winner, throw error
+  if (battle.winner_id) {
+    throw new UserInputError(
+      'You cannot update this battle since it has a winner'
+    )
   }
 }
 
@@ -134,7 +163,7 @@ export const updateMatch: MutationArg<'updateMatch'> = async (
   }
 
   // If we choose a character, that means we have to create another battle
-  if (state === MatchState.CHARACTER_CHOICE) {
+  if (state === MatchState.STARTED) {
     const update = await prisma.match.update({
       where: {
         id
@@ -169,7 +198,7 @@ export const updateMatch: MutationArg<'updateMatch'> = async (
 
 export const updateBattle: MutationArg<'updateBattle'> = async (
   _,
-  { id, character, vote },
+  { id, character, vote, state },
   { user }
 ) => {
   const battle = await prisma.battle.findUnique({
@@ -179,11 +208,16 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
   const match = battle.match
   const isInitiator = user.id === battle.initiator_id
   const matchGuardError = matchGuard(battle.match, user)
+  const battleGuardError = battleGuard(battle, character, vote)
   // If we have a winner (2 votes are the same), return his id, else undefined
   const winner = getBattleWinner(battle, vote, isInitiator)
 
   if (matchGuardError) {
     throw matchGuardError
+  }
+
+  if (battleGuardError) {
+    throw battleGuardError
   }
 
   // Cannot pass character AND vote
@@ -193,11 +227,21 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
     )
   }
 
-  // If battle has a winner, throw error
-  if (battle.winner_id) {
-    throw new UserInputError(
-      'You cannot update this battle since it has a winner'
-    )
+  // If user tries to stop when it is already stopped
+  if (battle.state === BattleState.VOTING && state === BattleState.VOTING) {
+    throw new UserInputError('You cannot stop a battle that already is stopped')
+  }
+
+  // This case should never reach
+  // Means that an user updated battle, but has no data inside
+  if (
+    !battle.initiator_character_id &&
+    !battle.opponent_character_id &&
+    !battle.opponent_vote_id &&
+    !battle.initiator_vote_id &&
+    winner
+  ) {
+    throw new UserInputError('Should never reach, some data is missing')
   }
 
   // If both user voted for a winner, evaluate if they won the match
@@ -210,42 +254,35 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
     match.opponent_wins + (winner === battle.opponent_id ? 1 : 0)
   )
 
-  /**
-   * If users voted for their characters, return MatchState.PLAYING
-   * Else
-   *  If one of the two users won match, return MatchState.FINISHED
-   *  Else
-   *    If we have a battle winner, return MatchState.CHARACTER_CHOICE,
-   *    Else return the default match state
-   * @returns MatchState
-   */
-  const computedMatchState = () => {
-    if (character) {
-      if (isInitiator && battle.opponent_character_id) {
-        return MatchState.PLAYING
-      }
+  let matchState: MatchState = undefined
 
-      if (!isInitiator && battle.initiator_character_id) {
-        return MatchState.PLAYING
-      }
-    }
-
-    return initiatorWin || opponentWin
-      ? MatchState.FINISHED
-      : winner
-      ? MatchState.CHARACTER_CHOICE
-      : match.state
+  // If either initiator or opponent wins, update match state
+  // to end match
+  if (initiatorWin || opponentWin) {
+    matchState = MatchState.FINISHED
   }
 
-  const matchState = computedMatchState()
+  // Users came to an agreement, then the battle is finished
+  if (winner) {
+    state = BattleState.FINISHED
+  }
+
   const updatedBattle = await prisma.battle.update({
     where: {
       id
     },
     data: {
+      state: state,
+      // If user selected a character, set it
       ...getBattleCharacterQuery(character, isInitiator),
+      // If user voted, set it
       ...getVoteQuery(vote, isInitiator),
+      // If we have a winner, connect it
       winner: winner ? { connect: { id: winner } } : undefined,
+      // If user starts battle, set start_at
+      start_at: state === BattleState.PLAYING ? new Date() : undefined,
+      // If user stops battle, set end_at
+      end_at: state === BattleState.VOTING ? new Date() : undefined,
       match: winner
         ? {
             update: {
@@ -270,7 +307,6 @@ export const updateBattle: MutationArg<'updateBattle'> = async (
     }
   })
 
-  // If we have a winnner, we send an update with match + a new battle
   if (winner && matchState !== MatchState.FINISHED) {
     const updatedMatch = await prisma.match.update({
       where: {

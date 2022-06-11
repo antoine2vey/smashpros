@@ -95,8 +95,9 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  BattleState: "CHARACTER_CHOICE" | "FINISHED" | "PLAYING" | "VOTING"
   CrewUpdateActionEnum: "ACCEPT" | "DENY"
-  MatchState: "CHARACTER_CHOICE" | "FINISHED" | "HOLD" | "PLAYING" | "REFUSED"
+  MatchState: "FINISHED" | "HOLD" | "REFUSED" | "STARTED"
   RoleEnum: "ADMIN" | "CREW_ADMIN" | "TOURNAMENT_ORGANIZER" | "USER"
 }
 
@@ -118,6 +119,7 @@ export interface NexusGenObjects {
   }
   Battle: { // root type
     id: string; // ID!
+    state: NexusGenEnums['BattleState']; // BattleState!
     winner_id?: string | null; // String
   }
   Character: { // root type
@@ -287,6 +289,7 @@ export interface NexusGenFieldTypes {
     opponent: NexusGenRootTypes['User'] | null; // User
     opponent_character: NexusGenRootTypes['Character'] | null; // Character
     opponent_vote: NexusGenRootTypes['User'] | null; // User
+    state: NexusGenEnums['BattleState']; // BattleState!
     winner: NexusGenRootTypes['User'] | null; // User
     winner_id: string | null; // String
   }
@@ -510,6 +513,7 @@ export interface NexusGenFieldTypeNames {
     opponent: 'User'
     opponent_character: 'Character'
     opponent_vote: 'User'
+    state: 'BattleState'
     winner: 'User'
     winner_id: 'String'
   }
@@ -777,6 +781,7 @@ export interface NexusGenArgTypes {
     updateBattle: { // args
       character?: string | null; // ID
       id: string; // ID!
+      state?: NexusGenEnums['BattleState'] | null; // BattleState
       vote?: string | null; // ID
     }
     updateMatch: { // args
