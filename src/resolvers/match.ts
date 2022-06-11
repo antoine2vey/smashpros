@@ -1,7 +1,13 @@
 import { findManyCursorConnection } from '@devoxa/prisma-relay-cursor-connection'
-import { BattleState, Match, MatchState, Prisma, User } from '@prisma/client'
+import {
+  Battle,
+  BattleState,
+  Match,
+  MatchState,
+  Prisma,
+  User
+} from '@prisma/client'
 import { UserInputError } from 'apollo-server-errors'
-import { Battle } from 'nexus-prisma/index'
 import { prisma } from '../prisma'
 import { pubsub } from '../redis'
 import { PubSub } from '../typings/enums'
